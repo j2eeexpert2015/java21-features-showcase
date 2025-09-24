@@ -1,4 +1,4 @@
-package org.example.model.common;
+package org.example.dto.common;
 
 import java.util.Map;
 import java.util.HashMap;
