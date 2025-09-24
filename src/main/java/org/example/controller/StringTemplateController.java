@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.example.constants.Java21Methods;
+
 @RestController
 @RequestMapping("/api/templates")
 public class StringTemplateController {
@@ -43,6 +45,8 @@ public class StringTemplateController {
                     "Email template generated using STR processor")
                     .withServiceCall("StringTemplateService.generateEmail",
                             List.of("STR", "Expression embedding", "Safety"))
+                    .withServiceCall("SecurityService.validateContent",
+                            List.of("Safety"))
                     .withMetadata("templateResponse", response);
 
         } catch (Exception e) {
@@ -69,6 +73,8 @@ public class StringTemplateController {
                     "SMS template generated using FMT processor")
                     .withServiceCall("StringTemplateService.generateSMS",
                             List.of("FMT", "Expression embedding", "Formatted output"))
+                    .withServiceCall("NotificationService.formatCurrency",
+                            List.of("Formatted output"))
                     .withMetadata("templateResponse", response);
 
         } catch (Exception e) {
@@ -95,6 +101,8 @@ public class StringTemplateController {
                     "Safe SQL template generated using custom processor")
                     .withServiceCall("StringTemplateService.generateSafeSQL",
                             List.of("Custom", "Safety", "Injection prevention"))
+                    .withServiceCall("SecurityService.parameterizeQuery",
+                            List.of("Injection prevention"))
                     .withMetadata("templateResponse", response);
 
         } catch (Exception e) {

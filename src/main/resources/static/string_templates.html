@@ -6,7 +6,7 @@
     <title>TechMart - String Templates Demo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
+
     <style>
         :root {
             --primary-color: #007bff;
@@ -113,6 +113,35 @@
             }
         }
 
+        .connection-status {
+            position: absolute;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 10px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #dc3545;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.connected {
+            background: #28a745;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
         .demo-page-container {
             padding: 0.25rem;
         }
@@ -164,8 +193,19 @@
             transition: transform 0.2s ease;
         }
 
-        .btn-compact:hover {
+        .btn-compact:hover:not(:disabled) {
             transform: translateY(-1px);
+        }
+
+        .btn-compact:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-compact.processing {
+            background: linear-gradient(145deg, #6c757d 0%, #495057 100%) !important;
+            border-color: #495057 !important;
         }
 
         .str-processor-tag {
@@ -201,35 +241,50 @@
             display: inline-block;
         }
 
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #6c757d;
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 6px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         /* IMPROVED API REFERENCE TABLE STYLES */
-        .api-reference-table { 
-            font-size: 0.78em; /* Further reduced */
+        .api-reference-table {
+            font-size: 0.78em;
             border-collapse: separate;
             border-spacing: 0;
             border: 2px solid #e9ecef;
             border-radius: 8px;
             overflow: hidden;
         }
-        
+
         .api-reference-table td, .api-reference-table th {
-            padding: 0.5rem 0.35rem; /* Further reduced padding */
+            padding: 0.5rem 0.35rem;
             vertical-align: middle;
-            line-height: 1.25; /* Reduced line height */
+            line-height: 1.25;
             border-bottom: 1px solid #e9ecef;
         }
-        
+
         .api-reference-table tbody tr {
             transition: background-color 0.2s ease;
         }
-        
+
         .api-reference-table tbody tr:hover {
             background-color: #f8f9fa;
         }
-        
+
         .api-reference-table tbody tr:last-child td {
             border-bottom: none;
         }
-        
+
         .api-reference-table td:first-child {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             font-weight: 600;
@@ -237,18 +292,18 @@
             border-right: 2px solid #dee2e6;
             width: 35%;
         }
-        
+
         .api-reference-table td:last-child {
             color: #333;
             font-weight: 500;
         }
-        
+
         .api-reference-table code {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
-            padding: 0.25rem 0.5rem; /* Reduced padding */
+            padding: 0.25rem 0.5rem;
             border-radius: 6px;
-            font-size: 0.9em; /* Slightly smaller */
+            font-size: 0.9em;
             font-weight: 600;
             font-family: 'Courier New', monospace;
             box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
@@ -281,6 +336,14 @@
             background: rgba(255, 255, 255, 0.1);
             transform: translateX(3px);
             border-left-color: #10b981;
+        }
+
+        .api-flow-block.error {
+            border-left-color: #dc3545;
+        }
+
+        .api-flow-block.success {
+            border-left-color: #28a745;
         }
 
         @keyframes flowSlideIn {
@@ -430,6 +493,14 @@
             opacity: 1;
         }
 
+        .error-text {
+            color: #dc3545;
+        }
+
+        .success-text {
+            color: #28a745;
+        }
+
         @media (max-width: 768px) {
             .template-output-section {
                 max-height: 200px;
@@ -437,18 +508,18 @@
             .api-log-container {
                 height: 200px;
             }
-            
+
             .custom-tooltip .tooltip-content {
                 font-size: 0.7rem;
                 padding: 6px 10px;
                 white-space: normal;
                 max-width: 200px;
             }
-            
+
             .api-reference-table {
                 font-size: 0.75em;
             }
-            
+
             .api-reference-table td, .api-reference-table th {
                 padding: 0.4rem 0.25rem;
             }
@@ -459,6 +530,10 @@
 <div class="container-fluid my-3">
     <div class="main-container">
         <header class="demo-header">
+            <div class="connection-status">
+                <div class="status-dot" id="connectionDot"></div>
+                <span id="connectionText">Connecting...</span>
+            </div>
             <h1>
                 <i class="fas fa-envelope"></i>
                 Template & Notification Demo
@@ -498,7 +573,7 @@
                             <div class="row">
                                 <div class="col-4">
                                     <div class="custom-tooltip">
-                                        <button class="btn btn-primary btn-compact w-100" onclick="generateEmail()">
+                                        <button class="btn btn-primary btn-compact w-100" onclick="generateEmail()" id="emailBtn">
                                             <span class="str-processor-tag">STR</span> Email
                                         </button>
                                         <div class="tooltip-content">
@@ -508,7 +583,7 @@
                                 </div>
                                 <div class="col-4">
                                     <div class="custom-tooltip">
-                                        <button class="btn btn-success btn-compact w-100" onclick="generateSMS()">
+                                        <button class="btn btn-success btn-compact w-100" onclick="generateSMS()" id="smsBtn">
                                             <span class="fmt-processor-tag">FMT</span> SMS
                                         </button>
                                         <div class="tooltip-content">
@@ -518,7 +593,7 @@
                                 </div>
                                 <div class="col-4">
                                     <div class="custom-tooltip">
-                                        <button class="btn btn-warning btn-compact w-100" onclick="generateSQL()">
+                                        <button class="btn btn-warning btn-compact w-100" onclick="generateSQL()" id="sqlBtn">
                                             <span class="custom-processor-tag">SAFE</span> SQL
                                         </button>
                                         <div class="tooltip-content">
@@ -529,7 +604,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="demo-card h-100">
                         <div class="mb-3">
                             <h6 class="mb-2"><i class="fas fa-book"></i> Java 21 String Templates Reference</h6>
@@ -553,14 +628,14 @@
                             <div class="text-muted text-center py-3">Select a template type above to see String Template output...</div>
                         </div>
                     </div>
-                    
+
                     <div class="demo-card">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h6><i class="fas fa-stream"></i> Visual Flow Inspector</h6>
                             <button class="btn btn-sm btn-outline-secondary clear-log-btn" onclick="clearInspectorLog()"><i class="fas fa-eraser"></i> Clear</button>
                         </div>
                         <div id="api-log" class="api-log-container" aria-live="polite">
-                            <div class="text-muted text-center py-2">Click a template action to see the processing flow...</div>
+                            <div class="text-muted text-center py-2">Starting backend connection check...</div>
                         </div>
                     </div>
                 </div>
@@ -571,102 +646,530 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-function generateEmail() {
-    const data = getInputData();
-    const logId = createFlowLog('Generate Email', 'POST', '/api/templates/email');
-    
-    setTimeout(() => {
-        const emailContent = simulateEmailGeneration(data);
-        updateFlowLog(logId, {
-            controller_method: 'TemplateController.generateEmail',
-            service_calls: {
-                'EmailTemplateService.processSTRTemplate': ['STR', 'Expression embedding'],
-                'SecurityService.validateContent': ['Safety']
-            },
-            security_validation: 'Safe - No injection risks detected',
-            operation_description: 'Email generated using STR processor with safe interpolation'
-        });
-        
-        displayTemplate(emailContent, 'email');
-        
-        // Highlight STR + Expression (since STR uses \{expr} syntax)
-        setTimeout(() => highlightMultipleFeatures(['STR', 'EXPRESSION']), 200);
-    }, 500);
-}
-
-function generateSMS() {
-    const data = getInputData();
-    const logId = createFlowLog('Generate SMS', 'POST', '/api/templates/sms');
-    
-    setTimeout(() => {
-        const smsContent = simulateSMSGeneration(data);
-        updateFlowLog(logId, {
-            controller_method: 'TemplateController.generateSMS',
-            service_calls: {
-                'SMSTemplateService.processFMTTemplate': ['FMT', 'Expression embedding'],
-                'NotificationService.formatCurrency': ['Formatted output']
-            },
-            security_validation: 'Safe - Content sanitized',
-            operation_description: 'SMS generated using FMT processor for currency formatting'
-        });
-        
-        displayTemplate(smsContent, 'sms');
-        
-        // Highlight FMT + Expression (since FMT also uses \{expr} syntax)
-        setTimeout(() => highlightMultipleFeatures(['FMT', 'EXPRESSION']), 200);
-    }, 500);
-}
-
-function generateSQL() {
-    const data = getInputData();
-    const logId = createFlowLog('Generate Safe SQL', 'POST', '/api/templates/sql');
-    
-    setTimeout(() => {
-        const sqlContent = simulateSQLGeneration(data);
-        updateFlowLog(logId, {
-            controller_method: 'TemplateController.generateSafeSQL',
-            service_calls: {
-                'DatabaseService.processSafeTemplate': ['Custom', 'Safety'],
-                'SecurityService.parameterizeQuery': ['Injection prevention']
-            },
-            security_validation: 'Safe - Parameters validated and escaped',
-            operation_description: 'SQL generated using custom processor preventing injection attacks'
-        });
-        
-        displayTemplate(sqlContent, 'sql');
-        
-        // Highlight Custom + Safety (since custom processor provides safety)
-        setTimeout(() => highlightMultipleFeatures(['CUSTOM', 'SAFETY']), 200);
-    }, 500);
-}
-
-function clearInspectorLog() {
-    const logContainer = document.getElementById('api-log');
-    if (!logContainer) return;
-    logContainer.innerHTML = '<div class="text-muted text-center py-2">Log cleared. Click a template action to see the processing flow...</div>';
-}
-
-function getInputData() {
-    return {
-        customerName: document.getElementById('customerName').value,
-        orderId: document.getElementById('orderId').value,
-        amount: parseFloat(document.getElementById('amount').value),
-        itemsCount: parseInt(document.getElementById('itemsCount').value),
-        searchQuery: document.getElementById('searchQuery').value
+    // Configuration
+    const API_BASE_URL = 'http://localhost:8080';
+    const ENDPOINTS = {
+        EMAIL: '/api/templates/email',
+        SMS: '/api/templates/sms',
+        SQL: '/api/templates/sql',
+        DEMO_STATE: '/api/templates/demo-state',
+        RESET: '/api/templates/reset'
     };
-}
 
-function simulateEmailGeneration(data) {
-    return {
-        type: 'email',
-        title: 'Order Confirmation Email',
-        template: 'STR."Dear \\{customerName}, Your order #\\{orderId} has been confirmed!"',
-        output: `Dear ${data.customerName},
+    // Application state
+    let appState = {
+        customerName: 'John Doe',
+        orderId: 'ORD-123456',
+        amount: 1299.99,
+        itemsCount: 3,
+        searchQuery: 'John',
+        connected: false,
+        processing: false
+    };
+
+    // API Helper Functions
+    async function apiCall(method, endpoint, data = null) {
+        const logId = createFlowLog(
+            `${method.toUpperCase()} Request`,
+            method.toUpperCase(),
+            endpoint
+        );
+
+        try {
+            const config = {
+                method: method.toUpperCase(),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include'
+            };
+
+            if (data && (method.toUpperCase() === 'POST' || method.toUpperCase() === 'PUT')) {
+                config.body = JSON.stringify(data);
+            }
+
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const responseData = await response.json();
+
+            // Update flow log with success
+            updateFlowLog(logId, {
+                controller_method: responseData.controllerMethod || 'StringTemplateController',
+                service_calls: responseData.serviceCalls || {},
+                operation_description: responseData.operationDescription || 'Operation completed',
+                response_data: responseData
+            });
+
+            return responseData;
+
+        } catch (error) {
+            console.error('API Call failed:', error);
+
+            // Update flow log with error
+            updateFlowLog(logId, {
+                error: error.message,
+                controller_method: 'Connection Failed'
+            });
+
+            throw error;
+        }
+    }
+
+    // Connection management
+    async function checkConnection() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/templates/demo-state`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                appState.connected = true;
+                updateConnectionStatus(true);
+                const demoState = await response.json();
+                syncWithBackendState(demoState);
+                return true;
+            }
+        } catch (error) {
+            console.log('Backend not available:', error.message);
+        }
+
+        appState.connected = false;
+        updateConnectionStatus(false);
+        return false;
+    }
+
+    function updateConnectionStatus(connected) {
+        const dot = document.getElementById('connectionDot');
+        const text = document.getElementById('connectionText');
+
+        if (connected) {
+            dot.classList.add('connected');
+            text.textContent = 'Backend Connected';
+            // Enable all buttons
+            document.querySelectorAll('button').forEach(btn => btn.disabled = false);
+        } else {
+            dot.classList.remove('connected');
+            text.textContent = 'Backend Offline';
+            // Keep UI functional but show offline status
+        }
+    }
+
+    function syncWithBackendState(backendState) {
+        if (!backendState) return;
+
+        // Update app state from backend
+        if (backendState.customerName) {
+            appState.customerName = backendState.customerName;
+            document.getElementById('customerName').value = backendState.customerName;
+        }
+
+        if (backendState.orderId) {
+            appState.orderId = backendState.orderId;
+            document.getElementById('orderId').value = backendState.orderId;
+        }
+
+        if (backendState.amount) {
+            appState.amount = parseFloat(backendState.amount);
+            document.getElementById('amount').value = backendState.amount;
+        }
+
+        if (backendState.itemsCount) {
+            appState.itemsCount = parseInt(backendState.itemsCount);
+            document.getElementById('itemsCount').value = backendState.itemsCount;
+        }
+
+        if (backendState.searchQuery) {
+            appState.searchQuery = backendState.searchQuery;
+            document.getElementById('searchQuery').value = backendState.searchQuery;
+        }
+    }
+
+    // Visual Flow Inspector Functions
+    function createFlowLog(userAction, method, endpoint) {
+        const logContainer = document.getElementById('api-log');
+        if (!logContainer) return null;
+
+        // Clear initial message if present
+        const initialMessages = logContainer.querySelectorAll('.text-muted, .text-center');
+        initialMessages.forEach(msg => {
+            if (msg.textContent && (msg.textContent.includes('Starting') || msg.textContent.includes('Click'))) {
+                logContainer.innerHTML = '';
+            }
+        });
+
+        const flowBlock = document.createElement('div');
+        const logId = `flow-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        flowBlock.id = logId;
+        flowBlock.className = 'api-flow-block';
+
+        const statusIcon = appState.connected ? '🌐' : '⚠️';
+        const statusText = appState.connected ? 'API Call' : 'Offline Mode';
+
+        flowBlock.innerHTML = `
+            <div>👤 <strong>${userAction}</strong> (Frontend)</div>
+            <div class="api-flow-child">${statusIcon} ${statusText}: ${method} ${endpoint}</div>
+            <div class="api-flow-child" data-role="controller"><div class="spinner"></div> Processing...</div>
+        `;
+
+        logContainer.insertBefore(flowBlock, logContainer.firstChild);
+
+        // Maintain entry limit
+        while (logContainer.children.length > 12) {
+            logContainer.removeChild(logContainer.lastChild);
+        }
+
+        logContainer.scrollTop = 0;
+        return logId;
+    }
+
+    function updateFlowLog(logId, responseData) {
+        if (!logId) return;
+
+        const flowBlock = document.getElementById(logId);
+        if (!flowBlock) return;
+
+        const controllerElement = flowBlock.querySelector('[data-role="controller"]');
+        if (!controllerElement) return;
+
+        // Handle error responses
+        if (responseData.error) {
+            flowBlock.classList.add('error');
+            controllerElement.innerHTML = `🔴 <span class="error-text">Error: ${responseData.error}</span>`;
+            return;
+        }
+
+        flowBlock.classList.add('success');
+        let html = `🔴 Controller: <strong>${responseData.controller_method || 'StringTemplateController'}</strong>`;
+
+        // Handle service calls from your backend's ApiResponse format
+        if (responseData.service_calls && Object.keys(responseData.service_calls).length > 0) {
+            html += `<div class="api-flow-child">🟣 Service Layer: Template processing executed</div>`;
+
+            Object.entries(responseData.service_calls).forEach(([serviceMethod, templateFeatures]) => {
+                if (Array.isArray(templateFeatures) && templateFeatures.length > 0) {
+                    html += `<div class="api-flow-child">  └── <strong>${serviceMethod}</strong> → <span class="java21-method-tag">${templateFeatures.join(', ')}</span></div>`;
+                    templateFeatures.forEach(method => highlightJavaMethod(method));
+                } else {
+                    html += `<div class="api-flow-child">  └── <strong>${serviceMethod}</strong> → Standard processing</div>`;
+                }
+            });
+        }
+
+        if (responseData.operation_description) {
+            html += `<div class="api-flow-child">💡 <span class="success-text">${responseData.operation_description}</span></div>`;
+        }
+
+        // Handle template response data
+        if (responseData.templateResponse || responseData.response_data?.templateResponse || responseData.metadata?.templateResponse) {
+            const template = responseData.templateResponse || responseData.response_data?.templateResponse || responseData.metadata?.templateResponse;
+            html += `<div class="api-flow-child">📄 Template: <strong>${template.templateType}</strong> (${template.processorUsed})</div>`;
+            if (template.securityStatus) {
+                html += `<div class="api-flow-child">🛡️ Security: ${template.securityStatus}</div>`;
+            }
+        }
+
+        controllerElement.innerHTML = html;
+    }
+
+    function clearInspectorLog() {
+        const logContainer = document.getElementById('api-log');
+        if (!logContainer) return;
+        logContainer.innerHTML = '<div class="text-muted text-center py-2">Log cleared. Generate templates to see API calls...</div>';
+    }
+
+    function highlightJavaMethod(methodName) {
+        if (!methodName) return;
+
+        const safe = String(methodName).replace(/\(\)$/, '');
+
+        // Clear previous highlights
+        document.querySelectorAll('.api-reference-table tr[data-highlight="1"]').forEach(row => {
+            const cells = Array.from(row.cells);
+            cells.forEach(cell => {
+                cell.style.removeProperty('box-shadow');
+                cell.style.removeProperty('background-color');
+                cell.style.removeProperty('border-top');
+                cell.style.removeProperty('border-bottom');
+                cell.style.removeProperty('border-left');
+                cell.style.removeProperty('border-right');
+            });
+            row.removeAttribute('data-highlight');
+        });
+
+        // Map backend method names to UI patterns
+        let targetSelector = null;
+        switch(safe.toLowerCase()) {
+            case 'str':
+            case 'string template':
+            case 'safe string interpolation':
+                targetSelector = '#code-STR';
+                break;
+            case 'fmt':
+            case 'formatted output':
+            case 'format':
+                targetSelector = '#code-FMT';
+                break;
+            case 'custom':
+            case 'safe':
+            case 'custom template processors':
+                targetSelector = '#code-custom';
+                break;
+            case 'expression embedding':
+            case 'expression':
+                targetSelector = '#code-expression';
+                break;
+            case 'safety':
+            case 'injection prevention':
+            case 'compile-time injection prevention':
+                targetSelector = '#code-safety';
+                break;
+        }
+
+        if (targetSelector) {
+            const row = document.querySelector(targetSelector);
+            if (row) {
+                // Apply highlighting
+                const cells = Array.from(row.cells);
+                const bg = '#fffbea';
+                const border = '#ffc107';
+
+                cells.forEach((cell, i) => {
+                    cell.style.setProperty('box-shadow', `inset 0 0 0 9999px ${bg}`, 'important');
+                    cell.style.setProperty('background-color', 'transparent', 'important');
+                    cell.style.setProperty('border-top', `2px solid ${border}`, 'important');
+                    cell.style.setProperty('border-bottom', `2px solid ${border}`, 'important');
+                    if (i === 0) cell.style.setProperty('border-left', `2px solid ${border}`, 'important');
+                    if (i === cells.length - 1) cell.style.setProperty('border-right', `2px solid ${border}`, 'important');
+                });
+
+                row.setAttribute('data-highlight', '1');
+
+                // Auto-remove highlighting
+                setTimeout(() => {
+                    if (row.isConnected) {
+                        cells.forEach(cell => {
+                            cell.style.removeProperty('box-shadow');
+                            cell.style.removeProperty('background-color');
+                            cell.style.removeProperty('border-top');
+                            cell.style.removeProperty('border-bottom');
+                            cell.style.removeProperty('border-left');
+                            cell.style.removeProperty('border-right');
+                        });
+                        row.removeAttribute('data-highlight');
+                    }
+                }, 3000);
+            }
+        }
+    }
+
+    // Template Generation Functions
+    async function generateEmail() {
+        if (appState.processing) return;
+
+        const emailBtn = document.getElementById('emailBtn');
+        const originalText = emailBtn.innerHTML;
+
+        appState.processing = true;
+        emailBtn.disabled = true;
+        emailBtn.classList.add('processing');
+        emailBtn.innerHTML = '<div class="spinner"></div> Processing...';
+
+        try {
+            const templateRequest = {
+                customerName: document.getElementById('customerName').value,
+                orderId: document.getElementById('orderId').value,
+                amount: parseFloat(document.getElementById('amount').value),
+                itemsCount: parseInt(document.getElementById('itemsCount').value),
+                searchQuery: document.getElementById('searchQuery').value
+            };
+
+            if (appState.connected) {
+                const response = await apiCall('POST', ENDPOINTS.EMAIL, templateRequest);
+
+                if (response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse) {
+                    const templateData = response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse;
+                    displayTemplate({
+                        type: 'email',
+                        title: 'Order Confirmation Email',
+                        template: templateData.templateSource || 'STR template processed',
+                        output: templateData.generatedContent,
+                        processorUsed: templateData.processorUsed || 'STR Processor',
+                        securityStatus: templateData.securityStatus || 'safe'
+                    }, 'email');
+                }
+            } else {
+                // Offline simulation
+                const logId = createFlowLog('Generate Email (Offline)', 'POST', '/api/templates/email');
+                setTimeout(() => {
+                    updateFlowLog(logId, {
+                        controller_method: 'StringTemplateController.generateEmail (Simulated)',
+                        service_calls: {
+                            'StringTemplateService.generateEmail': ['STR', 'Expression embedding', 'Safety']
+                        },
+                        operation_description: 'Email template generated using STR processor (offline simulation)'
+                    });
+
+                    const emailContent = simulateEmailGeneration(templateRequest);
+                    displayTemplate(emailContent, 'email');
+                }, 1000);
+            }
+
+        } catch (error) {
+            console.error('Email generation failed:', error);
+        } finally {
+            setTimeout(() => {
+                appState.processing = false;
+                emailBtn.disabled = false;
+                emailBtn.classList.remove('processing');
+                emailBtn.innerHTML = originalText;
+            }, 2000);
+        }
+    }
+
+    async function generateSMS() {
+        if (appState.processing) return;
+
+        const smsBtn = document.getElementById('smsBtn');
+        const originalText = smsBtn.innerHTML;
+
+        appState.processing = true;
+        smsBtn.disabled = true;
+        smsBtn.classList.add('processing');
+        smsBtn.innerHTML = '<div class="spinner"></div> Processing...';
+
+        try {
+            const templateRequest = {
+                customerName: document.getElementById('customerName').value,
+                orderId: document.getElementById('orderId').value,
+                amount: parseFloat(document.getElementById('amount').value),
+                itemsCount: parseInt(document.getElementById('itemsCount').value),
+                searchQuery: document.getElementById('searchQuery').value
+            };
+
+            if (appState.connected) {
+                const response = await apiCall('POST', ENDPOINTS.SMS, templateRequest);
+
+                if (response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse) {
+                    const templateData = response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse;
+                    displayTemplate({
+                        type: 'sms',
+                        title: 'SMS Notification',
+                        template: templateData.templateSource || 'FMT template processed',
+                        output: templateData.generatedContent,
+                        processorUsed: templateData.processorUsed || 'FMT Processor',
+                        securityStatus: templateData.securityStatus || 'safe'
+                    }, 'sms');
+                }
+            } else {
+                // Offline simulation
+                const logId = createFlowLog('Generate SMS (Offline)', 'POST', '/api/templates/sms');
+                setTimeout(() => {
+                    updateFlowLog(logId, {
+                        controller_method: 'StringTemplateController.generateSMS (Simulated)',
+                        service_calls: {
+                            'StringTemplateService.generateSMS': ['FMT', 'Expression embedding', 'Formatted output']
+                        },
+                        operation_description: 'SMS template generated using FMT processor (offline simulation)'
+                    });
+
+                    const smsContent = simulateSMSGeneration(templateRequest);
+                    displayTemplate(smsContent, 'sms');
+                }, 1000);
+            }
+
+        } catch (error) {
+            console.error('SMS generation failed:', error);
+        } finally {
+            setTimeout(() => {
+                appState.processing = false;
+                smsBtn.disabled = false;
+                smsBtn.classList.remove('processing');
+                smsBtn.innerHTML = originalText;
+            }, 2000);
+        }
+    }
+
+    async function generateSQL() {
+        if (appState.processing) return;
+
+        const sqlBtn = document.getElementById('sqlBtn');
+        const originalText = sqlBtn.innerHTML;
+
+        appState.processing = true;
+        sqlBtn.disabled = true;
+        sqlBtn.classList.add('processing');
+        sqlBtn.innerHTML = '<div class="spinner"></div> Processing...';
+
+        try {
+            const templateRequest = {
+                customerName: document.getElementById('customerName').value,
+                orderId: document.getElementById('orderId').value,
+                amount: parseFloat(document.getElementById('amount').value),
+                itemsCount: parseInt(document.getElementById('itemsCount').value),
+                searchQuery: document.getElementById('searchQuery').value
+            };
+
+            if (appState.connected) {
+                const response = await apiCall('POST', ENDPOINTS.SQL, templateRequest);
+
+                if (response.templateResponse || response.response_data?.templateResponse) {
+                    const templateData = response.templateResponse || response.response_data.templateResponse;
+                    displayTemplate({
+                        type: 'sql',
+                        title: 'Safe Database Query',
+                        template: templateData.templateSource || 'SAFE template processed',
+                        output: templateData.generatedContent,
+                        processorUsed: templateData.processorUsed || 'Custom Safe Processor',
+                        securityStatus: templateData.securityStatus || 'safe'
+                    }, 'sql');
+                }
+            } else {
+                // Offline simulation
+                const logId = createFlowLog('Generate Safe SQL (Offline)', 'POST', '/api/templates/sql');
+                setTimeout(() => {
+                    updateFlowLog(logId, {
+                        controller_method: 'StringTemplateController.generateSafeSQL (Simulated)',
+                        service_calls: {
+                            'StringTemplateService.generateSafeSQL': ['Custom', 'Safety', 'Injection prevention']
+                        },
+                        operation_description: 'Safe SQL template generated using custom processor (offline simulation)'
+                    });
+
+                    const sqlContent = simulateSQLGeneration(templateRequest);
+                    displayTemplate(sqlContent, 'sql');
+                }, 1000);
+            }
+
+        } catch (error) {
+            console.error('SQL generation failed:', error);
+        } finally {
+            setTimeout(() => {
+                appState.processing = false;
+                sqlBtn.disabled = false;
+                sqlBtn.classList.remove('processing');
+                sqlBtn.innerHTML = originalText;
+            }, 2000);
+        }
+    }
+
+    // Simulation functions for offline mode
+    function simulateEmailGeneration(data) {
+        return {
+            type: 'email',
+            title: 'Order Confirmation Email',
+            template: 'STR."Dear \\{customerName}, Your order #\\{orderId} has been confirmed!"',
+            output: `Dear ${data.customerName},
 
 Your order #${data.orderId} has been confirmed!
 
 Order Details:
-- Total Amount: $${data.amount.toFixed(2)}
+- Total Amount: ${data.amount.toFixed(2)}
 - Items: ${data.itemsCount} product(s)
 - Order Date: ${new Date().toLocaleDateString()}
 
@@ -674,288 +1177,124 @@ Thank you for shopping with TechMart!
 
 Best regards,
 The TechMart Team`,
-        processorUsed: 'STR Processor',
-        securityStatus: 'safe'
-    };
-}
+            processorUsed: 'STR Processor',
+            securityStatus: 'safe'
+        };
+    }
 
-function simulateSMSGeneration(data) {
-    return {
-        type: 'sms',
-        title: 'SMS Notification',
-        template: 'FMT."Order \\{orderId} confirmed! Total: \\{amount:$.2f} for \\{itemsCount} items"',
-        output: `TechMart Alert
+    function simulateSMSGeneration(data) {
+        return {
+            type: 'sms',
+            title: 'SMS Notification',
+            template: 'FMT."Order \\{orderId} confirmed! Total: \\{amount:$.2f} for \\{itemsCount} items"',
+            output: `TechMart Alert
 Order ${data.orderId} confirmed!
-Total: $${data.amount.toFixed(2)} for ${data.itemsCount} items.
+Total: ${data.amount.toFixed(2)} for ${data.itemsCount} items.
 Track: techmart.com/track/${data.orderId}`,
-        processorUsed: 'FMT Processor',
-        securityStatus: 'safe'
-    };
-}
+            processorUsed: 'FMT Processor',
+            securityStatus: 'safe'
+        };
+    }
 
-function simulateSQLGeneration(data) {
-    return {
-        type: 'sql',
-        title: 'Safe Database Query',
-        template: 'SAFE."SELECT * FROM customers WHERE name = \\{searchQuery} AND status = \'active\'"',
-        output: `-- Generated Safe SQL Query
-SELECT c.id, c.name, c.email, c.status 
-FROM customers c 
-WHERE c.name = ? 
-  AND c.status = 'active' 
+    function simulateSQLGeneration(data) {
+        return {
+            type: 'sql',
+            title: 'Safe Database Query',
+            template: 'SAFE."SELECT * FROM customers WHERE name = \\{searchQuery} AND status = \'active\'"',
+            output: `-- Generated Safe SQL Query
+SELECT c.id, c.name, c.email, c.status
+FROM customers c
+WHERE c.name = ?
+  AND c.status = 'active'
   AND c.created_date >= CURRENT_DATE - INTERVAL 365 DAY;
 
 -- Parameters (safely escaped):
 -- Parameter 1: "${data.searchQuery}"`,
-        processorUsed: 'Custom Safe Processor',
-        securityStatus: 'safe'
-    };
-}
-
-function displayTemplate(content, type) {
-    const outputContainer = document.getElementById('template-output');
-    
-    let typeIcon = '';
-    let typeClass = '';
-    
-    switch(type) {
-        case 'email':
-            typeIcon = '📧';
-            typeClass = 'email-preview';
-            break;
-        case 'sms':
-            typeIcon = '📱';
-            typeClass = 'sms-preview';
-            break;
-        case 'sql':
-            typeIcon = '🗄️';
-            typeClass = 'sql-preview';
-            break;
+            processorUsed: 'Custom Safe Processor',
+            securityStatus: 'safe'
+        };
     }
-    
-    const securityIcon = content.securityStatus === 'safe' ? '🛡️' : '⚠️';
-    const securityClass = content.securityStatus === 'safe' ? 'security-safe' : 'security-unsafe';
-    
-    outputContainer.innerHTML = `
-        <div class="template-preview ${typeClass}">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6>${typeIcon} ${content.title}</h6>
-                <span class="${securityClass}">${securityIcon} ${content.securityStatus.toUpperCase()}</span>
-            </div>
-            
-            <div class="mb-2">
-                <small class="text-muted">Template:</small><br>
-                <code style="background: #f8f9fa; padding: 0.25rem; border-radius: 0.25rem; font-size: 0.8rem;">${content.template}</code>
-            </div>
-            
-            <div class="mb-2">
-                <small class="text-muted">Generated Output:</small>
-                <div style="background: white; padding: 0.75rem; border: 1px solid #e9ecef; border-radius: 0.25rem; margin-top: 0.25rem;">
-                    <pre style="margin: 0; white-space: pre-wrap; font-family: inherit; font-size: 0.9rem;">${content.output}</pre>
+
+    // Display template output
+    function displayTemplate(content, type) {
+        const outputContainer = document.getElementById('template-output');
+
+        let typeIcon = '';
+        let typeClass = '';
+
+        switch(type) {
+            case 'email':
+                typeIcon = '📧';
+                typeClass = 'email-preview';
+                break;
+            case 'sms':
+                typeIcon = '📱';
+                typeClass = 'sms-preview';
+                break;
+            case 'sql':
+                typeIcon = '🗄️';
+                typeClass = 'sql-preview';
+                break;
+        }
+
+        const securityIcon = content.securityStatus === 'safe' ? '🛡️' : '⚠️';
+        const securityClass = content.securityStatus === 'safe' ? 'security-safe' : 'security-unsafe';
+
+        outputContainer.innerHTML = `
+            <div class="template-preview ${typeClass}">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6>${typeIcon} ${content.title}</h6>
+                    <span class="${securityClass}">${securityIcon} ${content.securityStatus.toUpperCase()}</span>
+                </div>
+
+                <div class="mb-2">
+                    <small class="text-muted">Template:</small><br>
+                    <code style="background: #f8f9fa; padding: 0.25rem; border-radius: 0.25rem; font-size: 0.8rem;">${content.template}</code>
+                </div>
+
+                <div class="mb-2">
+                    <small class="text-muted">Generated Output:</small>
+                    <div style="background: white; padding: 0.75rem; border: 1px solid #e9ecef; border-radius: 0.25rem; margin-top: 0.25rem;">
+                        <pre style="margin: 0; white-space: pre-wrap; font-family: inherit; font-size: 0.9rem;">${content.output}</pre>
+                    </div>
+                </div>
+
+                <div style="font-size: 0.8rem; color: #6c757d;">
+                    <strong>Processor Used:</strong> ${content.processorUsed}
                 </div>
             </div>
-            
-            <div style="font-size: 0.8rem; color: #6c757d;">
-                <strong>Processor Used:</strong> ${content.processorUsed}
-            </div>
-        </div>
-    `;
-}
+        `;
+    }
 
-function createFlowLog(userAction, method, endpoint) {
-    const logContainer = document.getElementById('api-log');
-    if (!logContainer) return null;
+    // Initialize application
+    async function initApp() {
+        // Check backend connection
+        const logId = createFlowLog('App Initialization', 'GET', '/api/templates/demo-state');
 
-    const initialMessages = logContainer.querySelectorAll('.text-muted, .text-center');
-    initialMessages.forEach(msg => {
-        if (msg.textContent && msg.textContent.includes('Click')) {
-            logContainer.innerHTML = '';
+        const connected = await checkConnection();
+
+        if (connected) {
+            updateFlowLog(logId, {
+                controller_method: 'StringTemplateController.getDemoState',
+                service_calls: {
+                    'StringTemplateService.initializeProcessors': ['STR', 'FMT', 'Custom']
+                },
+                operation_description: 'Backend connected - String Templates Demo ready'
+            });
+        } else {
+            updateFlowLog(logId, {
+                controller_method: 'Frontend Only Mode',
+                service_calls: {},
+                operation_description: 'Backend offline - Demo running in simulation mode'
+            });
         }
-    });
-
-    const flowBlock = document.createElement('div');
-    const logId = `flow-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    flowBlock.id = logId;
-    flowBlock.className = 'api-flow-block';
-
-    flowBlock.innerHTML = `
-        <div>👤 <strong>${userAction}</strong> (Frontend)</div>
-        <div class="api-flow-child">🌐 API Call: ${method} ${endpoint}</div>
-        <div class="api-flow-child" data-role="controller">🔴 Controller: Pending...</div>
-    `;
-
-    logContainer.insertBefore(flowBlock, logContainer.firstChild);
-
-    while (logContainer.children.length > 12) {
-        logContainer.removeChild(logContainer.lastChild);
     }
 
-    logContainer.scrollTop = 0;
-    return logId;
-}
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', initApp);
 
-function updateFlowLog(logId, responseData) {
-    if (!logId) return;
-
-    const flowBlock = document.getElementById(logId);
-    if (!flowBlock) return;
-
-    const controllerElement = flowBlock.querySelector('[data-role="controller"]');
-    if (!controllerElement) return;
-
-    if (responseData.error) {
-        controllerElement.innerHTML = `🔴 Controller: <span style="color: #ef4444;">${responseData.error}</span>`;
-        return;
-    }
-
-    let html = `🔴 Controller: <strong>${responseData.controller_method || 'TemplateController.processTemplate'}</strong>`;
-
-    if (responseData.service_calls && typeof responseData.service_calls === 'object') {
-        html += `<div class="api-flow-child">🟣 Service Layer: Multiple processors used</div>`;
-
-        Object.entries(responseData.service_calls).forEach(([serviceMethod, templateFeatures]) => {
-            if (templateFeatures && templateFeatures.length > 0) {
-                html += `<div class="api-flow-child">  └── <strong>${serviceMethod}</strong> → <span class="java21-method-tag">${templateFeatures.join(', ')}</span></div>`;
-            }
-        });
-    }
-
-    if (responseData.security_validation) {
-        html += `<div class="api-flow-child">🛡️ Security: ${responseData.security_validation}</div>`;
-    }
-
-    if (responseData.operation_description) {
-        html += `<div class="api-flow-child">💡 Operation: ${responseData.operation_description}</div>`;
-    }
-
-    controllerElement.innerHTML = html;
-}
-
-function highlightMultipleFeatures(featureTypes) {
-    console.log('highlightMultipleFeatures called with:', featureTypes);
-    
-    // Clear all highlights first
-    document.querySelectorAll('tr[data-highlight="1"]').forEach(row => {
-        const cells = Array.from(row.cells);
-        cells.forEach(cell => {
-            cell.style.removeProperty('box-shadow');
-            cell.style.removeProperty('background-color');
-            cell.style.removeProperty('border-top');
-            cell.style.removeProperty('border-bottom');
-            cell.style.removeProperty('border-left');
-            cell.style.removeProperty('border-right');
-        });
-        row.removeAttribute('data-highlight');
-    });
-
-    // Highlight multiple features
-    featureTypes.forEach(featureType => {
-        console.log('Processing feature:', featureType);
-        let targetRow = null;
-        switch(featureType) {
-            case 'STR':
-                targetRow = document.getElementById('code-STR');
-                console.log('STR row found:', targetRow);
-                break;
-            case 'FMT':
-                targetRow = document.getElementById('code-FMT');
-                console.log('FMT row found:', targetRow);
-                break;
-            case 'CUSTOM':
-                targetRow = document.getElementById('code-custom');
-                console.log('CUSTOM row found:', targetRow);
-                break;
-            case 'EXPRESSION':
-                targetRow = document.getElementById('code-expression');
-                console.log('EXPRESSION row found:', targetRow);
-                break;
-            case 'SAFETY':
-                targetRow = document.getElementById('code-safety');
-                console.log('SAFETY row found:', targetRow);
-                break;
-        }
-
-        if (!targetRow) {
-            console.log('No target row found for:', featureType);
-            return;
-        }
-
-        console.log('Highlighting row:', targetRow.id);
-
-        // Apply highlight
-        const cells = Array.from(targetRow.cells);
-        const bg = '#fffbea';
-        const border = '#ffc107';
-
-        cells.forEach((cell, i) => {
-            cell.style.setProperty('box-shadow', `inset 0 0 0 9999px ${bg}`, 'important');
-            cell.style.setProperty('background-color', 'transparent', 'important');
-            cell.style.setProperty('border-top', `2px solid ${border}`, 'important');
-            cell.style.setProperty('border-bottom', `2px solid ${border}`, 'important');
-            if (i === 0) cell.style.setProperty('border-left', `2px solid ${border}`, 'important');
-            if (i === cells.length - 1) cell.style.setProperty('border-right', `2px solid ${border}`, 'important');
-        });
-
-        targetRow.setAttribute('data-highlight', '1');
-    });
-
-    console.log('All highlights applied');
-
-    // Remove highlights after 3 seconds (longer since there are multiple)
-    setTimeout(() => {
-        console.log('Removing highlights');
-        featureTypes.forEach(featureType => {
-            let targetRow = null;
-            switch(featureType) {
-                case 'STR':
-                    targetRow = document.getElementById('code-STR');
-                    break;
-                case 'FMT':
-                    targetRow = document.getElementById('code-FMT');
-                    break;
-                case 'CUSTOM':
-                    targetRow = document.getElementById('code-custom');
-                    break;
-                case 'EXPRESSION':
-                    targetRow = document.getElementById('code-expression');
-                    break;
-                case 'SAFETY':
-                    targetRow = document.getElementById('code-safety');
-                    break;
-            }
-
-            if (targetRow && targetRow.isConnected) {
-                const cells = Array.from(targetRow.cells);
-                cells.forEach(cell => {
-                    cell.style.removeProperty('box-shadow');
-                    cell.style.removeProperty('background-color');
-                    cell.style.removeProperty('border-top');
-                    cell.style.removeProperty('border-bottom');
-                    cell.style.removeProperty('border-left');
-                    cell.style.removeProperty('border-right');
-                });
-                targetRow.removeAttribute('data-highlight');
-            }
-        });
-    }, 3000);
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('String Templates Demo Ready');
-    
-    const logId = createFlowLog('Demo Initialization', 'GET', '/api/demo/init');
-    setTimeout(() => {
-        updateFlowLog(logId, {
-            controller_method: 'DemoController.initializeStringTemplates',
-            service_calls: {
-                'TemplateEngineService.setupProcessors': ['STR', 'FMT', 'Custom']
-            },
-            security_validation: 'All processors initialized with safety checks',
-            operation_description: 'String Templates Demo ready for safe template processing'
-        });
-        // No highlight on page load
-    }, 500);
-});
+    // Periodic connection check
+    setInterval(checkConnection, 30000); // Check every 30 seconds
 </script>
 </body>
 </html>
