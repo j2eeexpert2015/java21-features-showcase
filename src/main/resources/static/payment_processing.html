@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Processing Engine - Java 21</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .header {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            padding: 8px 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            position: relative;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .header-controls {
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 8px;
+        }
+        
+        .header-btn {
+            padding: 4px 8px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s;
+        }
+        
+        .header-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .header-btn.primary {
+            background: rgba(23,162,184,0.8);
+            border-color: rgba(23,162,184,0.8);
+        }
+        
+        .header h1 {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .java-badge {
+            background: #4CAF50;
+            color: white;
+            padding: 1px 5px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: bold;
+            margin-left: 6px;
+        }
+        
+        .subtitle {
+            font-size: 10px;
+            opacity: 0.9;
+            margin: 0;
+        }
+        
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            padding: 8px;
+            height: calc(100vh - 66px);
+            max-width: 1400px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+        
+        .panel {
+            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 8px;
+            padding: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            height: 100%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .panel:first-child {
+            background: linear-gradient(145deg, #fff8f0 0%, #fdf4e8 100%);
+        }
+        
+        .panel:nth-child(2) {
+            background: linear-gradient(145deg, #f0f8ff 0%, #e8f2fd 100%);
+        }
+        
+        .panel:nth-child(3) {
+            background: linear-gradient(145deg, #f8fff0 0%, #f0fde8 100%);
+        }
+        
+        .panel-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        .panel-icon {
+            margin-right: 6px;
+            font-size: 14px;
+        }
+        
+        .quick-tests {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+        
+        .test-btn {
+            padding: 3px 8px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .test-btn.active {
+            border-color: #007bff;
+            background: linear-gradient(145deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.3);
+        }
+        
+        .test-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            font-size: 11px;
+        }
+        
+        .total {
+            border-top: 1px solid #eee;
+            padding-top: 6px;
+            margin-top: 6px;
+            font-weight: 600;
+        }
+        
+        .payment-methods {
+            display: flex;
+            gap: 6px;
+            margin: 8px 0;
+        }
+        
+        .payment-method {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 6px;
+            border: 1px solid #e0e6ed;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+        }
+        
+        .payment-method.selected {
+            border-color: #007bff;
+            background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,123,255,0.2);
+        }
+        
+        .payment-method:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .payment-icon {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+        
+        .customer-type {
+            margin: 8px 0;
+        }
+        
+        .customer-tabs {
+            display: flex;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .customer-tab {
+            flex: 1;
+            padding: 6px;
+            text-align: center;
+            background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%);
+            border: none;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s;
+        }
+        
+        .customer-tab.active {
+            background: linear-gradient(145deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.3);
+        }
+        
+        .customer-tab:hover:not(.active) {
+            background: linear-gradient(145deg, #e9ecef 0%, #dee2e6 100%);
+        }
+        
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            font-size: 11px;
+        }
+        
+        .checkbox-option input {
+            margin-right: 6px;
+        }
+        
+        .process-btn {
+            width: 100%;
+            padding: 8px;
+            background: linear-gradient(145deg, #28a745 0%, #1e7e34 100%);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 11px;
+            margin-top: auto;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(40,167,69,0.3);
+        }
+        
+        .process-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(40,167,69,0.4);
+        }
+        
+        .pattern-reference {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 11px;
+            margin-bottom: 8px;
+            flex-shrink: 0;
+        }
+
+        .pattern-line {
+            padding: 2px 0;
+            line-height: 1.3;
+            transition: all 0.3s ease;
+        }
+
+        .pattern-line.highlighted {
+            background: linear-gradient(145deg, #fff3cd 0%, #ffeaa7 100%);
+            border: 2px solid #ffc107;
+            border-radius: 4px;
+            padding: 4px 6px;
+            margin: 2px 0;
+            box-shadow: 0 2px 8px rgba(255,193,7,0.3);
+            animation: fadeHighlight 3s ease-in-out forwards;
+        }
+
+        @keyframes fadeHighlight {
+            0% {
+                background: linear-gradient(145deg, #fff3cd 0%, #ffeaa7 100%);
+                border-color: #ffc107;
+                box-shadow: 0 2px 8px rgba(255,193,7,0.3);
+            }
+            70% {
+                background: linear-gradient(145deg, #fff3cd 0%, #ffeaa7 100%);
+                border-color: #ffc107;
+                box-shadow: 0 2px 8px rgba(255,193,7,0.3);
+            }
+            100% {
+                background: transparent;
+                border-color: transparent;
+                box-shadow: none;
+            }
+        }
+
+        .keyword {
+            color: #d73a49;
+            font-weight: bold;
+        }
+
+        .type {
+            color: #005cc5;
+        }
+
+        .string {
+            color: #032f62;
+        }
+
+        .comment {
+            color: #6a737d;
+            font-style: italic;
+        }
+
+        .pattern-note {
+            background: linear-gradient(145deg, #fff3cd 0%, #ffeaa7 100%);
+            padding: 4px;
+            border-radius: 3px;
+            font-size: 10px;
+            color: #856404;
+            margin-bottom: 8px;
+            flex-shrink: 0;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status-section h4 {
+            font-size: 10px;
+            margin-bottom: 4px;
+            color: #586069;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            padding: 4px;
+            margin-bottom: 3px;
+            border-radius: 4px;
+            background: #f8f9fa;
+        }
+
+        .status-icon {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            margin-right: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .status-icon.success {
+            background: #28a745;
+        }
+
+        .status-icon.warning {
+            background: #ffc107;
+        }
+
+        .status-icon.pending {
+            background: #6c757d;
+        }
+
+        .status-icon.play {
+            background: #17a2b8;
+        }
+
+        .status-content h5 {
+            font-size: 10px;
+            margin-bottom: 1px;
+            line-height: 1.2;
+        }
+
+        .status-content p {
+            font-size: 8px;
+            color: #6c757d;
+            margin: 0;
+            line-height: 1.1;
+        }
+
+        .visual-flow {
+            background: linear-gradient(145deg, #1e1e1e 0%, #2a2a2a 100%);
+            border-radius: 6px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            color: #e0e0e0;
+            font-size: 11px;
+            min-height: 100px;
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 12px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            line-height: 1.5;
+        }
+
+        .log-entry {
+            margin: 1px 0;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            line-height: 1.4;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .log-entry:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .log-entry.info {
+            color: #90cdf4;
+            background: rgba(144, 205, 244, 0.08);
+            border-left: 3px solid #3182ce;
+            font-weight: 500;
+        }
+
+        .log-entry.success {
+            color: #68d391;
+            background: rgba(104, 211, 145, 0.08);
+            border-left: 3px solid #38a169;
+        }
+
+        .log-entry.warning {
+            color: #fbd38d;
+            background: rgba(251, 211, 141, 0.08);
+            border-left: 3px solid #d69e2e;
+        }
+
+        .log-entry.method {
+            color: #f093c1;
+            background: rgba(240, 147, 193, 0.08);
+            border-left: 3px solid #d53f8c;
+            margin-left: 16px;
+        }
+
+        .log-entry.detail {
+            color: #a78bfa;
+            background: rgba(167, 139, 250, 0.08);
+            border-left: 3px solid #805ad5;
+            margin-left: 32px;
+        }
+
+        .log-entry.feature {
+            color: #fbb6ce;
+            background: rgba(251, 182, 206, 0.08);
+            border-left: 3px solid #ed64a6;
+            margin-left: 48px;
+        }
+
+        .log-icon {
+            margin-right: 8px;
+            font-size: 12px;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .error {
+            color: #dc3545;
+            background: rgba(220, 53, 69, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin: 4px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-controls">
+        <button class="header-btn" onclick="resetDemo()">🔄 Reset Demo</button>
+        <button class="header-btn primary" onclick="runScenarios()">▶️ Run Scenarios</button>
+    </div>
+    <div>
+        <h1>💳 Payment Processing Engine <span class="java-badge">JAVA 21</span></h1>
+        <p class="subtitle">Interactive demonstration of Java 21 Pattern Matching with Sealed Payment Hierarchy</p>
+    </div>
+</div>
+
+<div class="main-container">
+    <!-- Left Panel: Order Summary -->
+    <div class="panel">
+        <div class="panel-header">
+            <span class="panel-icon">🛒</span>
+            Order Summary
+        </div>
+
+        <div class="quick-tests">
+            <button class="test-btn active" onclick="setQuickTest(500)" data-amount="500">$500</button>
+            <button class="test-btn" onclick="setQuickTest(1500)" data-amount="1500">$1.5K</button>
+            <button class="test-btn" onclick="setQuickTest(5000)" data-amount="5000">$5K</button>
+        </div>
+
+        <div id="order-items">
+            <div class="order-item">
+                <span>iPhone 15 Pro</span>
+                <span>$500</span>
+            </div>
+        </div>
+
+        <div class="total">
+            <div class="order-item">
+                <span>Total:</span>
+                <span id="total-amount">$500</span>
+            </div>
+        </div>
+
+        <div class="panel-header" style="margin-top: 30px;">
+            <span class="panel-icon">💳</span>
+            Payment Method
+        </div>
+
+        <div class="payment-methods">
+            <div class="payment-method selected" onclick="selectPaymentMethod('credit')" data-method="credit">
+                <div class="payment-icon">💳</div>
+                <div style="font-size: 12px; text-align: center;">
+                    <div style="font-weight: 600;">Credit Card</div>
+                    <div style="color: #6c757d;">Visa, MC, Amex</div>
+                </div>
+            </div>
+            <div class="payment-method" onclick="selectPaymentMethod('paypal')" data-method="paypal">
+                <div class="payment-icon">📱</div>
+                <div style="font-size: 12px; text-align: center;">
+                    <div style="font-weight: 600;">PayPal</div>
+                    <div style="color: #6c757d;">Account</div>
+                </div>
+            </div>
+            <div class="payment-method" onclick="selectPaymentMethod('bank')" data-method="bank">
+                <div class="payment-icon">🏛️</div>
+                <div style="font-size: 12px; text-align: center;">
+                    <div style="font-weight: 600;">Bank Transfer</div>
+                    <div style="color: #6c757d;">Direct</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="customer-type">
+            <div style="margin-bottom: 10px; font-weight: 600; font-size: 14px;">👤 Customer Type</div>
+            <div class="customer-tabs">
+                <button class="customer-tab" onclick="selectCustomerType('basic')" data-type="basic">Basic</button>
+                <button class="customer-tab" onclick="selectCustomerType('premium')" data-type="premium">Premium</button>
+                <button class="customer-tab active" onclick="selectCustomerType('vip')" data-type="vip">VIP</button>
+            </div>
+        </div>
+
+        <div class="checkbox-option">
+            <input type="checkbox" id="international" onchange="toggleInternational()">
+            <label for="international">International Transaction</label>
+        </div>
+        <div style="font-size: 12px; color: #6c757d; margin-left: 20px;">
+            High amounts + international = verification
+        </div>
+
+        <button class="process-btn" onclick="processPayment()">🔒 Process Payment - <span id="btn-amount">$500</span></button>
+    </div>
+
+    <!-- Center Panel: Pattern Matching Reference -->
+    <div class="panel">
+        <div class="panel-header">
+            <span class="panel-icon">⚡</span>
+            Java 21 Pattern Matching
+        </div>
+
+        <h4 style="font-size: 12px; color: #6c757d; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Pattern Matching Reference</h4>
+
+        <div class="pattern-reference" id="pattern-reference">
+            <div class="pattern-line" data-pattern="switch">
+                <span class="keyword">switch</span> <span class="type">(payment)</span> <span class="comment">Pattern matching switch expression</span>
+            </div>
+            <div class="pattern-line" data-pattern="credit">
+                <span class="keyword">case</span> <span class="type">CreditCard(...)</span> <span class="comment">Record pattern with destructuring</span>
+            </div>
+            <div class="pattern-line" data-pattern="guard">
+                <span class="keyword">when</span> <span class="type">amount > 1000</span> <span class="comment">Guard condition for business rules</span>
+            </div>
+            <div class="pattern-line" data-pattern="paypal">
+                <span class="keyword">case</span> <span class="type">PayPal(...)</span> <span class="comment">Alternative payment method pattern</span>
+            </div>
+            <div class="pattern-line" data-pattern="bank">
+                <span class="keyword">case</span> <span class="type">BankTransfer(...)</span> <span class="comment">Bank transfer pattern matching</span>
+            </div>
+            <div class="pattern-line" data-pattern="sealed">
+                <span class="keyword">sealed interface</span> <span class="comment">Sealed hierarchy for type safety</span>
+            </div>
+        </div>
+
+        <div class="pattern-note">
+            💡 Rows highlight when patterns match
+        </div>
+
+        <h4 style="font-size: 12px; color: #6c757d; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px;">Current Pattern Status</h4>
+
+        <div class="status-section" id="status-section">
+            <div class="status-item">
+                <div class="status-icon success">✓</div>
+                <div class="status-content">
+                    <h5 style="font-size: 12px !important; font-weight: bold !important; color: #333 !important;">Payment Method Detection</h5>
+                    <p id="payment-detection" style="font-size: 10px !important; color: #555 !important; font-weight: 500 !important;">Pattern: CreditCard identified</p>
+                </div>
+            </div>
+
+            <div class="status-item">
+                <div class="status-icon warning">⚠</div>
+                <div class="status-content">
+                    <h5 style="font-size: 12px !important; font-weight: bold !important; color: #333 !important;">Guard Condition Check</h5>
+                    <p id="guard-condition" style="font-size: 10px !important; color: #555 !important; font-weight: 500 !important;">Amount ≤ $1,000 – Standard processing</p>
+                </div>
+            </div>
+
+            <div class="status-item">
+                <div class="status-icon pending">○</div>
+                <div class="status-content">
+                    <h5 style="font-size: 12px !important; font-weight: bold !important; color: #333 !important;">Validation</h5>
+                    <p id="validation-status" style="font-size: 10px !important; color: #555 !important; font-weight: 500 !important;">Ready for processing</p>
+                </div>
+            </div>
+
+            <div class="status-item">
+                <div class="status-icon play">▶</div>
+                <div class="status-content">
+                    <h5 style="font-size: 12px !important; font-weight: bold !important; color: #333 !important;">Payment Processing</h5>
+                    <p id="processing-status" style="font-size: 10px !important; color: #555 !important; font-weight: 500 !important;">Click Process to execute</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel: Visual Flow Inspector -->
+    <div class="panel">
+        <div class="panel-header">
+            <span class="panel-icon">📊</span>
+            Visual Flow Inspector
+            <button style="margin-left: auto; border: 1px solid #ddd; background: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;" onclick="clearVisualFlow()">🗑️ Clear</button>
+        </div>
+
+        <div class="visual-flow" id="visual-flow">
+            <div style="color: #666; text-align: center; margin-top: 40px;">Backend integration ready - click an action to see API calls</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Configuration
+    const API_BASE_URL = 'http://localhost:8080/api/payment';
+
+    // Application state - matches backend defaults
+    let appState = {
+        amount: 500,
+        paymentMethod: 'credit',
+        customerType: 'vip',
+        isInternational: false,
+        processing: false
+    };
+
+    // Initialize application
+    function initApp() {
+        updatePatternHighlighting();
+        updateStatusIndicators();
+        updateVisualFlow('Application initialized - backend connected to ' + API_BASE_URL);
+    }
+
+    // Quick test amount selection
+    async function setQuickTest(amount) {
+        document.querySelectorAll('.test-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        appState.amount = amount;
+        updateOrderDisplay(amount);
+        updateAmountDisplays(amount);
+        updatePatternHighlighting();
+        updateStatusIndicators();
+
+        try {
+            updateVisualFlow(`Setting amount to ${amount}`);
+            const response = await fetch(`${API_BASE_URL}/amount/${amount}`, {
+                method: 'PUT'
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                logApiResponse('Amount Update', result);
+            } else {
+                throw new Error(`HTTP ${response.status}`);
+            }
+        } catch (error) {
+            updateVisualFlow(`❌ Amount update failed: ${error.message}`, 'error');
+        }
+    }
+
+    // Update order display
+    function updateOrderDisplay(amount) {
+        const orderItems = document.getElementById('order-items');
+        if (amount === 500) {
+            orderItems.innerHTML = '<div class="order-item"><span>iPhone 15 Pro</span><span>$500</span></div>';
+        } else if (amount === 1500) {
+            orderItems.innerHTML = `
+                <div class="order-item"><span>iPhone 15 Pro</span><span>$999</span></div>
+                <div class="order-item"><span>AirPods Pro</span><span>$501</span></div>
+            `;
+        } else if (amount === 5000) {
+            orderItems.innerHTML = `
+                <div class="order-item"><span>MacBook Pro M3</span><span>$2500</span></div>
+                <div class="order-item"><span>iPhone 15 Pro</span><span>$999</span></div>
+                <div class="order-item"><span>AirPods Pro x3</span><span>$1501</span></div>
+            `;
+        }
+    }
+
+    // Update amount displays
+    function updateAmountDisplays(amount) {
+        document.getElementById('total-amount').textContent = `${amount.toLocaleString()}`;
+        document.getElementById('btn-amount').textContent = `${amount.toLocaleString()}`;
+    }
+
+    // Payment method selection
+    async function selectPaymentMethod(method) {
+        document.querySelectorAll('.payment-method').forEach(pm => pm.classList.remove('selected'));
+        event.target.closest('.payment-method').classList.add('selected');
+
+        appState.paymentMethod = method;
+        updatePatternHighlighting();
+        updateStatusIndicators();
+
+        try {
+            updateVisualFlow(`💳 Changing payment method to ${method}`);
+            const response = await fetch(`${API_BASE_URL}/method/${method}`, {
+                method: 'PUT'
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                logApiResponse('Payment Method Change', result);
+            } else {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+        } catch (error) {
+            updateVisualFlow(`❌ Payment method change failed: ${error.message}`, 'error');
+        }
+    }
+
+    // Customer type selection
+    async function selectCustomerType(type) {
+        document.querySelectorAll('.customer-tab').forEach(tab => tab.classList.remove('active'));
+        event.target.classList.add('active');
+
+        appState.customerType = type;
+        updateStatusIndicators();
+
+        try {
+            updateVisualFlow(`👤 Changing customer type to ${type}`);
+            const response = await fetch(`${API_BASE_URL}/customer/type/${type}`, {
+                method: 'PUT'
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                logApiResponse('Customer Type Change', result);
+            } else {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+        } catch (error) {
+            updateVisualFlow(`❌ Customer type change failed: ${error.message}`, 'error');
+        }
+    }
+
+    // International transaction toggle
+    async function toggleInternational() {
+        appState.isInternational = document.getElementById('international').checked;
+        updateStatusIndicators();
+
+        try {
+            updateVisualFlow(`🌍 Setting international flag to ${appState.isInternational}`);
+            const response = await fetch(`${API_BASE_URL}/international/${appState.isInternational}`, {
+                method: 'PUT'
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                logApiResponse('International Toggle', result);
+            } else {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+        } catch (error) {
+            updateVisualFlow(`❌ International toggle failed: ${error.message}`, 'error');
+        }
+    }
+
+    // Process payment - Main backend integration
+    async function processPayment() {
+        if (appState.processing) return;
+
+        appState.processing = true;
+        document.querySelector('.process-btn').classList.add('loading');
+        updateVisualFlow('🔄 Starting payment processing...');
+
+        try {
+            const requestBody = {
+                paymentMethod: appState.paymentMethod,
+                amount: appState.amount,
+                customerId: 1,
+                customerType: appState.customerType.toUpperCase(),
+                international: appState.isInternational
+            };
+
+            updateVisualFlow(`📤 Request: ${JSON.stringify(requestBody)}`);
+
+            const response = await fetch(`${API_BASE_URL}/process`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+
+                // Handle errors in ApiResponse
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+
+                logApiResponse('Payment Processing', result);
+
+                // Display payment result from metadata
+                if (result.metadata && result.metadata.paymentResponse) {
+                    const paymentResult = result.metadata.paymentResponse;
+                    updateVisualFlow(`✅ Payment processed successfully`);
+                    updateVisualFlow(`📋 Transaction ID: ${paymentResult.transactionId}`);
+                    updateVisualFlow(`📊 Status: ${paymentResult.status}`);
+                    updateVisualFlow(`💬 Message: ${paymentResult.validationMessage}`);
+
+                    if (paymentResult.requiresAdditionalVerification) {
+                        updateVisualFlow(`⚠️ Additional verification required`, 'warning');
+                    }
+                } else {
+                    updateVisualFlow(`✅ Operation completed successfully`);
+                }
+            } else {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+        } catch (error) {
+            updateVisualFlow(`❌ Payment processing failed: ${error.message}`, 'error');
+            console.error('Payment processing error:', error);
+        } finally {
+            appState.processing = false;
+            document.querySelector('.process-btn').classList.remove('loading');
+        }
+    }
+
+    // Reset demo
+    async function resetDemo() {
+        try {
+            updateVisualFlow('🔄 Resetting demo to default state...');
+            const response = await fetch(`${API_BASE_URL}/reset`, {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                logApiResponse('Demo Reset', result);
+
+                // Reset UI to backend defaults
+                appState = {
+                    amount: 500, // Backend default
+                    paymentMethod: 'credit',
+                    customerType: 'vip',
+                    isInternational: false,
+                    processing: false
+                };
+
+                // Reset UI elements to match backend defaults
+                document.querySelectorAll('.test-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelector('[data-amount="500"]').classList.add('active');
+
+                document.querySelectorAll('.payment-method').forEach(pm => pm.classList.remove('selected'));
+                document.querySelector('[data-method="credit"]').classList.add('selected');
+
+                document.querySelectorAll('.customer-tab').forEach(tab => tab.classList.remove('active'));
+                document.querySelector('[data-type="vip"]').classList.add('active');
+
+                document.getElementById('international').checked = false;
+
+                updateOrderDisplay(500);
+                updateAmountDisplays(500);
+                updatePatternHighlighting();
+                updateStatusIndicators();
+
+                updateVisualFlow('✅ Demo reset completed - state synchronized with backend');
+
+            } else {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+        } catch (error) {
+            updateVisualFlow(`❌ Demo reset failed: ${error.message}`, 'error');
+        }
+    }
+
+    // Run scenarios
+    async function runScenarios() {
+        updateVisualFlow('🧪 Running automated scenarios...');
+
+        const scenarios = [
+            { amount: 500, method: 'credit', customer: 'basic', international: false },
+            { amount: 1500, method: 'paypal', customer: 'premium', international: true },
+            { amount: 5000, method: 'bank', customer: 'vip', international: false }
+        ];
+
+        for (let i = 0; i < scenarios.length; i++) {
+            const scenario = scenarios[i];
+            updateVisualFlow(`📋 Scenario ${i + 1}: ${scenario.amount} ${scenario.method} ${scenario.customer} ${scenario.international ? 'international' : 'domestic'}`);
+
+            // Apply scenario settings
+            await setQuickTest(scenario.amount);
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // This is a simplified version - you could make actual API calls here
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
+        updateVisualFlow('✅ All scenarios completed');
+    }
+
+    // Update pattern highlighting
+    function updatePatternHighlighting() {
+        // Remove existing highlights
+        document.querySelectorAll('.pattern-line').forEach(line => {
+            line.classList.remove('highlighted');
+        });
+
+        // Apply new highlights with auto-remove
+        const linesToHighlight = [];
+
+        const switchLine = document.querySelector('[data-pattern="switch"]');
+        linesToHighlight.push(switchLine);
+
+        const methodLine = document.querySelector(`[data-pattern="${appState.paymentMethod}"]`);
+        if (methodLine) {
+            linesToHighlight.push(methodLine);
+        }
+
+        if (appState.amount > 1000) {
+            const guardLine = document.querySelector('[data-pattern="guard"]');
+            linesToHighlight.push(guardLine);
+        }
+
+        const sealedLine = document.querySelector('[data-pattern="sealed"]');
+        linesToHighlight.push(sealedLine);
+
+        linesToHighlight.forEach(line => {
+            if (line) {
+                line.classList.add('highlighted');
+                setTimeout(() => {
+                    line.classList.remove('highlighted');
+                }, 3000);
+            }
+        });
+    }
+
+    // Update status indicators
+    function updateStatusIndicators() {
+        const statusItems = document.querySelectorAll('.status-item');
+
+        // Reset styles
+        statusItems.forEach(item => {
+            item.style.background = '#f8f9fa';
+            item.style.border = '1px solid rgba(0,0,0,0.05)';
+            item.style.transform = 'translateX(0)';
+            item.style.boxShadow = 'none';
+        });
+
+        // Highlight relevant items
+        setTimeout(() => {
+            if (statusItems[0]) {
+                statusItems[0].style.background = 'linear-gradient(145deg, #d4edda 0%, #c3e6cb 100%)';
+                statusItems[0].style.border = '2px solid #28a745';
+                statusItems[0].style.transform = 'translateX(3px)';
+                statusItems[0].style.boxShadow = '0 2px 8px rgba(40,167,69,0.3)';
+            }
+
+            if (appState.amount > 1000 && statusItems[1]) {
+                statusItems[1].style.background = 'linear-gradient(145deg, #fff3cd 0%, #ffeaa7 100%)';
+                statusItems[1].style.border = '2px solid #ffc107';
+                statusItems[1].style.transform = 'translateX(3px)';
+                statusItems[1].style.boxShadow = '0 2px 8px rgba(255,193,7,0.3)';
+            }
+
+            setTimeout(() => {
+                statusItems.forEach(item => {
+                    item.style.background = '#f8f9fa';
+                    item.style.border = '1px solid rgba(0,0,0,0.05)';
+                    item.style.transform = 'translateX(0)';
+                    item.style.boxShadow = 'none';
+                });
+            }, 3000);
+        }, 100);
+
+        // Update text content
+        document.getElementById('payment-detection').textContent = `Pattern: ${appState.paymentMethod} identified`;
+
+        const guardText = appState.amount > 1000
+            ? `Amount > $1,000 – Additional verification required`
+            : `Amount ≤ $1,000 – Standard processing`;
+        document.getElementById('guard-condition').textContent = guardText;
+
+        let validationText = `${appState.customerType} customer - Ready for processing`;
+        if (appState.isInternational) {
+            validationText += ' + International compliance';
+        }
+        document.getElementById('validation-status').textContent = validationText;
+
+        document.getElementById('processing-status').textContent = 'Click Process to execute pattern matching';
+    }
+
+    // Visual Flow Inspector functions
+    function updateVisualFlow(message, type = 'info') {
+        const visualFlow = document.getElementById('visual-flow');
+        const timestamp = new Date().toLocaleTimeString();
+
+        // Clear initial message if present
+        if (visualFlow.innerHTML.includes('Backend integration ready')) {
+            visualFlow.innerHTML = '';
+        }
+
+        const logEntry = document.createElement('div');
+        logEntry.className = `log-entry ${type}`;
+        logEntry.innerHTML = `<span class="log-icon">📡</span><span>${timestamp}: ${message}</span>`;
+
+        visualFlow.appendChild(logEntry);
+        visualFlow.scrollTop = visualFlow.scrollHeight;
+    }
+
+    function logApiResponse(action, response) {
+        // Handle error responses
+        if (response.error) {
+            updateVisualFlow(`❌ ${action} Error: ${response.error}`, 'error');
+            return;
+        }
+
+        updateVisualFlow(`🎯 ${action} Response:`);
+        updateVisualFlow(`├─ Controller: ${response.controllerMethod}`, 'method');
+        updateVisualFlow(`├─ Operation: ${response.operationDescription}`, 'detail');
+
+        if (response.serviceCalls) {
+            Object.entries(response.serviceCalls).forEach(([service, methods]) => {
+                updateVisualFlow(`├─ Service: ${service}`, 'method');
+                updateVisualFlow(`│  └─ Java 21 Methods: ${methods.join(', ')}`, 'feature');
+            });
+        }
+
+        // Show metadata if present
+        if (response.metadata && Object.keys(response.metadata).length > 0) {
+            updateVisualFlow(`├─ Response Data: Available`, 'detail');
+        }
+
+        updateVisualFlow(`└─ Timestamp: ${new Date(response.timestamp).toLocaleTimeString()}`, 'detail');
+    }
+
+    function clearVisualFlow() {
+        const visualFlow = document.getElementById('visual-flow');
+        visualFlow.innerHTML = '<div style="color: #666; text-align: center; margin-top: 40px;">Log cleared - ready for new API calls</div>';
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', initApp);
+</script>
+</body>
+</html>
