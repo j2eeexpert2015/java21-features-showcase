@@ -10,7 +10,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -19,7 +19,7 @@
             margin: 0;
             padding: 0;
         }
-        
+
         .header {
             background: rgba(255,255,255,0.1);
             color: white;
@@ -33,7 +33,7 @@
             justify-content: center;
             flex-shrink: 0;
         }
-        
+
         .header-controls {
             position: absolute;
             top: 50%;
@@ -42,7 +42,7 @@
             display: flex;
             gap: 8px;
         }
-        
+
         .header-btn {
             padding: 4px 8px;
             border: 1px solid rgba(255,255,255,0.3);
@@ -54,22 +54,27 @@
             backdrop-filter: blur(10px);
             transition: all 0.2s;
         }
-        
+
         .header-btn:hover {
             background: rgba(255,255,255,0.2);
         }
-        
+
         .header-btn.primary {
             background: rgba(23,162,184,0.8);
             border-color: rgba(23,162,184,0.8);
         }
-        
+
+        .header-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         .header h1 {
             font-size: 14px;
             font-weight: 600;
             margin: 0;
         }
-        
+
         .java-badge {
             background: #4CAF50;
             color: white;
@@ -79,13 +84,42 @@
             font-weight: bold;
             margin-left: 6px;
         }
-        
+
         .subtitle {
             font-size: 10px;
             opacity: 0.9;
             margin: 0;
         }
-        
+
+        .connection-status {
+            position: absolute;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 10px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #dc3545;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.connected {
+            background: #28a745;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
         .main-container {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -96,7 +130,7 @@
             margin: 0 auto;
             overflow: hidden;
         }
-        
+
         .panel {
             background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
             border-radius: 8px;
@@ -108,19 +142,19 @@
             flex-direction: column;
             border: 1px solid rgba(0,0,0,0.05);
         }
-        
+
         .panel:first-child {
             background: linear-gradient(145deg, #fff8f0 0%, #fdf4e8 100%);
         }
-        
+
         .panel:nth-child(2) {
             background: linear-gradient(145deg, #f0f8ff 0%, #e8f2fd 100%);
         }
-        
+
         .panel:nth-child(3) {
             background: linear-gradient(145deg, #f8fff0 0%, #f0fde8 100%);
         }
-        
+
         .panel-header {
             display: flex;
             align-items: center;
@@ -128,18 +162,18 @@
             font-weight: 600;
             font-size: 12px;
         }
-        
+
         .panel-icon {
             margin-right: 6px;
             font-size: 14px;
         }
-        
+
         .quick-tests {
             display: flex;
             gap: 4px;
             margin-bottom: 8px;
         }
-        
+
         .test-btn {
             padding: 3px 8px;
             border: 1px solid #ddd;
@@ -149,39 +183,39 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        
+
         .test-btn.active {
             border-color: #007bff;
             background: linear-gradient(145deg, #007bff 0%, #0056b3 100%);
             color: white;
             box-shadow: 0 2px 8px rgba(0,123,255,0.3);
         }
-        
+
         .test-btn:hover {
             transform: translateY(-1px);
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
-        
+
         .order-item {
             display: flex;
             justify-content: space-between;
             margin-bottom: 4px;
             font-size: 11px;
         }
-        
+
         .total {
             border-top: 1px solid #eee;
             padding-top: 6px;
             margin-top: 6px;
             font-weight: 600;
         }
-        
+
         .payment-methods {
             display: flex;
             gap: 6px;
             margin: 8px 0;
         }
-        
+
         .payment-method {
             display: flex;
             flex-direction: column;
@@ -194,35 +228,35 @@
             flex: 1;
             background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
         }
-        
+
         .payment-method.selected {
             border-color: #007bff;
             background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%);
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(0,123,255,0.2);
         }
-        
+
         .payment-method:hover {
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        
+
         .payment-icon {
             font-size: 16px;
             margin-bottom: 4px;
         }
-        
+
         .customer-type {
             margin: 8px 0;
         }
-        
+
         .customer-tabs {
             display: flex;
             border: 1px solid #ddd;
             border-radius: 4px;
             overflow: hidden;
         }
-        
+
         .customer-tab {
             flex: 1;
             padding: 6px;
@@ -233,28 +267,28 @@
             font-size: 11px;
             transition: all 0.2s;
         }
-        
+
         .customer-tab.active {
             background: linear-gradient(145deg, #007bff 0%, #0056b3 100%);
             color: white;
             box-shadow: 0 2px 8px rgba(0,123,255,0.3);
         }
-        
+
         .customer-tab:hover:not(.active) {
             background: linear-gradient(145deg, #e9ecef 0%, #dee2e6 100%);
         }
-        
+
         .checkbox-option {
             display: flex;
             align-items: center;
             margin: 8px 0;
             font-size: 11px;
         }
-        
+
         .checkbox-option input {
             margin-right: 6px;
         }
-        
+
         .process-btn {
             width: 100%;
             padding: 8px;
@@ -269,25 +303,35 @@
             transition: all 0.2s;
             box-shadow: 0 2px 8px rgba(40,167,69,0.3);
         }
-        
-        .process-btn:hover {
+
+        .process-btn:hover:not(:disabled) {
             transform: translateY(-1px);
             box-shadow: 0 4px 16px rgba(40,167,69,0.4);
         }
-        
+
+        .process-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .process-btn.processing {
+            background: linear-gradient(145deg, #6c757d 0%, #495057 100%);
+        }
+
         .pattern-reference {
             font-family: 'Monaco', 'Menlo', monospace;
             font-size: 11px;
             margin-bottom: 8px;
             flex-shrink: 0;
         }
-        
+
         .pattern-line {
             padding: 2px 0;
             line-height: 1.3;
             transition: all 0.3s ease;
         }
-        
+
         .pattern-line.highlighted {
             background: linear-gradient(145deg, #fff3cd 0%, #ffeaa7 100%);
             border: 2px solid #ffc107;
@@ -297,43 +341,43 @@
             box-shadow: 0 2px 8px rgba(255,193,7,0.3);
             animation: fadeHighlight 3s ease-in-out forwards;
         }
-        
+
         @keyframes fadeHighlight {
-            0% { 
+            0% {
                 background: linear-gradient(145deg, #fff3cd 0%, #ffeaa7 100%);
                 border-color: #ffc107;
                 box-shadow: 0 2px 8px rgba(255,193,7,0.3);
             }
-            70% { 
+            70% {
                 background: linear-gradient(145deg, #fff3cd 0%, #ffeaa7 100%);
                 border-color: #ffc107;
                 box-shadow: 0 2px 8px rgba(255,193,7,0.3);
             }
-            100% { 
+            100% {
                 background: transparent;
                 border-color: transparent;
                 box-shadow: none;
             }
         }
-        
+
         .keyword {
             color: #d73a49;
             font-weight: bold;
         }
-        
+
         .type {
             color: #005cc5;
         }
-        
+
         .string {
             color: #032f62;
         }
-        
+
         .comment {
             color: #6a737d;
             font-style: italic;
         }
-        
+
         .pattern-note {
             background: linear-gradient(145deg, #fff3cd 0%, #ffeaa7 100%);
             padding: 4px;
@@ -344,7 +388,7 @@
             flex-shrink: 0;
             border: 1px solid #ffeaa7;
         }
-        
+
         .status-section h4 {
             font-size: 10px;
             margin-bottom: 4px;
@@ -352,7 +396,7 @@
             text-transform: uppercase;
             letter-spacing: 0.3px;
         }
-        
+
         .status-item {
             display: flex;
             align-items: center;
@@ -361,7 +405,7 @@
             border-radius: 4px;
             background: #f8f9fa;
         }
-        
+
         .status-icon {
             width: 14px;
             height: 14px;
@@ -374,37 +418,36 @@
             color: white;
             flex-shrink: 0;
         }
-        
+
         .status-icon.success {
             background: #28a745;
         }
-        
+
         .status-icon.warning {
             background: #ffc107;
         }
-        
+
         .status-icon.pending {
             background: #6c757d;
         }
-        
+
         .status-icon.play {
             background: #17a2b8;
         }
-        
+
         .status-content h5 {
             font-size: 10px;
             margin-bottom: 1px;
             line-height: 1.2;
         }
-        
+
         .status-content p {
             font-size: 8px;
             color: #6c757d;
             margin: 0;
             line-height: 1.1;
         }
-        
-        /* STANDARDIZED VISUAL FLOW INSPECTOR - SAME AS OTHER DEMOS */
+
         .api-log-container {
             background-color: #212529;
             color: #f8f9fa;
@@ -434,6 +477,14 @@
             background: rgba(255, 255, 255, 0.1);
             transform: translateX(3px);
             border-left-color: #10b981;
+        }
+
+        .api-flow-block.error {
+            border-left-color: #dc3545;
+        }
+
+        .api-flow-block.success {
+            border-left-color: #28a745;
         }
 
         @keyframes flowSlideIn {
@@ -480,19 +531,16 @@
             padding: 0.25rem 0.5rem;
         }
 
-        /* Method highlighting - same as other demos */
-        .api-reference-table tr[data-highlight="1"] > * {
-            box-shadow: inset 0 0 0 9999px #fffbea !important;
-            background-color: transparent !important;
-            border-top: 2px solid #ffc107 !important;
-            border-bottom: 2px solid #ffc107 !important;
-            transition: box-shadow 250ms ease;
+        .error-text {
+            color: #dc3545;
         }
-        .api-reference-table tr[data-highlight="1"] > *:first-child {
-            border-left: 2px solid #ffc107 !important;
+
+        .success-text {
+            color: #28a745;
         }
-        .api-reference-table tr[data-highlight="1"] > *:last-child {
-            border-right: 2px solid #ffc107 !important;
+
+        .warning-text {
+            color: #ffc107;
         }
 
         /* Scrollbar styles */
@@ -510,733 +558,962 @@
         .api-log-container::-webkit-scrollbar-thumb:hover {
             background: #868e96;
         }
+
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #6c757d;
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 6px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-controls">
-            <button class="header-btn" onclick="resetDemo()">🔄 Reset Demo</button>
-            <button class="header-btn primary" onclick="runScenarios()">▶️ Run Scenarios</button>
-        </div>
-        <div>
-            <h1>💳 Payment Processing Engine <span class="java-badge">JAVA 21</span></h1>
-            <p class="subtitle">Interactive demonstration of Java 21 Pattern Matching for Switch with Sealed Payment Hierarchy</p>
-        </div>
+<div class="header">
+    <div class="connection-status">
+        <div class="status-dot" id="connectionDot"></div>
+        <span id="connectionText">Connecting...</span>
     </div>
-    
-    <div class="main-container">
-        <!-- Left Panel: Order Summary -->
-        <div class="panel">
-            <div class="panel-header">
-                <span class="panel-icon">🛒</span>
-                Order Summary
-            </div>
-            
-            <div class="quick-tests">
-                <button class="test-btn active" onclick="setQuickTest(500)" data-amount="500">$500</button>
-                <button class="test-btn" onclick="setQuickTest(1500)" data-amount="1500">$1.5K</button>
-                <button class="test-btn" onclick="setQuickTest(5000)" data-amount="5000">$5K</button>
-            </div>
-            
-            <div id="order-items">
-                <div class="order-item">
-                    <span>iPhone 15 Pro</span>
-                    <span>$999</span>
-                </div>
-                <div class="order-item">
-                    <span>MacBook Pro M3</span>
-                    <span>$2.5K</span>
-                </div>
-                <div class="order-item">
-                    <span>AirPods Pro x2</span>
-                    <span>$498</span>
-                </div>
-            </div>
-            
-            <div class="total">
-                <div class="order-item">
-                    <span>Total:</span>
-                    <span id="total-amount">$3,996</span>
-                </div>
-            </div>
-            
-            <div class="panel-header" style="margin-top: 30px;">
-                <span class="panel-icon">💳</span>
-                Payment Method
-            </div>
-            
-            <div class="payment-methods">
-                <div class="payment-method selected" onclick="selectPaymentMethod('credit')" data-method="credit">
-                    <div class="payment-icon">💳</div>
-                    <div style="font-size: 12px; text-align: center;">
-                        <div style="font-weight: 600;">Credit Card</div>
-                        <div style="color: #6c757d;">Visa, MC, Amex</div>
-                    </div>
-                </div>
-                <div class="payment-method" onclick="selectPaymentMethod('paypal')" data-method="paypal">
-                    <div class="payment-icon">📱</div>
-                    <div style="font-size: 12px; text-align: center;">
-                        <div style="font-weight: 600;">PayPal</div>
-                        <div style="color: #6c757d;">Account</div>
-                    </div>
-                </div>
-                <div class="payment-method" onclick="selectPaymentMethod('bank')" data-method="bank">
-                    <div class="payment-icon">🏛️</div>
-                    <div style="font-size: 12px; text-align: center;">
-                        <div style="font-weight: 600;">Bank Transfer</div>
-                        <div style="color: #6c757d;">Direct</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="customer-type">
-                <div style="margin-bottom: 10px; font-weight: 600; font-size: 14px;">👤 Customer Type</div>
-                <div class="customer-tabs">
-                    <button class="customer-tab" onclick="selectCustomerType('basic')" data-type="basic">Basic</button>
-                    <button class="customer-tab" onclick="selectCustomerType('premium')" data-type="premium">Premium</button>
-                    <button class="customer-tab active" onclick="selectCustomerType('vip')" data-type="vip">VIP</button>
-                </div>
-            </div>
-            
-            <div class="checkbox-option">
-                <input type="checkbox" id="international" onchange="toggleInternational()">
-                <label for="international">International Transaction</label>
-            </div>
-            <div style="font-size: 12px; color: #6c757d; margin-left: 20px;">
-                High amounts + international = verification
-            </div>
-            
-            <button class="process-btn" onclick="processPayment()">🔒 Process Payment - <span id="btn-amount">$3,996</span></button>
+    <div class="header-controls">
+        <button class="header-btn" onclick="resetDemo()" id="resetBtn">🔄 Reset Demo</button>
+        <button class="header-btn primary" onclick="runScenarios()" id="scenariosBtn">▶️ Run Scenarios</button>
+    </div>
+    <div>
+        <h1>💳 Payment Processing Engine <span class="java-badge">JAVA 21</span></h1>
+        <p class="subtitle">Interactive demonstration of Java 21 Pattern Matching for Switch with Sealed Payment Hierarchy</p>
+    </div>
+</div>
+
+<div class="main-container">
+    <!-- Left Panel: Order Summary -->
+    <div class="panel">
+        <div class="panel-header">
+            <span class="panel-icon">🛒</span>
+            Order Summary
         </div>
-        
-        <!-- Center Panel: Pattern Matching Reference -->
-        <div class="panel">
-            <div class="panel-header">
-                <span class="panel-icon">⚡</span>
-                Java 21 Pattern Matching
+
+        <div class="quick-tests">
+            <button class="test-btn" onclick="setQuickTest(500)" data-amount="500">$500</button>
+            <button class="test-btn" onclick="setQuickTest(1500)" data-amount="1500">$1.5K</button>
+            <button class="test-btn" onclick="setQuickTest(5000)" data-amount="5000">$5K</button>
+        </div>
+
+        <div id="order-items">
+            <div class="order-item">
+                <span>iPhone 15 Pro</span>
+                <span>$999</span>
             </div>
-            
-            <h4 style="font-size: 12px; color: #6c757d; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Pattern Matching Reference</h4>
-            
-            <div class="pattern-reference" id="pattern-reference">
-                <div class="pattern-line" data-pattern="switch">
-                    <span class="keyword">switch</span> <span class="type">(payment)</span> <span class="comment">Pattern matching switch expression</span>
-                </div>
-                <div class="pattern-line" data-pattern="credit">
-                    <span class="keyword">case</span> <span class="type">CreditCard(...)</span> <span class="comment">Record pattern with destructuring</span>
-                </div>
-                <div class="pattern-line" data-pattern="guard">
-                    <span class="keyword">when</span> <span class="type">amount > 1000</span> <span class="comment">Guard condition for business rules</span>
-                </div>
-                <div class="pattern-line" data-pattern="paypal">
-                    <span class="keyword">case</span> <span class="type">PayPal(...)</span> <span class="comment">Alternative payment method pattern</span>
-                </div>
-                <div class="pattern-line" data-pattern="bank">
-                    <span class="keyword">case</span> <span class="type">BankTransfer(...)</span> <span class="comment">Bank transfer pattern matching</span>
-                </div>
-                <div class="pattern-line" data-pattern="sealed">
-                    <span class="keyword">sealed interface</span> <span class="comment">Sealed hierarchy for type safety</span>
+            <div class="order-item">
+                <span>AirPods Pro</span>
+                <span>$249</span>
+            </div>
+        </div>
+
+        <div class="total">
+            <div class="order-item">
+                <span>Total:</span>
+                <span id="total-amount">$500</span>
+            </div>
+        </div>
+
+        <div class="panel-header" style="margin-top: 30px;">
+            <span class="panel-icon">💳</span>
+            Payment Method
+        </div>
+
+        <div class="payment-methods">
+            <div class="payment-method selected" onclick="selectPaymentMethod('credit')" data-method="credit">
+                <div class="payment-icon">💳</div>
+                <div style="font-size: 12px; text-align: center;">
+                    <div style="font-weight: 600;">Credit Card</div>
+                    <div style="color: #6c757d;">Visa, MC, Amex</div>
                 </div>
             </div>
-            
-            <div class="pattern-note">
-                💡 Rows highlight when patterns match
+            <div class="payment-method" onclick="selectPaymentMethod('paypal')" data-method="paypal">
+                <div class="payment-icon">📱</div>
+                <div style="font-size: 12px; text-align: center;">
+                    <div style="font-weight: 600;">PayPal</div>
+                    <div style="color: #6c757d;">Account</div>
+                </div>
             </div>
-            
-            <h4 style="font-size: 12px; color: #6c757d; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px;">Current Pattern Status</h4>
-            
-            <div class="status-section" id="status-section">
-                <div class="status-item">
-                    <div class="status-icon success">✓</div>
-                    <div class="status-content">
-                        <h5 style="font-size: 12px !important; font-weight: bold !important; color: #333 !important;">Payment Method Detection</h5>
-                        <p id="payment-detection" style="font-size: 10px !important; color: #555 !important; font-weight: 500 !important;">Pattern: CreditCard identified</p>
-                    </div>
-                </div>
-                
-                <div class="status-item">
-                    <div class="status-icon warning">⚠</div>
-                    <div class="status-content">
-                        <h5 style="font-size: 12px !important; font-weight: bold !important; color: #333 !important;">Guard Condition Check</h5>
-                        <p id="guard-condition" style="font-size: 10px !important; color: #555 !important; font-weight: 500 !important;">Amount > $1,000 – Additional verification</p>
-                    </div>
-                </div>
-                
-                <div class="status-item">
-                    <div class="status-icon pending">○</div>
-                    <div class="status-content">
-                        <h5 style="font-size: 12px !important; font-weight: bold !important; color: #333 !important;">Validation</h5>
-                        <p id="validation-status" style="font-size: 10px !important; color: #555 !important; font-weight: 500 !important;">Ready for processing</p>
-                    </div>
-                </div>
-                
-                <div class="status-item">
-                    <div class="status-icon play">▶</div>
-                    <div class="status-content">
-                        <h5 style="font-size: 12px !important; font-weight: bold !important; color: #333 !important;">Payment Processing</h5>
-                        <p id="processing-status" style="font-size: 10px !important; color: #555 !important; font-weight: 500 !important;">Click Process to execute</p>
-                    </div>
+            <div class="payment-method" onclick="selectPaymentMethod('bank')" data-method="bank">
+                <div class="payment-icon">🏛️</div>
+                <div style="font-size: 12px; text-align: center;">
+                    <div style="font-weight: 600;">Bank Transfer</div>
+                    <div style="color: #6c757d;">Direct</div>
                 </div>
             </div>
         </div>
-        
-        <!-- Right Panel: Visual Flow Inspector - STANDARDIZED -->
-        <div class="panel">
-            <div class="panel-header">
-                <span class="panel-icon">📊</span>
-                Visual Flow Inspector
-                <button class="btn btn-sm btn-outline-secondary clear-log-btn" onclick="clearInspectorLog()" style="margin-left: auto; border: 1px solid #ddd; background: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;">🗑️ Clear</button>
+
+        <div class="customer-type">
+            <div style="margin-bottom: 10px; font-weight: 600; font-size: 14px;">👤 Customer Type</div>
+            <div class="customer-tabs">
+                <button class="customer-tab" onclick="selectCustomerType('basic')" data-type="basic">Basic</button>
+                <button class="customer-tab" onclick="selectCustomerType('premium')" data-type="premium">Premium</button>
+                <button class="customer-tab active" onclick="selectCustomerType('vip')" data-type="vip">VIP</button>
             </div>
-            
-            <div id="api-log" class="api-log-container" aria-live="polite">
-                <div class="text-muted text-center py-2">Click an action to see the call stack...</div>
+        </div>
+
+        <div class="checkbox-option">
+            <input type="checkbox" id="international" onchange="toggleInternational()">
+            <label for="international">International Transaction</label>
+        </div>
+        <div style="font-size: 12px; color: #6c757d; margin-left: 20px;">
+            High amounts + international = verification
+        </div>
+
+        <button class="process-btn" onclick="processPayment()" id="processBtn">🔒 Process Payment - <span id="btn-amount">$500</span></button>
+    </div>
+
+    <!-- Center Panel: Pattern Matching Reference -->
+    <div class="panel">
+        <div class="panel-header">
+            <span class="panel-icon">⚡</span>
+            Java 21 Pattern Matching
+        </div>
+
+        <h4 style="font-size: 12px; color: #6c757d; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Pattern Matching Reference</h4>
+
+        <div class="pattern-reference" id="pattern-reference">
+            <div class="pattern-line" data-pattern="switch">
+                <span class="keyword">switch</span> <span class="type">(payment)</span> <span class="comment">Pattern matching switch expression</span>
+            </div>
+            <div class="pattern-line" data-pattern="credit">
+                <span class="keyword">case</span> <span class="type">CreditCard(...)</span> <span class="comment">Record pattern with destructuring</span>
+            </div>
+            <div class="pattern-line" data-pattern="guard">
+                <span class="keyword">when</span> <span class="type">amount > 1000</span> <span class="comment">Guard condition for business rules</span>
+            </div>
+            <div class="pattern-line" data-pattern="paypal">
+                <span class="keyword">case</span> <span class="type">PayPal(...)</span> <span class="comment">Alternative payment method pattern</span>
+            </div>
+            <div class="pattern-line" data-pattern="bank">
+                <span class="keyword">case</span> <span class="type">BankTransfer(...)</span> <span class="comment">Bank transfer pattern matching</span>
+            </div>
+            <div class="pattern-line" data-pattern="sealed">
+                <span class="keyword">sealed interface</span> <span class="comment">Sealed hierarchy for type safety</span>
+            </div>
+        </div>
+
+        <div class="pattern-note">
+            💡 Rows highlight when patterns match
+        </div>
+
+        <h4 style="font-size: 12px; color: #6c757d; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px;">Current Pattern Status</h4>
+
+        <div class="status-section" id="status-section">
+            <div class="status-item">
+                <div class="status-icon success">✓</div>
+                <div class="status-content">
+                    <h5 style="font-size: 12px !important; font-weight: bold !important; color: #333 !important;">Payment Method Detection</h5>
+                    <p id="payment-detection" style="font-size: 10px !important; color: #555 !important; font-weight: 500 !important;">Pattern: CreditCard identified</p>
+                </div>
+            </div>
+
+            <div class="status-item">
+                <div class="status-icon pending">○</div>
+                <div class="status-content">
+                    <h5 style="font-size: 12px !important; font-weight: bold !important; color: #333 !important;">Guard Condition Check</h5>
+                    <p id="guard-condition" style="font-size: 10px !important; color: #555 !important; font-weight: 500 !important;">Amount ≤ $1,000 — Standard processing</p>
+                </div>
+            </div>
+
+            <div class="status-item">
+                <div class="status-icon success">✓</div>
+                <div class="status-content">
+                    <h5 style="font-size: 12px !important; font-weight: bold !important; color: #333 !important;">Validation</h5>
+                    <p id="validation-status" style="font-size: 10px !important; color: #555 !important; font-weight: 500 !important;">Ready for processing</p>
+                </div>
+            </div>
+
+            <div class="status-item">
+                <div class="status-icon play">▶</div>
+                <div class="status-content">
+                    <h5 style="font-size: 12px !important; font-weight: bold !important; color: #333 !important;">Payment Processing</h5>
+                    <p id="processing-status" style="font-size: 10px !important; color: #555 !important; font-weight: 500 !important;">Click Process to execute</p>
+                </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // Application state
-        let appState = {
-            amount: 3996,
-            paymentMethod: 'credit',
-            customerType: 'vip',
-            isInternational: false,
-            processing: false
-        };
+    <!-- Right Panel: Visual Flow Inspector -->
+    <div class="panel">
+        <div class="panel-header">
+            <span class="panel-icon">📊</span>
+            Visual Flow Inspector
+            <button class="btn btn-sm btn-outline-secondary clear-log-btn" onclick="clearInspectorLog()" style="margin-left: auto; border: 1px solid #ddd; background: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;">🗑️ Clear</button>
+        </div>
 
-        // Quick test scenarios
-        const scenarios = {
-            500: { items: [{ name: 'AirPods Pro', price: 500 }], total: 500 },
-            1500: { items: [{ name: 'iPhone 15 Pro', price: 999 }, { name: 'AirPods Pro', price: 498 }], total: 1500 },
-            5000: { items: [{ name: 'iPhone 15 Pro', price: 999 }, { name: 'MacBook Pro M3', price: 2500 }, { name: 'AirPods Pro x2', price: 498 }, { name: 'iPad Pro', price: 1000 }], total: 5000 }
-        };
+        <div id="api-log" class="api-log-container" aria-live="polite">
+            <div class="text-muted text-center py-2">Starting backend connection check...</div>
+        </div>
+    </div>
+</div>
 
-        // Payment method configurations
-        const paymentMethods = {
-            credit: { 
-                name: 'CreditCard', 
-                pattern: 'CreditCard(var number, var type, var cvv)',
-                validation: 'CVV + fraud detection',
-                processingTime: 'Instant'
-            },
-            paypal: { 
-                name: 'PayPal', 
-                pattern: 'PayPal(var email, var accountId)',
-                validation: 'Account verification',
-                processingTime: '1-2 minutes'
-            },
-            bank: { 
-                name: 'BankTransfer', 
-                pattern: 'BankTransfer(var routing, var account)',
-                validation: 'Bank verification',
-                processingTime: '2-3 business days'
+<script>
+    // Configuration
+    const API_BASE_URL = 'http://localhost:8080';
+    const ENDPOINTS = {
+        PROCESS: '/api/payment/process',
+        METHOD: '/api/payment/method',
+        CUSTOMER_TYPE: '/api/payment/customer/type',
+        INTERNATIONAL: '/api/payment/international',
+        AMOUNT: '/api/payment/amount',
+        DEMO_STATE: '/api/payment/demo-state',
+        RESET: '/api/payment/reset'
+    };
+
+    // Application state
+    let appState = {
+        amount: 500,
+        paymentMethod: 'credit',
+        customerType: 'vip',
+        isInternational: false,
+        processing: false,
+        connected: false
+    };
+
+    // Quick test scenarios
+    const scenarios = {
+        500: { items: [{ name: 'iPhone 15 Pro', price: 999 }, { name: 'AirPods Pro', price: 249 }], total: 500 },
+        1500: { items: [{ name: 'iPhone 15 Pro', price: 999 }, { name: 'AirPods Pro', price: 498 }], total: 1500 },
+        5000: { items: [{ name: 'iPhone 15 Pro', price: 999 }, { name: 'MacBook Pro M3', price: 2500 }, { name: 'AirPods Pro x2', price: 498 }, { name: 'iPad Pro', price: 1000 }], total: 5000 }
+    };
+
+    // Payment method configurations
+    const paymentMethods = {
+        credit: {
+            name: 'CreditCard',
+            pattern: 'CreditCard(var number, var type, var cvv)',
+            validation: 'CVV + fraud detection',
+            processingTime: 'Instant'
+        },
+        paypal: {
+            name: 'PayPal',
+            pattern: 'PayPal(var email, var accountId)',
+            validation: 'Account verification',
+            processingTime: '1-2 minutes'
+        },
+        bank: {
+            name: 'BankTransfer',
+            pattern: 'BankTransfer(var routing, var account)',
+            validation: 'Bank verification',
+            processingTime: '2-3 business days'
+        }
+    };
+
+    // Customer type configurations
+    const customerTypes = {
+        basic: { tier: 'Basic', discount: 0, priority: 'Standard' },
+        premium: { tier: 'Premium', discount: 5, priority: 'High' },
+        vip: { tier: 'VIP', discount: 10, priority: 'Express' }
+    };
+
+    // API Helper Functions
+    async function apiCall(method, endpoint, data = null) {
+        const logId = createFlowLog(
+            `${method.toUpperCase()} Request`,
+            method.toUpperCase(),
+            endpoint
+        );
+
+        try {
+            const config = {
+                method: method.toUpperCase(),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include'
+            };
+
+            if (data && (method.toUpperCase() === 'POST' || method.toUpperCase() === 'PUT')) {
+                config.body = JSON.stringify(data);
             }
-        };
 
-        // Customer type configurations
-        const customerTypes = {
-            basic: { tier: 'Basic', discount: 0, priority: 'Standard' },
-            premium: { tier: 'Premium', discount: 5, priority: 'High' },
-            vip: { tier: 'VIP', discount: 10, priority: 'Express' }
-        };
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
 
-        // STANDARDIZED VISUAL FLOW INSPECTOR FUNCTIONS - SAME AS OTHER DEMOS
-        function createFlowLog(userAction, method, endpoint) {
-            const logContainer = document.getElementById('api-log');
-            if (!logContainer) {
-                console.error('VFI: Cannot create flow log - container not found');
-                return null;
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
 
-            // Clear initial message if present
-            const initialMessages = logContainer.querySelectorAll('.text-muted, .text-center');
-            initialMessages.forEach(msg => {
-                if (msg.textContent && msg.textContent.includes('Click')) {
-                    logContainer.innerHTML = '';
-                }
+            const responseData = await response.json();
+
+            // Update flow log with success
+            updateFlowLog(logId, {
+                controller_method: responseData.controller_method || 'PaymentController',
+                service_calls: responseData.service_calls || {},
+                operation_description: responseData.operation_description || 'Operation completed',
+                response_data: responseData
             });
 
-            const flowBlock = document.createElement('div');
-            const logId = `flow-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-            flowBlock.id = logId;
-            flowBlock.className = 'api-flow-block';
+            return responseData;
 
-            flowBlock.innerHTML = `
-                <div>👤 <strong>${userAction}</strong> (Frontend)</div>
-                <div class="api-flow-child">🌐 API Call: ${method} ${endpoint}</div>
-                <div class="api-flow-child" data-role="controller">🔴 Controller: Pending...</div>
-            `;
+        } catch (error) {
+            console.error('API Call failed:', error);
 
-            logContainer.insertBefore(flowBlock, logContainer.firstChild);
+            // Update flow log with error
+            updateFlowLog(logId, {
+                error: error.message,
+                controller_method: 'Connection Failed'
+            });
 
-            // Maintain entry limit
-            while (logContainer.children.length > 12) {
-                logContainer.removeChild(logContainer.lastChild);
+            throw error;
+        }
+    }
+
+    // Connection management
+    async function checkConnection() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/payment/demo-state`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                appState.connected = true;
+                updateConnectionStatus(true);
+                const demoState = await response.json();
+                syncWithBackendState(demoState);
+                return true;
             }
-
-            logContainer.scrollTop = 0;
-            return logId;
+        } catch (error) {
+            console.log('Backend not available:', error.message);
         }
 
-        function updateFlowLog(logId, responseData) {
-            if (!logId) return;
+        appState.connected = false;
+        updateConnectionStatus(false);
+        return false;
+    }
 
-            const flowBlock = document.getElementById(logId);
-            if (!flowBlock) return;
+    function updateConnectionStatus(connected) {
+        const dot = document.getElementById('connectionDot');
+        const text = document.getElementById('connectionText');
 
-            const controllerElement = flowBlock.querySelector('[data-role="controller"]');
-            if (!controllerElement) return;
+        if (connected) {
+            dot.classList.add('connected');
+            text.textContent = 'Backend Connected';
+            // Enable all buttons
+            document.querySelectorAll('button').forEach(btn => btn.disabled = false);
+        } else {
+            dot.classList.remove('connected');
+            text.textContent = 'Backend Offline';
+            // Keep UI functional but show offline status
+        }
+    }
 
-            // Handle error responses
-            if (responseData.error) {
-                controllerElement.innerHTML = `🔴 Controller: <span style="color: #ef4444;">${responseData.error}</span>`;
-                return;
+    function syncWithBackendState(backendState) {
+        if (!backendState) return;
+
+        // Update app state from backend
+        if (backendState.amount) {
+            appState.amount = parseFloat(backendState.amount);
+            updateAmountDisplays(appState.amount);
+        }
+
+        if (backendState.paymentMethod) {
+            appState.paymentMethod = backendState.paymentMethod;
+            updatePaymentMethodUI(backendState.paymentMethod);
+        }
+
+        if (backendState.customerType) {
+            appState.customerType = backendState.customerType.toLowerCase();
+            updateCustomerTypeUI(appState.customerType);
+        }
+
+        if (typeof backendState.international === 'boolean') {
+            appState.isInternational = backendState.international;
+            document.getElementById('international').checked = backendState.international;
+        }
+
+        updateStatusIndicators();
+        updatePatternHighlighting();
+    }
+
+    // Visual Flow Inspector Functions
+    function createFlowLog(userAction, method, endpoint) {
+        const logContainer = document.getElementById('api-log');
+        if (!logContainer) return null;
+
+        // Clear initial message if present
+        const initialMessages = logContainer.querySelectorAll('.text-muted, .text-center');
+        initialMessages.forEach(msg => {
+            if (msg.textContent && msg.textContent.includes('Starting') || msg.textContent.includes('Click')) {
+                logContainer.innerHTML = '';
             }
+        });
 
-            let html = `🔴 Controller: <strong>${responseData.controller_method || 'PaymentController.processPayment'}</strong>`;
+        const flowBlock = document.createElement('div');
+        const logId = `flow-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        flowBlock.id = logId;
+        flowBlock.className = 'api-flow-block';
 
-            // Handle service calls
-            if (responseData.service_calls && typeof responseData.service_calls === 'object') {
-                html += `<div class="api-flow-child">🟣 Service Layer: Multiple methods called</div>`;
+        const statusIcon = appState.connected ? '🌐' : '⚠️';
+        const statusText = appState.connected ? 'API Call' : 'Offline Mode';
 
-                Object.entries(responseData.service_calls).forEach(([serviceMethod, java21Methods]) => {
-                    if (java21Methods && java21Methods.length > 0) {
-                        html += `<div class="api-flow-child">  └── <strong>${serviceMethod}</strong> → <span class="java21-method-tag">${java21Methods.join(', ')}</span></div>`;
-                        java21Methods.forEach(method => highlightJavaMethod(method));
-                    } else {
-                        html += `<div class="api-flow-child">  └── <strong>${serviceMethod}</strong> → Standard processing</div>`;
+        flowBlock.innerHTML = `
+            <div>👤 <strong>${userAction}</strong> (Frontend)</div>
+            <div class="api-flow-child">${statusIcon} ${statusText}: ${method} ${endpoint}</div>
+            <div class="api-flow-child" data-role="controller"><div class="spinner"></div> Processing...</div>
+        `;
+
+        logContainer.insertBefore(flowBlock, logContainer.firstChild);
+
+        // Maintain entry limit
+        while (logContainer.children.length > 12) {
+            logContainer.removeChild(logContainer.lastChild);
+        }
+
+        logContainer.scrollTop = 0;
+        return logId;
+    }
+
+    function updateFlowLog(logId, responseData) {
+        if (!logId) return;
+
+        const flowBlock = document.getElementById(logId);
+        if (!flowBlock) return;
+
+        const controllerElement = flowBlock.querySelector('[data-role="controller"]');
+        if (!controllerElement) return;
+
+        // Handle error responses
+        if (responseData.error) {
+            flowBlock.classList.add('error');
+            controllerElement.innerHTML = `🔴 <span class="error-text">Error: ${responseData.error}</span>`;
+            return;
+        }
+
+        flowBlock.classList.add('success');
+        let html = `🔴 Controller: <strong>${responseData.controller_method || 'PaymentController'}</strong>`;
+
+        // Handle service calls from your backend's ApiResponse format
+        if (responseData.service_calls && typeof responseData.service_calls === 'object') {
+            html += `<div class="api-flow-child">🟣 Service Layer: Pattern matching executed</div>`;
+
+            Object.entries(responseData.service_calls).forEach(([serviceMethod, java21Methods]) => {
+                if (Array.isArray(java21Methods) && java21Methods.length > 0) {
+                    html += `<div class="api-flow-child">  └── <strong>${serviceMethod}</strong> → <span class="java21-method-tag">${java21Methods.join(', ')}</span></div>`;
+                    java21Methods.forEach(method => highlightJavaMethod(method));
+                } else {
+                    html += `<div class="api-flow-child">  └── <strong>${serviceMethod}</strong> → Standard processing</div>`;
+                }
+            });
+        }
+
+        if (responseData.operation_description) {
+            html += `<div class="api-flow-child">💡 <span class="success-text">${responseData.operation_description}</span></div>`;
+        }
+
+        // Handle payment response data
+        if (responseData.response_data && responseData.response_data.paymentResponse) {
+            const payment = responseData.response_data.paymentResponse;
+            html += `<div class="api-flow-child">💳 Transaction: <strong>${payment.transactionId}</strong> (${payment.status})</div>`;
+            if (payment.validationMessage) {
+                html += `<div class="api-flow-child">📝 Result: ${payment.validationMessage}</div>`;
+            }
+        }
+
+        controllerElement.innerHTML = html;
+    }
+
+    function clearInspectorLog() {
+        const logContainer = document.getElementById('api-log');
+        if (!logContainer) return;
+        logContainer.innerHTML = '<div class="text-muted text-center py-2">Log cleared. Perform actions to see API calls...</div>';
+    }
+
+    function highlightJavaMethod(methodName) {
+        if (!methodName) return;
+
+        const safe = String(methodName).replace(/\(\)$/, '');
+
+        // Clear previous highlights
+        document.querySelectorAll('.pattern-line.highlighted').forEach(line => {
+            line.classList.remove('highlighted');
+        });
+
+        // Map backend method names to UI patterns
+        let targetSelector = null;
+        switch(safe.toLowerCase()) {
+            case 'switch':
+            case 'pattern matching':
+                targetSelector = '[data-pattern="switch"]';
+                break;
+            case 'creditcard':
+            case 'credit':
+                targetSelector = '[data-pattern="credit"]';
+                break;
+            case 'paypal':
+                targetSelector = '[data-pattern="paypal"]';
+                break;
+            case 'banktransfer':
+            case 'bank':
+                targetSelector = '[data-pattern="bank"]';
+                break;
+            case 'guard':
+            case 'when':
+                targetSelector = '[data-pattern="guard"]';
+                break;
+            case 'sealed':
+                targetSelector = '[data-pattern="sealed"]';
+                break;
+        }
+
+        if (targetSelector) {
+            const line = document.querySelector(targetSelector);
+            if (line) {
+                line.classList.add('highlighted');
+                // Auto-remove after animation
+                setTimeout(() => {
+                    if (line.isConnected) {
+                        line.classList.remove('highlighted');
                     }
-                });
+                }, 3000);
             }
+        }
+    }
 
-            if (responseData.operation_description) {
-                html += `<div class="api-flow-child">💡 Operation: ${responseData.operation_description}</div>`;
+    // UI Update Functions
+    function updateAmountDisplays(amount) {
+        document.getElementById('total-amount').textContent = `${amount.toLocaleString()}`;
+        document.getElementById('btn-amount').textContent = `${amount.toLocaleString()}`;
+    }
+
+    function updatePaymentMethodUI(method) {
+        document.querySelectorAll('.payment-method').forEach(pm => pm.classList.remove('selected'));
+        const methodElement = document.querySelector(`[data-method="${method}"]`);
+        if (methodElement) {
+            methodElement.classList.add('selected');
+        }
+    }
+
+    function updateCustomerTypeUI(type) {
+        document.querySelectorAll('.customer-tab').forEach(tab => tab.classList.remove('active'));
+        const typeElement = document.querySelector(`[data-type="${type}"]`);
+        if (typeElement) {
+            typeElement.classList.add('active');
+        }
+    }
+
+    function updateOrderDisplay(scenario) {
+        const orderItems = document.getElementById('order-items');
+        orderItems.innerHTML = scenario.items.map(item =>
+            `<div class="order-item"><span>${item.name}</span><span>${item.price.toLocaleString()}</span></div>`
+        ).join('');
+    }
+
+    // Event Handler Functions
+    async function setQuickTest(amount) {
+        document.querySelectorAll('.test-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        appState.amount = amount;
+        updateOrderDisplay(scenarios[amount]);
+        updateAmountDisplays(amount);
+        updatePatternHighlighting();
+        updateStatusIndicators();
+
+        // Call backend if connected
+        if (appState.connected) {
+            try {
+                await apiCall('PUT', `${ENDPOINTS.AMOUNT}/${amount}`);
+            } catch (error) {
+                console.error('Failed to update amount on backend:', error);
             }
-
-            controllerElement.innerHTML = html;
-        }
-
-        function clearInspectorLog() {
-            const logContainer = document.getElementById('api-log');
-            if (!logContainer) return;
-            logContainer.innerHTML = '<div class="text-muted text-center py-2">Log cleared. Click an action to see the call stack...</div>';
-        }
-
-        function highlightJavaMethod(methodName) {
-            if (!methodName) return;
-
-            const safe = String(methodName).replace(/\(\)$/, '');
-
-            // Clear previous highlights
-            document.querySelectorAll('tr[data-highlight="1"]').forEach(row => {
-                const cells = Array.from(row.cells);
-                cells.forEach(cell => {
-                    cell.style.removeProperty('box-shadow');
-                    cell.style.removeProperty('background-color');
-                    cell.style.removeProperty('border-top');
-                    cell.style.removeProperty('border-bottom');
-                    cell.style.removeProperty('border-left');
-                    cell.style.removeProperty('border-right');
-                });
-                row.removeAttribute('data-highlight');
-            });
-
-            // Find target row (map pattern matching terms to concepts)
-            let targetSelector = null;
-            switch(safe) {
-                case 'switch':
-                case 'pattern matching':
-                    targetSelector = '[data-pattern="switch"]';
-                    break;
-                case 'CreditCard':
-                case 'credit':
-                    targetSelector = '[data-pattern="credit"]';
-                    break;
-                case 'PayPal':
-                case 'paypal':
-                    targetSelector = '[data-pattern="paypal"]';
-                    break;
-                case 'BankTransfer':
-                case 'bank':
-                    targetSelector = '[data-pattern="bank"]';
-                    break;
-                case 'guard':
-                case 'when':
-                    targetSelector = '[data-pattern="guard"]';
-                    break;
-                case 'sealed':
-                    targetSelector = '[data-pattern="sealed"]';
-                    break;
-            }
-
-            if (!targetSelector) return;
-            const row = document.querySelector(targetSelector);
-            if (!row) return;
-
-            // Apply highlighting
-            const bg = '#fffbea';
-            const border = '#ffc107';
-
-            row.style.setProperty('background', `linear-gradient(145deg, ${bg} 0%, #ffeaa7 100%)`, 'important');
-            row.style.setProperty('border', `2px solid ${border}`, 'important');
-            row.style.setProperty('border-radius', '4px', 'important');
-            row.style.setProperty('padding', '4px 6px', 'important');
-            row.style.setProperty('margin', '2px 0', 'important');
-            row.style.setProperty('box-shadow', `0 2px 8px rgba(255,193,7,0.3)`, 'important');
-
-            row.setAttribute('data-highlight', '1');
-
-            // Auto-remove highlighting
-            setTimeout(() => {
-                if (row.isConnected) {
-                    row.style.removeProperty('background');
-                    row.style.removeProperty('border');
-                    row.style.removeProperty('border-radius');
-                    row.style.removeProperty('padding');
-                    row.style.removeProperty('margin');
-                    row.style.removeProperty('box-shadow');
-                    row.removeAttribute('data-highlight');
-                }
-            }, 2000);
-        }
-
-        // Initialize application
-        function initApp() {
-            updatePatternHighlighting();
-            updateStatusIndicators();
-            
-            // Initialize with standardized flow log
-            const logId = createFlowLog('Demo Initialization', 'GET', '/api/demo/init');
+        } else {
+            // Simulate offline mode
+            const logId = createFlowLog('Set Amount (Offline)', 'PUT', `/api/payment/amount/${amount}`);
             setTimeout(() => {
                 updateFlowLog(logId, {
-                    controller_method: 'PaymentController.initialize',
-                    service_calls: {
-                        'PaymentService.setupPatternMatching': ['switch', 'sealed'],
-                        'ValidationService.initializeRules': ['guard', 'when']
-                    },
-                    operation_description: 'Payment Processing Demo ready with Java 21 Pattern Matching'
-                });
-            }, 500);
-        }
-
-        // Quick test amount selection
-        function setQuickTest(amount) {
-            document.querySelectorAll('.test-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            appState.amount = amount;
-            updateOrderDisplay(scenarios[amount]);
-            updateAmountDisplays(amount);
-            updatePatternHighlighting();
-            updateStatusIndicators();
-            
-            // Use standardized flow logging
-            const logId = createFlowLog('Set Amount', 'PUT', `/api/demo/amount/${amount}`);
-            setTimeout(() => {
-                updateFlowLog(logId, {
-                    controller_method: 'DemoController.setAmount',
+                    controller_method: 'PaymentController.setAmount (Simulated)',
                     service_calls: {
                         'PaymentService.updateAmount': ['pattern matching']
                     },
-                    operation_description: `Amount set to ${amount.toLocaleString()}`
+                    operation_description: `Amount set to ${amount.toLocaleString()} (offline mode)`
                 });
             }, 300);
         }
+    }
 
-        // Update order display
-        function updateOrderDisplay(scenario) {
-            const orderItems = document.getElementById('order-items');
-            orderItems.innerHTML = scenario.items.map(item => 
-                `<div class="order-item"><span>${item.name}</span><span>${item.price.toLocaleString()}</span></div>`
-            ).join('');
-        }
+    async function selectPaymentMethod(method) {
+        document.querySelectorAll('.payment-method').forEach(pm => pm.classList.remove('selected'));
+        event.target.closest('.payment-method').classList.add('selected');
 
-        // Update amount displays
-        function updateAmountDisplays(amount) {
-            document.getElementById('total-amount').textContent = `${amount.toLocaleString()}`;
-            document.getElementById('btn-amount').textContent = `${amount.toLocaleString()}`;
-        }
+        appState.paymentMethod = method;
+        updatePatternHighlighting();
+        updateStatusIndicators();
 
-        // Payment method selection
-        function selectPaymentMethod(method) {
-            document.querySelectorAll('.payment-method').forEach(pm => pm.classList.remove('selected'));
-            event.target.closest('.payment-method').classList.add('selected');
-            
-            appState.paymentMethod = method;
-            updatePatternHighlighting();
-            updateStatusIndicators();
-            
-            // Use standardized flow logging
-            const logId = createFlowLog('Select Payment Method', 'PUT', `/api/payment/method/${method}`);
+        if (appState.connected) {
+            try {
+                await apiCall('PUT', `${ENDPOINTS.METHOD}/${method}`);
+            } catch (error) {
+                console.error('Failed to update payment method on backend:', error);
+            }
+        } else {
+            // Simulate offline mode
+            const logId = createFlowLog('Select Payment Method (Offline)', 'PUT', `/api/payment/method/${method}`);
             setTimeout(() => {
                 updateFlowLog(logId, {
-                    controller_method: 'PaymentController.selectMethod',
+                    controller_method: 'PaymentController.selectPaymentMethod (Simulated)',
                     service_calls: {
-                        'PaymentService.setPaymentMethod': [paymentMethods[method].name, 'pattern matching']
+                        'PaymentService.setPaymentType': ['switch', paymentMethods[method].name, 'sealed']
                     },
-                    operation_description: `Payment method changed to ${paymentMethods[method].name}`
+                    operation_description: `Payment method changed to ${paymentMethods[method].name} (offline mode)`
                 });
             }, 300);
         }
+    }
 
-        // Customer type selection
-        function selectCustomerType(type) {
-            document.querySelectorAll('.customer-tab').forEach(tab => tab.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            appState.customerType = type;
-            updateStatusIndicators();
-            
-            // Use standardized flow logging
-            const logId = createFlowLog('Select Customer Type', 'PUT', `/api/customer/type/${type}`);
+    async function selectCustomerType(type) {
+        document.querySelectorAll('.customer-tab').forEach(tab => tab.classList.remove('active'));
+        event.target.classList.add('active');
+
+        appState.customerType = type;
+        updateStatusIndicators();
+
+        if (appState.connected) {
+            try {
+                await apiCall('PUT', `${ENDPOINTS.CUSTOMER_TYPE}/${type.toUpperCase()}`);
+            } catch (error) {
+                console.error('Failed to update customer type on backend:', error);
+            }
+        } else {
+            // Simulate offline mode
+            const logId = createFlowLog('Select Customer Type (Offline)', 'PUT', `/api/payment/customer/type/${type}`);
             setTimeout(() => {
                 updateFlowLog(logId, {
-                    controller_method: 'CustomerController.setType',
+                    controller_method: 'PaymentController.selectCustomerType (Simulated)',
                     service_calls: {
                         'CustomerService.updateType': ['pattern matching']
                     },
-                    operation_description: `Customer type changed to ${customerTypes[type].tier}`
+                    operation_description: `Customer type changed to ${customerTypes[type].tier} (offline mode)`
                 });
             }, 300);
         }
+    }
 
-        // International transaction toggle
-        function toggleInternational() {
-            appState.isInternational = document.getElementById('international').checked;
-            updateStatusIndicators();
-            
-            // Use standardized flow logging
-            const logId = createFlowLog('Toggle International', 'PUT', `/api/payment/international/${appState.isInternational}`);
+    async function toggleInternational() {
+        appState.isInternational = document.getElementById('international').checked;
+        updateStatusIndicators();
+
+        if (appState.connected) {
+            try {
+                await apiCall('PUT', `${ENDPOINTS.INTERNATIONAL}/${appState.isInternational}`);
+            } catch (error) {
+                console.error('Failed to update international status on backend:', error);
+            }
+        } else {
+            // Simulate offline mode
+            const logId = createFlowLog('Toggle International (Offline)', 'PUT', `/api/payment/international/${appState.isInternational}`);
             setTimeout(() => {
                 updateFlowLog(logId, {
-                    controller_method: 'PaymentController.toggleInternational',
+                    controller_method: 'PaymentController.toggleInternational (Simulated)',
                     service_calls: {
-                        'ValidationService.setInternational': ['guard', 'when']
+                        'ValidationService.setInternational': ['when']
                     },
-                    operation_description: `International transaction: ${appState.isInternational ? 'enabled' : 'disabled'}`
+                    operation_description: `International: ${appState.isInternational ? 'enabled' : 'disabled'} (offline mode)`
                 });
             }, 300);
         }
+    }
 
-        // Update pattern highlighting
-        function updatePatternHighlighting() {
-            // Remove all existing highlights
-            document.querySelectorAll('.pattern-line').forEach(line => {
-                line.classList.remove('highlighted');
-            });
+    async function processPayment() {
+        if (appState.processing) return;
 
-            // Add highlights with auto-remove after animation
-            const linesToHighlight = [];
-            
-            // Highlight switch pattern
-            const switchLine = document.querySelector('[data-pattern="switch"]');
-            linesToHighlight.push(switchLine);
+        appState.processing = true;
+        const processBtn = document.getElementById('processBtn');
+        const originalText = processBtn.innerHTML;
+        processBtn.disabled = true;
+        processBtn.classList.add('processing');
+        processBtn.innerHTML = '<div class="spinner"></div> Processing...';
 
-            // Highlight current payment method pattern
-            const methodLine = document.querySelector(`[data-pattern="${appState.paymentMethod}"]`);
-            if (methodLine) {
-                linesToHighlight.push(methodLine);
-            }
+        try {
+            if (appState.connected) {
+                // Create payment request matching your backend format
+                const paymentRequest = {
+                    customerId: 1,
+                    paymentMethod: appState.paymentMethod,
+                    amount: appState.amount,
+                    customerType: appState.customerType.toUpperCase(),
+                    international: appState.isInternational
+                };
 
-            // Highlight guard condition if amount > 1000
-            if (appState.amount > 1000) {
-                const guardLine = document.querySelector('[data-pattern="guard"]');
-                linesToHighlight.push(guardLine);
-            }
+                const response = await apiCall('POST', ENDPOINTS.PROCESS, paymentRequest);
 
-            // Highlight sealed interface
-            const sealedLine = document.querySelector('[data-pattern="sealed"]');
-            linesToHighlight.push(sealedLine);
-
-            // Apply highlights and set auto-remove
-            linesToHighlight.forEach(line => {
-                if (line) {
-                    line.classList.add('highlighted');
-                    setTimeout(() => {
-                        line.classList.remove('highlighted');
-                    }, 3000);
-                }
-            });
-        }
-
-        // Update status indicators with logical highlighting
-        function updateStatusIndicators() {
-            const method = paymentMethods[appState.paymentMethod];
-            const customer = customerTypes[appState.customerType];
-
-            // Get all status items
-            const statusItems = document.querySelectorAll('.status-item');
-
-            // Reset all items to default style
-            statusItems.forEach(item => {
-                item.style.background = 'linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)';
-                item.style.border = '1px solid rgba(0,0,0,0.05)';
-                item.style.transform = 'translateX(0)';
-                item.style.boxShadow = 'none';
-            });
-
-            // Apply simple, logical highlighting
-            setTimeout(() => {
-                // 1. Payment method detection - always highlights (pattern matching always occurs)
-                if (statusItems[0]) {
-                    statusItems[0].style.background = 'linear-gradient(145deg, #d4edda 0%, #c3e6cb 100%)';
-                    statusItems[0].style.border = '2px solid #28a745';
-                    statusItems[0].style.transform = 'translateX(3px)';
-                    statusItems[0].style.boxShadow = '0 2px 8px rgba(40,167,69,0.3)';
-                }
-                
-                // 2. Guard condition - only when amount > 1000 (guard condition triggered)
-                if (appState.amount > 1000 && statusItems[1]) {
-                    statusItems[1].style.background = 'linear-gradient(145deg, #fff3cd 0%, #ffeaa7 100%)';
-                    statusItems[1].style.border = '2px solid #ffc107';
-                    statusItems[1].style.transform = 'translateX(3px)';
-                    statusItems[1].style.boxShadow = '0 2px 8px rgba(255,193,7,0.3)';
+                // Update UI with response
+                if (response.paymentResponse) {
+                    updateProcessingResults(response.paymentResponse);
                 }
 
-                // Auto-fade after 3 seconds
+            } else {
+                // Simulate offline processing
+                const logId = createFlowLog('Process Payment (Offline)', 'POST', '/api/payment/process');
                 setTimeout(() => {
-                    statusItems.forEach(item => {
-                        item.style.background = 'linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)';
-                        item.style.border = '1px solid rgba(0,0,0,0.05)';
-                        item.style.transform = 'translateX(0)';
-                        item.style.boxShadow = 'none';
+                    updateFlowLog(logId, {
+                        controller_method: 'PaymentController.processPayment (Simulated)',
+                        service_calls: {
+                            'PaymentService.processPayment': ['switch', paymentMethods[appState.paymentMethod].name, 'sealed'],
+                            'ValidationService.validatePayment': appState.amount > 1000 ? ['when'] : []
+                        },
+                        operation_description: `Payment processed successfully (offline simulation)`,
+                        response_data: {
+                            paymentResponse: {
+                                transactionId: 'TXN-OFFLINE-' + Date.now().toString().slice(-6),
+                                status: 'SIMULATED_SUCCESS',
+                                amount: appState.amount,
+                                paymentMethod: paymentMethods[appState.paymentMethod].name,
+                                validationMessage: 'Offline simulation - payment would be processed'
+                            }
+                        }
                     });
-                }, 3000);
-            }, 100);
-
-            // Update text content
-            document.getElementById('payment-detection').textContent = `Pattern: ${method.name} identified`;
-
-            const guardText = appState.amount > 1000 
-                ? `Amount > $1,000 – Additional verification required`
-                : `Amount ≤ $1,000 – Standard processing`;
-            document.getElementById('guard-condition').textContent = guardText;
-
-            let validationText = `${customer.tier} customer - ${method.validation}`;
-            if (appState.isInternational) {
-                validationText += ' + International compliance';
+                }, 1000);
             }
-            document.getElementById('validation-status').textContent = validationText;
 
-            document.getElementById('processing-status').textContent = `Ready - ${method.processingTime}`;
-        }
-
-        // Process payment
-        function processPayment() {
-            if (appState.processing) return;
-            
-            appState.processing = true;
-            
-            // Use standardized flow logging
-            const logId = createFlowLog('Process Payment', 'POST', '/api/payment/process');
-            
+        } catch (error) {
+            console.error('Payment processing failed:', error);
+        } finally {
+            // Reset button state
             setTimeout(() => {
-                updateFlowLog(logId, {
-                    controller_method: 'PaymentController.processPayment',
-                    service_calls: {
-                        'PaymentService.executePayment': ['switch', paymentMethods[appState.paymentMethod].name],
-                        'ValidationService.validatePayment': appState.amount > 1000 ? ['guard', 'when'] : [],
-                        'SecurityService.processSecurely': ['sealed']
-                    },
-                    operation_description: `Payment processed successfully using ${paymentMethods[appState.paymentMethod].name} pattern`
-                });
-                
                 appState.processing = false;
-            }, 1000);
+                processBtn.disabled = false;
+                processBtn.classList.remove('processing');
+                processBtn.innerHTML = originalText;
+            }, 2000);
         }
+    }
 
-        // Reset demo
-        function resetDemo() {
-            appState = {
-                amount: 500,
-                paymentMethod: 'credit',
-                customerType: 'vip',
-                isInternational: false,
-                processing: false
-            };
-            
-            // Reset UI elements
-            document.querySelectorAll('.test-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector('[data-amount="500"]').classList.add('active');
-            
-            document.querySelectorAll('.payment-method').forEach(pm => pm.classList.remove('selected'));
-            document.querySelector('[data-method="credit"]').classList.add('selected');
-            
-            document.querySelectorAll('.customer-tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelector('[data-type="vip"]').classList.add('active');
-            
-            document.getElementById('international').checked = false;
-            
-            // Reset displays
-            setQuickTest(500);
-            clearInspectorLog();
-            
-            const logId = createFlowLog('Reset Demo', 'POST', '/api/demo/reset');
-            setTimeout(() => {
-                updateFlowLog(logId, {
-                    controller_method: 'DemoController.reset',
-                    service_calls: {
-                        'DemoService.resetState': ['pattern matching']
-                    },
-                    operation_description: 'Demo reset to initial state'
-                });
-            }, 300);
+    function updateProcessingResults(paymentResponse) {
+        // Update status indicators with real results
+        document.getElementById('processing-status').textContent =
+            `${paymentResponse.status} - Transaction: ${paymentResponse.transactionId}`;
+
+        // Update validation status with response message
+        if (paymentResponse.validationMessage) {
+            document.getElementById('validation-status').textContent = paymentResponse.validationMessage;
         }
+    }
 
-        // Run scenarios
-        function runScenarios() {
-            const logId = createFlowLog('Run Scenarios', 'POST', '/api/demo/scenarios');
-            
-            setTimeout(() => {
-                updateFlowLog(logId, {
-                    controller_method: 'DemoController.runScenarios',
-                    service_calls: {
-                        'ScenarioService.executeAll': ['pattern matching', 'switch']
-                    },
-                    operation_description: 'Running automated test scenarios'
-                });
-            }, 300);
-            
-            const scenarioSteps = [
-                { amount: 500, method: 'credit', customer: 'basic', international: false },
-                { amount: 1500, method: 'paypal', customer: 'premium', international: true },
-                { amount: 5000, method: 'bank', customer: 'vip', international: false }
-            ];
-            
-            let stepIndex = 0;
-            const runNextStep = () => {
-                if (stepIndex >= scenarioSteps.length) {
-                    const finalLogId = createFlowLog('Scenarios Complete', 'GET', '/api/demo/scenarios/status');
-                    setTimeout(() => {
-                        updateFlowLog(finalLogId, {
-                            controller_method: 'DemoController.getScenariosStatus',
-                            service_calls: {
-                                'ScenarioService.getResults': ['pattern matching']
-                            },
-                            operation_description: 'All scenarios completed successfully'
-                        });
-                    }, 300);
-                    return;
+    async function resetDemo() {
+        const resetBtn = document.getElementById('resetBtn');
+        resetBtn.disabled = true;
+
+        try {
+            if (appState.connected) {
+                const response = await apiCall('POST', ENDPOINTS.RESET);
+                if (response) {
+                    // Get updated state from backend
+                    const demoState = await apiCall('GET', ENDPOINTS.DEMO_STATE);
+                    syncWithBackendState(demoState);
                 }
-                
-                const step = scenarioSteps[stepIndex];
-                
-                // Apply scenario changes
-                setQuickTest(step.amount);
-                selectPaymentMethod(step.method);
-                selectCustomerType(step.customer);
-                document.getElementById('international').checked = step.international;
-                toggleInternational();
-                
-                stepIndex++;
-                setTimeout(runNextStep, 2000);
-            };
-            
-            setTimeout(runNextStep, 1000);
+            } else {
+                // Reset to default offline state
+                appState = {
+                    amount: 500,
+                    paymentMethod: 'credit',
+                    customerType: 'vip',
+                    isInternational: false,
+                    processing: false,
+                    connected: appState.connected
+                };
+
+                // Reset UI elements
+                document.querySelectorAll('.test-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelector('[data-amount="500"]').classList.add('active');
+
+                updatePaymentMethodUI('credit');
+                updateCustomerTypeUI('vip');
+                document.getElementById('international').checked = false;
+                updateOrderDisplay(scenarios[500]);
+                updateAmountDisplays(500);
+                clearInspectorLog();
+
+                // Simulate reset log
+                const logId = createFlowLog('Reset Demo (Offline)', 'POST', '/api/payment/reset');
+                setTimeout(() => {
+                    updateFlowLog(logId, {
+                        controller_method: 'PaymentController.resetDemo (Simulated)',
+                        service_calls: {
+                            'DemoService.initializeDefaults': ['pattern matching']
+                        },
+                        operation_description: 'Demo reset to defaults (offline mode)'
+                    });
+                }, 300);
+            }
+        } catch (error) {
+            console.error('Reset failed:', error);
+        } finally {
+            resetBtn.disabled = false;
         }
 
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', initApp);
-    </script>
+        updatePatternHighlighting();
+        updateStatusIndicators();
+    }
+
+    async function runScenarios() {
+        const scenariosBtn = document.getElementById('scenariosBtn');
+        scenariosBtn.disabled = true;
+
+        const scenarioSteps = [
+            { amount: 500, method: 'credit', customer: 'basic', international: false },
+            { amount: 1500, method: 'paypal', customer: 'premium', international: true },
+            { amount: 5000, method: 'bank', customer: 'vip', international: false }
+        ];
+
+        let stepIndex = 0;
+        const runNextStep = async () => {
+            if (stepIndex >= scenarioSteps.length) {
+                const finalLogId = createFlowLog('Scenarios Complete', 'GET', '/api/demo/scenarios/status');
+                setTimeout(() => {
+                    updateFlowLog(finalLogId, {
+                        controller_method: 'DemoController.getScenariosStatus',
+                        service_calls: {
+                            'ScenarioService.getResults': ['pattern matching']
+                        },
+                        operation_description: 'All scenarios completed successfully'
+                    });
+                    scenariosBtn.disabled = false;
+                }, 300);
+                return;
+            }
+
+            const step = scenarioSteps[stepIndex];
+
+            // Apply scenario changes
+            await setQuickTest(step.amount);
+            await selectPaymentMethod(step.method);
+            await selectCustomerType(step.customer);
+            document.getElementById('international').checked = step.international;
+            await toggleInternational();
+
+            // Process payment for this scenario
+            await processPayment();
+
+            stepIndex++;
+            setTimeout(runNextStep, 3000);
+        };
+
+        setTimeout(runNextStep, 1000);
+    }
+
+    // Pattern highlighting and status updates
+    function updatePatternHighlighting() {
+        // Remove all existing highlights
+        document.querySelectorAll('.pattern-line').forEach(line => {
+            line.classList.remove('highlighted');
+        });
+
+        // Add highlights with auto-remove after animation
+        const linesToHighlight = [];
+
+        // Always highlight switch pattern
+        const switchLine = document.querySelector('[data-pattern="switch"]');
+        linesToHighlight.push(switchLine);
+
+        // Highlight current payment method pattern
+        const methodLine = document.querySelector(`[data-pattern="${appState.paymentMethod}"]`);
+        if (methodLine) {
+            linesToHighlight.push(methodLine);
+        }
+
+        // Highlight guard condition if amount > 1000 OR international
+        if (appState.amount > 1000 || appState.isInternational) {
+            const guardLine = document.querySelector('[data-pattern="guard"]');
+            linesToHighlight.push(guardLine);
+        }
+
+        // Always highlight sealed interface
+        const sealedLine = document.querySelector('[data-pattern="sealed"]');
+        linesToHighlight.push(sealedLine);
+
+        // Apply highlights
+        linesToHighlight.forEach(line => {
+            if (line) {
+                line.classList.add('highlighted');
+            }
+        });
+    }
+
+    function updateStatusIndicators() {
+        const method = paymentMethods[appState.paymentMethod];
+        const customer = customerTypes[appState.customerType];
+
+        // Update text content
+        document.getElementById('payment-detection').textContent = `Pattern: ${method.name} identified`;
+
+        let guardText;
+        let guardIcon;
+        if (appState.amount > 1000) {
+            guardText = `Amount > $1,000 — Additional verification required`;
+            guardIcon = document.querySelector('#status-section .status-item:nth-child(2) .status-icon');
+            guardIcon.className = 'status-icon warning';
+            guardIcon.textContent = '⚠';
+        } else {
+            guardText = `Amount ≤ $1,000 — Standard processing`;
+            guardIcon = document.querySelector('#status-section .status-item:nth-child(2) .status-icon');
+            guardIcon.className = 'status-icon success';
+            guardIcon.textContent = '✓';
+        }
+        document.getElementById('guard-condition').textContent = guardText;
+
+        let validationText = `${customer.tier} customer - ${method.validation}`;
+        if (appState.isInternational) {
+            validationText += ' + International compliance';
+        }
+        document.getElementById('validation-status').textContent = validationText;
+
+        let processingText = `Ready - ${method.processingTime}`;
+        if (!appState.connected) {
+            processingText += ' (Offline Mode)';
+        }
+        document.getElementById('processing-status').textContent = processingText;
+    }
+
+    // Initialize application
+    async function initApp() {
+        updatePatternHighlighting();
+        updateStatusIndicators();
+        updateAmountDisplays(appState.amount);
+        updateOrderDisplay(scenarios[500]);
+
+        // Set default active states
+        document.querySelector('[data-amount="500"]').classList.add('active');
+
+        // Check backend connection
+        const logId = createFlowLog('App Initialization', 'GET', '/api/payment/demo-state');
+
+        const connected = await checkConnection();
+
+        if (connected) {
+            updateFlowLog(logId, {
+                controller_method: 'PaymentController.getDemoState',
+                service_calls: {
+                    'PaymentService.setupPatternMatching': ['switch', 'sealed'],
+                    'ValidationService.initializeRules': ['guard', 'when']
+                },
+                operation_description: 'Backend connected - Demo synchronized with server state'
+            });
+        } else {
+            updateFlowLog(logId, {
+                controller_method: 'Frontend Only Mode',
+                service_calls: {},
+                operation_description: 'Backend offline - Demo running in simulation mode'
+            });
+        }
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', initApp);
+
+    // Periodic connection check
+    setInterval(checkConnection, 30000); // Check every 30 seconds
+</script>
 </body>
 </html>
