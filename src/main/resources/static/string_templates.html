@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechMart - String Templates Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --white: #ffffff;
+            --light-bg: #f8f9fa;
+            --border-color: #dee2e6;
+            --text-dark: #212529;
+            --text-muted: #6c757d;
+            --method-highlight-bg: #fffbea;
+            --method-highlight-border: #ffc107;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--light-bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container-fluid {
+            padding: 0 !important;
+        }
+
+        .my-3 {
+            margin: 0 !important;
+        }
+
+        .main-container {
+            background: var(--white);
+            margin: 0;
+            border: none;
+            border-radius: 0;
+            overflow: hidden;
+            max-width: none;
+            width: 100vw;
+        }
+
+        .demo-header {
+            padding: 0.25rem 0.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: var(--white);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 2px solid #4facfe;
+        }
+
+        .demo-header h1 {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .demo-header h1 i {
+            font-size: 1rem;
+            color: #fff;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+        }
+
+        .demo-header p {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 0;
+            font-size: 0.7rem;
+            opacity: 0.9;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .java21-badge {
+            display: inline-block;
+            background: linear-gradient(45deg, #10b981, #06b6d4);
+            color: white;
+            padding: 0.15rem 0.4rem;
+            border-radius: 12px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            margin-left: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 1px 4px rgba(16, 185, 129, 0.3);
+            animation: badgePulse 3s infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 1px 4px rgba(16, 185, 129, 0.3);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 2px 8px rgba(16, 185, 129, 0.5);
+            }
+        }
+
+        .demo-page-container {
+            padding: 0.25rem;
+        }
+
+        .demo-card {
+            border: 1px solid var(--border-color);
+            border-radius: .375rem;
+            padding: 0.5rem;
+            margin-bottom: 0.25rem;
+            background: var(--white);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .demo-card h5, .demo-card h6 {
+            font-weight: 600;
+            margin-bottom: .25rem;
+            font-size: 0.9rem;
+        }
+
+        .template-input-section {
+            background: var(--light-bg);
+            border: 1px solid var(--border-color);
+            border-radius: .25rem;
+            padding: .5rem;
+            margin-bottom: .5rem;
+        }
+
+        .template-output-section {
+            background: #f8f9fa;
+            border: 1px solid var(--border-color);
+            border-radius: .25rem;
+            padding: .5rem;
+            min-height: 200px;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        .form-control, .form-select {
+            font-size: 0.85rem;
+            padding: 0.375rem 0.5rem;
+        }
+
+        .btn-compact {
+            font-size: 0.75rem;
+            padding: 0.375rem 0.75rem;
+            margin: 0.125rem;
+            position: relative;
+            transition: transform 0.2s ease;
+        }
+
+        .btn-compact:hover {
+            transform: translateY(-1px);
+        }
+
+        .str-processor-tag {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 0.1rem 0.4rem;
+            border-radius: 8px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            margin: 0.125rem;
+            display: inline-block;
+        }
+
+        .fmt-processor-tag {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            padding: 0.1rem 0.4rem;
+            border-radius: 8px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            margin: 0.125rem;
+            display: inline-block;
+        }
+
+        .custom-processor-tag {
+            background: linear-gradient(45deg, #9b59b6, #8e44ad);
+            color: white;
+            padding: 0.1rem 0.4rem;
+            border-radius: 8px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            margin: 0.125rem;
+            display: inline-block;
+        }
+
+        /* IMPROVED API REFERENCE TABLE STYLES */
+        .api-reference-table { 
+            font-size: 0.78em; /* Further reduced */
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .api-reference-table td, .api-reference-table th {
+            padding: 0.5rem 0.35rem; /* Further reduced padding */
+            vertical-align: middle;
+            line-height: 1.25; /* Reduced line height */
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .api-reference-table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+        
+        .api-reference-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .api-reference-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .api-reference-table td:first-child {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            font-weight: 600;
+            color: #495057;
+            border-right: 2px solid #dee2e6;
+            width: 35%;
+        }
+        
+        .api-reference-table td:last-child {
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .api-reference-table code {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.25rem 0.5rem; /* Reduced padding */
+            border-radius: 6px;
+            font-size: 0.9em; /* Slightly smaller */
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        /* STANDARDIZED VISUAL FLOW INSPECTOR - MATCHES OTHER DEMOS */
+        .api-log-container {
+            background-color: #212529;
+            color: #f8f9fa;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.8em;
+            padding: .5rem;
+            border-radius: .25rem;
+            height: 320px;
+            overflow-y: auto;
+            border: 1px solid #495057;
+            position: relative;
+        }
+
+        .api-flow-block {
+            margin-bottom: .5rem;
+            padding-left: .5rem;
+            border-left: 3px solid #17a2b8;
+            animation: flowSlideIn 0.4s ease-out;
+            transition: all 0.3s ease;
+        }
+
+        .api-flow-block:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(3px);
+            border-left-color: #10b981;
+        }
+
+        @keyframes flowSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .api-flow-child {
+            padding-left: 1.25rem;
+            position: relative;
+            margin-top: 3px;
+            opacity: 0.9;
+        }
+
+        .api-flow-child::before {
+            content: '└──';
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: #6c757d;
+            font-weight: bold;
+        }
+
+        .java21-method-tag {
+            color: #ffffff;
+            background-color: #28a745;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 0.8em;
+            display: inline-block;
+            margin: 0 2px;
+        }
+
+        .clear-log-btn {
+            line-height: 1;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .api-reference-table tr[data-highlight="1"] > * {
+            box-shadow: inset 0 0 0 9999px var(--method-highlight-bg) !important;
+            background-color: transparent !important;
+            border-top: 2px solid var(--method-highlight-border) !important;
+            border-bottom: 2px solid var(--method-highlight-border) !important;
+            transition: box-shadow 250ms ease;
+        }
+        .api-reference-table tr[data-highlight="1"] > *:first-child {
+            border-left: 2px solid var(--method-highlight-border) !important;
+        }
+        .api-reference-table tr[data-highlight="1"] > *:last-child {
+            border-right: 2px solid var(--method-highlight-border) !important;
+        }
+
+        .security-safe {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .security-unsafe {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .template-preview {
+            background: #ffffff;
+            border: 2px solid #e9ecef;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .email-preview {
+            border-left: 4px solid #007bff;
+        }
+
+        .sms-preview {
+            border-left: 4px solid #28a745;
+        }
+
+        .sql-preview {
+            border-left: 4px solid #6f42c1;
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+        }
+
+        .api-log-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .api-log-container::-webkit-scrollbar-track {
+            background: #495057;
+            border-radius: 4px;
+        }
+        .api-log-container::-webkit-scrollbar-thumb {
+            background: #6c757d;
+            border-radius: 4px;
+        }
+        .api-log-container::-webkit-scrollbar-thumb:hover {
+            background: #868e96;
+        }
+
+        /* Custom tooltip styles */
+        .custom-tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .custom-tooltip .tooltip-content {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 1000;
+            transition: opacity 0.3s, visibility 0.3s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .custom-tooltip .tooltip-content::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #2c3e50 transparent transparent transparent;
+        }
+
+        .custom-tooltip:hover .tooltip-content {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .template-output-section {
+                max-height: 200px;
+            }
+            .api-log-container {
+                height: 200px;
+            }
+            
+            .custom-tooltip .tooltip-content {
+                font-size: 0.7rem;
+                padding: 6px 10px;
+                white-space: normal;
+                max-width: 200px;
+            }
+            
+            .api-reference-table {
+                font-size: 0.75em;
+            }
+            
+            .api-reference-table td, .api-reference-table th {
+                padding: 0.4rem 0.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid my-3">
+    <div class="main-container">
+        <header class="demo-header">
+            <h1>
+                <i class="fas fa-envelope"></i>
+                Template & Notification Demo
+                <span class="java21-badge">Java 21</span>
+            </h1>
+            <p>Interactive demonstration of Java 21 String Templates</p>
+        </header>
+
+        <section class="demo-page-container">
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="demo-card">
+                        <h6><i class="fas fa-edit"></i> Template Input Data</h6>
+                        <div class="template-input-section">
+                            <div class="row">
+                                <div class="col-6 mb-2">
+                                    <label class="form-label">Customer Name</label>
+                                    <input type="text" class="form-control" id="customerName" value="John Doe">
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <label class="form-label">Order ID</label>
+                                    <input type="text" class="form-control" id="orderId" value="ORD-123456">
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <label class="form-label">Amount</label>
+                                    <input type="text" class="form-control" id="amount" value="1299.99">
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <label class="form-label">Items Count</label>
+                                    <input type="number" class="form-control" id="itemsCount" value="3">
+                                </div>
+                                <div class="col-12 mb-2">
+                                    <label class="form-label">Search Query (SQL Demo)</label>
+                                    <input type="text" class="form-control" id="searchQuery" value="John" placeholder="Customer search">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="custom-tooltip">
+                                        <button class="btn btn-primary btn-compact w-100" onclick="generateEmail()">
+                                            <span class="str-processor-tag">STR</span> Email
+                                        </button>
+                                        <div class="tooltip-content">
+                                            Generate order confirmation email using STR processor for safe string interpolation with customer data
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="custom-tooltip">
+                                        <button class="btn btn-success btn-compact w-100" onclick="generateSMS()">
+                                            <span class="fmt-processor-tag">FMT</span> SMS
+                                        </button>
+                                        <div class="tooltip-content">
+                                            Create SMS notification using FMT processor with formatted currency and number display
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="custom-tooltip">
+                                        <button class="btn btn-warning btn-compact w-100" onclick="generateSQL()">
+                                            <span class="custom-processor-tag">SAFE</span> SQL
+                                        </button>
+                                        <div class="tooltip-content">
+                                            Build secure database query using custom processor that prevents SQL injection attacks
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="demo-card h-100">
+                        <div class="mb-3">
+                            <h6 class="mb-2"><i class="fas fa-book"></i> Java 21 String Templates Reference</h6>
+                            <table class="table table-sm table-bordered api-reference-table mb-0">
+                                <tbody>
+                                <tr id="code-STR"><td><code>STR</code></td><td>Safe string interpolation processor</td></tr>
+                                <tr id="code-FMT"><td><code>FMT</code></td><td>Formatted output processor</td></tr>
+                                <tr id="code-custom"><td><code>Custom</code></td><td>Custom template processors</td></tr>
+                                <tr id="code-expression"><td><code>\{expr}</code></td><td>Expression embedding syntax</td></tr>
+                                <tr id="code-safety"><td><code>Safety</code></td><td>Compile-time injection prevention</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-7">
+                    <div class="demo-card">
+                        <h5><i class="fas fa-file-alt"></i> Generated Templates</h5>
+                        <div class="template-output-section" id="template-output">
+                            <div class="text-muted text-center py-3">Select a template type above to see String Template output...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="demo-card">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6><i class="fas fa-stream"></i> Visual Flow Inspector</h6>
+                            <button class="btn btn-sm btn-outline-secondary clear-log-btn" onclick="clearInspectorLog()"><i class="fas fa-eraser"></i> Clear</button>
+                        </div>
+                        <div id="api-log" class="api-log-container" aria-live="polite">
+                            <div class="text-muted text-center py-2">Click a template action to see the processing flow...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function generateEmail() {
+    const data = getInputData();
+    const logId = createFlowLog('Generate Email', 'POST', '/api/templates/email');
+    
+    setTimeout(() => {
+        const emailContent = simulateEmailGeneration(data);
+        updateFlowLog(logId, {
+            controller_method: 'TemplateController.generateEmail',
+            service_calls: {
+                'EmailTemplateService.processSTRTemplate': ['STR', 'Expression embedding'],
+                'SecurityService.validateContent': ['Safety']
+            },
+            security_validation: 'Safe - No injection risks detected',
+            operation_description: 'Email generated using STR processor with safe interpolation'
+        });
+        
+        displayTemplate(emailContent, 'email');
+        
+        // Highlight STR + Expression (since STR uses \{expr} syntax)
+        setTimeout(() => highlightMultipleFeatures(['STR', 'EXPRESSION']), 200);
+    }, 500);
+}
+
+function generateSMS() {
+    const data = getInputData();
+    const logId = createFlowLog('Generate SMS', 'POST', '/api/templates/sms');
+    
+    setTimeout(() => {
+        const smsContent = simulateSMSGeneration(data);
+        updateFlowLog(logId, {
+            controller_method: 'TemplateController.generateSMS',
+            service_calls: {
+                'SMSTemplateService.processFMTTemplate': ['FMT', 'Expression embedding'],
+                'NotificationService.formatCurrency': ['Formatted output']
+            },
+            security_validation: 'Safe - Content sanitized',
+            operation_description: 'SMS generated using FMT processor for currency formatting'
+        });
+        
+        displayTemplate(smsContent, 'sms');
+        
+        // Highlight FMT + Expression (since FMT also uses \{expr} syntax)
+        setTimeout(() => highlightMultipleFeatures(['FMT', 'EXPRESSION']), 200);
+    }, 500);
+}
+
+function generateSQL() {
+    const data = getInputData();
+    const logId = createFlowLog('Generate Safe SQL', 'POST', '/api/templates/sql');
+    
+    setTimeout(() => {
+        const sqlContent = simulateSQLGeneration(data);
+        updateFlowLog(logId, {
+            controller_method: 'TemplateController.generateSafeSQL',
+            service_calls: {
+                'DatabaseService.processSafeTemplate': ['Custom', 'Safety'],
+                'SecurityService.parameterizeQuery': ['Injection prevention']
+            },
+            security_validation: 'Safe - Parameters validated and escaped',
+            operation_description: 'SQL generated using custom processor preventing injection attacks'
+        });
+        
+        displayTemplate(sqlContent, 'sql');
+        
+        // Highlight Custom + Safety (since custom processor provides safety)
+        setTimeout(() => highlightMultipleFeatures(['CUSTOM', 'SAFETY']), 200);
+    }, 500);
+}
+
+function clearInspectorLog() {
+    const logContainer = document.getElementById('api-log');
+    if (!logContainer) return;
+    logContainer.innerHTML = '<div class="text-muted text-center py-2">Log cleared. Click a template action to see the processing flow...</div>';
+}
+
+function getInputData() {
+    return {
+        customerName: document.getElementById('customerName').value,
+        orderId: document.getElementById('orderId').value,
+        amount: parseFloat(document.getElementById('amount').value),
+        itemsCount: parseInt(document.getElementById('itemsCount').value),
+        searchQuery: document.getElementById('searchQuery').value
+    };
+}
+
+function simulateEmailGeneration(data) {
+    return {
+        type: 'email',
+        title: 'Order Confirmation Email',
+        template: 'STR."Dear \\{customerName}, Your order #\\{orderId} has been confirmed!"',
+        output: `Dear ${data.customerName},
+
+Your order #${data.orderId} has been confirmed!
+
+Order Details:
+- Total Amount: $${data.amount.toFixed(2)}
+- Items: ${data.itemsCount} product(s)
+- Order Date: ${new Date().toLocaleDateString()}
+
+Thank you for shopping with TechMart!
+
+Best regards,
+The TechMart Team`,
+        processorUsed: 'STR Processor',
+        securityStatus: 'safe'
+    };
+}
+
+function simulateSMSGeneration(data) {
+    return {
+        type: 'sms',
+        title: 'SMS Notification',
+        template: 'FMT."Order \\{orderId} confirmed! Total: \\{amount:$.2f} for \\{itemsCount} items"',
+        output: `TechMart Alert
+Order ${data.orderId} confirmed!
+Total: $${data.amount.toFixed(2)} for ${data.itemsCount} items.
+Track: techmart.com/track/${data.orderId}`,
+        processorUsed: 'FMT Processor',
+        securityStatus: 'safe'
+    };
+}
+
+function simulateSQLGeneration(data) {
+    return {
+        type: 'sql',
+        title: 'Safe Database Query',
+        template: 'SAFE."SELECT * FROM customers WHERE name = \\{searchQuery} AND status = \'active\'"',
+        output: `-- Generated Safe SQL Query
+SELECT c.id, c.name, c.email, c.status 
+FROM customers c 
+WHERE c.name = ? 
+  AND c.status = 'active' 
+  AND c.created_date >= CURRENT_DATE - INTERVAL 365 DAY;
+
+-- Parameters (safely escaped):
+-- Parameter 1: "${data.searchQuery}"`,
+        processorUsed: 'Custom Safe Processor',
+        securityStatus: 'safe'
+    };
+}
+
+function displayTemplate(content, type) {
+    const outputContainer = document.getElementById('template-output');
+    
+    let typeIcon = '';
+    let typeClass = '';
+    
+    switch(type) {
+        case 'email':
+            typeIcon = '📧';
+            typeClass = 'email-preview';
+            break;
+        case 'sms':
+            typeIcon = '📱';
+            typeClass = 'sms-preview';
+            break;
+        case 'sql':
+            typeIcon = '🗄️';
+            typeClass = 'sql-preview';
+            break;
+    }
+    
+    const securityIcon = content.securityStatus === 'safe' ? '🛡️' : '⚠️';
+    const securityClass = content.securityStatus === 'safe' ? 'security-safe' : 'security-unsafe';
+    
+    outputContainer.innerHTML = `
+        <div class="template-preview ${typeClass}">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6>${typeIcon} ${content.title}</h6>
+                <span class="${securityClass}">${securityIcon} ${content.securityStatus.toUpperCase()}</span>
+            </div>
+            
+            <div class="mb-2">
+                <small class="text-muted">Template:</small><br>
+                <code style="background: #f8f9fa; padding: 0.25rem; border-radius: 0.25rem; font-size: 0.8rem;">${content.template}</code>
+            </div>
+            
+            <div class="mb-2">
+                <small class="text-muted">Generated Output:</small>
+                <div style="background: white; padding: 0.75rem; border: 1px solid #e9ecef; border-radius: 0.25rem; margin-top: 0.25rem;">
+                    <pre style="margin: 0; white-space: pre-wrap; font-family: inherit; font-size: 0.9rem;">${content.output}</pre>
+                </div>
+            </div>
+            
+            <div style="font-size: 0.8rem; color: #6c757d;">
+                <strong>Processor Used:</strong> ${content.processorUsed}
+            </div>
+        </div>
+    `;
+}
+
+function createFlowLog(userAction, method, endpoint) {
+    const logContainer = document.getElementById('api-log');
+    if (!logContainer) return null;
+
+    const initialMessages = logContainer.querySelectorAll('.text-muted, .text-center');
+    initialMessages.forEach(msg => {
+        if (msg.textContent && msg.textContent.includes('Click')) {
+            logContainer.innerHTML = '';
+        }
+    });
+
+    const flowBlock = document.createElement('div');
+    const logId = `flow-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    flowBlock.id = logId;
+    flowBlock.className = 'api-flow-block';
+
+    flowBlock.innerHTML = `
+        <div>👤 <strong>${userAction}</strong> (Frontend)</div>
+        <div class="api-flow-child">🌐 API Call: ${method} ${endpoint}</div>
+        <div class="api-flow-child" data-role="controller">🔴 Controller: Pending...</div>
+    `;
+
+    logContainer.insertBefore(flowBlock, logContainer.firstChild);
+
+    while (logContainer.children.length > 12) {
+        logContainer.removeChild(logContainer.lastChild);
+    }
+
+    logContainer.scrollTop = 0;
+    return logId;
+}
+
+function updateFlowLog(logId, responseData) {
+    if (!logId) return;
+
+    const flowBlock = document.getElementById(logId);
+    if (!flowBlock) return;
+
+    const controllerElement = flowBlock.querySelector('[data-role="controller"]');
+    if (!controllerElement) return;
+
+    if (responseData.error) {
+        controllerElement.innerHTML = `🔴 Controller: <span style="color: #ef4444;">${responseData.error}</span>`;
+        return;
+    }
+
+    let html = `🔴 Controller: <strong>${responseData.controller_method || 'TemplateController.processTemplate'}</strong>`;
+
+    if (responseData.service_calls && typeof responseData.service_calls === 'object') {
+        html += `<div class="api-flow-child">🟣 Service Layer: Multiple processors used</div>`;
+
+        Object.entries(responseData.service_calls).forEach(([serviceMethod, templateFeatures]) => {
+            if (templateFeatures && templateFeatures.length > 0) {
+                html += `<div class="api-flow-child">  └── <strong>${serviceMethod}</strong> → <span class="java21-method-tag">${templateFeatures.join(', ')}</span></div>`;
+            }
+        });
+    }
+
+    if (responseData.security_validation) {
+        html += `<div class="api-flow-child">🛡️ Security: ${responseData.security_validation}</div>`;
+    }
+
+    if (responseData.operation_description) {
+        html += `<div class="api-flow-child">💡 Operation: ${responseData.operation_description}</div>`;
+    }
+
+    controllerElement.innerHTML = html;
+}
+
+function highlightMultipleFeatures(featureTypes) {
+    console.log('highlightMultipleFeatures called with:', featureTypes);
+    
+    // Clear all highlights first
+    document.querySelectorAll('tr[data-highlight="1"]').forEach(row => {
+        const cells = Array.from(row.cells);
+        cells.forEach(cell => {
+            cell.style.removeProperty('box-shadow');
+            cell.style.removeProperty('background-color');
+            cell.style.removeProperty('border-top');
+            cell.style.removeProperty('border-bottom');
+            cell.style.removeProperty('border-left');
+            cell.style.removeProperty('border-right');
+        });
+        row.removeAttribute('data-highlight');
+    });
+
+    // Highlight multiple features
+    featureTypes.forEach(featureType => {
+        console.log('Processing feature:', featureType);
+        let targetRow = null;
+        switch(featureType) {
+            case 'STR':
+                targetRow = document.getElementById('code-STR');
+                console.log('STR row found:', targetRow);
+                break;
+            case 'FMT':
+                targetRow = document.getElementById('code-FMT');
+                console.log('FMT row found:', targetRow);
+                break;
+            case 'CUSTOM':
+                targetRow = document.getElementById('code-custom');
+                console.log('CUSTOM row found:', targetRow);
+                break;
+            case 'EXPRESSION':
+                targetRow = document.getElementById('code-expression');
+                console.log('EXPRESSION row found:', targetRow);
+                break;
+            case 'SAFETY':
+                targetRow = document.getElementById('code-safety');
+                console.log('SAFETY row found:', targetRow);
+                break;
+        }
+
+        if (!targetRow) {
+            console.log('No target row found for:', featureType);
+            return;
+        }
+
+        console.log('Highlighting row:', targetRow.id);
+
+        // Apply highlight
+        const cells = Array.from(targetRow.cells);
+        const bg = '#fffbea';
+        const border = '#ffc107';
+
+        cells.forEach((cell, i) => {
+            cell.style.setProperty('box-shadow', `inset 0 0 0 9999px ${bg}`, 'important');
+            cell.style.setProperty('background-color', 'transparent', 'important');
+            cell.style.setProperty('border-top', `2px solid ${border}`, 'important');
+            cell.style.setProperty('border-bottom', `2px solid ${border}`, 'important');
+            if (i === 0) cell.style.setProperty('border-left', `2px solid ${border}`, 'important');
+            if (i === cells.length - 1) cell.style.setProperty('border-right', `2px solid ${border}`, 'important');
+        });
+
+        targetRow.setAttribute('data-highlight', '1');
+    });
+
+    console.log('All highlights applied');
+
+    // Remove highlights after 3 seconds (longer since there are multiple)
+    setTimeout(() => {
+        console.log('Removing highlights');
+        featureTypes.forEach(featureType => {
+            let targetRow = null;
+            switch(featureType) {
+                case 'STR':
+                    targetRow = document.getElementById('code-STR');
+                    break;
+                case 'FMT':
+                    targetRow = document.getElementById('code-FMT');
+                    break;
+                case 'CUSTOM':
+                    targetRow = document.getElementById('code-custom');
+                    break;
+                case 'EXPRESSION':
+                    targetRow = document.getElementById('code-expression');
+                    break;
+                case 'SAFETY':
+                    targetRow = document.getElementById('code-safety');
+                    break;
+            }
+
+            if (targetRow && targetRow.isConnected) {
+                const cells = Array.from(targetRow.cells);
+                cells.forEach(cell => {
+                    cell.style.removeProperty('box-shadow');
+                    cell.style.removeProperty('background-color');
+                    cell.style.removeProperty('border-top');
+                    cell.style.removeProperty('border-bottom');
+                    cell.style.removeProperty('border-left');
+                    cell.style.removeProperty('border-right');
+                });
+                targetRow.removeAttribute('data-highlight');
+            }
+        });
+    }, 3000);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('String Templates Demo Ready');
+    
+    const logId = createFlowLog('Demo Initialization', 'GET', '/api/demo/init');
+    setTimeout(() => {
+        updateFlowLog(logId, {
+            controller_method: 'DemoController.initializeStringTemplates',
+            service_calls: {
+                'TemplateEngineService.setupProcessors': ['STR', 'FMT', 'Custom']
+            },
+            security_validation: 'All processors initialized with safety checks',
+            operation_description: 'String Templates Demo ready for safe template processing'
+        });
+        // No highlight on page load
+    }, 500);
+});
+</script>
+</body>
+</html>
