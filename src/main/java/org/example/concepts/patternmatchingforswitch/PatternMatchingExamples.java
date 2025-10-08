@@ -46,9 +46,11 @@ public class PatternMatchingExamples {
         return switch (customerType) {
             case BASIC -> 5;
             case PREMIUM -> 2;
-            case VIP -> 1; 
+            case VIP -> 1;
+            default -> 7;
         };
     }
+
 
     /**
      * Helper method to format processing days as readable label
@@ -166,7 +168,6 @@ public class PatternMatchingExamples {
 
     /**
      * ULTIMATE OLD WAY: Before Java 21
-     * Manual type checking, casting, field extraction (~20 lines)
      */
     public String processPaymentCompleteOldWay(Payment payment, boolean isInternational) {
         String result;
@@ -211,8 +212,6 @@ public class PatternMatchingExamples {
 
     /**
      * ULTIMATE NEW WAY: Pattern Matching for Switch (Java 21)
-     * Combines: Switch Expression + Type Pattern + Record Pattern + Guard Conditions
-     * (~10 lines - 50% less code, type-safe, compiler-verified)
      */
     public String processPaymentCompleteNewWay(Payment payment, boolean isInternational) {
         return switch (payment) {
@@ -254,17 +253,17 @@ public class PatternMatchingExamples {
 
         Payment creditCard = new CreditCard(
                 "4532-1234-5678-9010", "Visa", "123", "12/25",
-                new BigDecimal("1500"), 1L
+                new BigDecimal("1500"), Long.valueOf(1L)
         );
 
         Payment paypal = new PayPal(
                 "user@example.com", "PP-12345",
-                new BigDecimal("500"), 2L
+                new BigDecimal("500"), Long.valueOf(2L)
         );
 
         Payment bank = new BankTransfer(
                 "123456789", "987654321", "Chase Bank",
-                new BigDecimal("5000"), 3L
+                new BigDecimal("5000"), Long.valueOf(3L)
         );
 
         System.out.println("=== FEATURE 1: SWITCH EXPRESSIONS ===");
