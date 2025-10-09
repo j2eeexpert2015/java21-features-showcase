@@ -581,10 +581,6 @@
         <div class="status-dot" id="connectionDot"></div>
         <span id="connectionText">Connecting...</span>
     </div>
-    <div class="header-controls">
-        <button class="header-btn" onclick="resetDemo()" id="resetBtn">🔄 Reset Demo</button>
-        <button class="header-btn primary" onclick="runScenarios()" id="scenariosBtn">▶️ Run Scenarios</button>
-    </div>
     <div>
         <h1>💳 Payment Processing Engine <span class="java-badge">JAVA 21</span></h1>
         <p class="subtitle">Interactive demonstration of Java 21 Pattern Matching for Switch with Sealed Payment Hierarchy</p>
@@ -1301,108 +1297,6 @@
         }
     }
 
-    async function resetDemo() {
-        const resetBtn = document.getElementById('resetBtn');
-        resetBtn.disabled = true;
-
-        try {
-            if (appState.connected) {
-                const response = await apiCall('POST', ENDPOINTS.RESET);
-                if (response) {
-                    // Get updated state from backend
-                    const demoState = await apiCall('GET', ENDPOINTS.DEMO_STATE);
-                    syncWithBackendState(demoState);
-                }
-            } else {
-                // Reset to default offline state
-                appState = {
-                    amount: 500,
-                    paymentMethod: 'credit',
-                    customerType: 'vip',
-                    isInternational: false,
-                    processing: false,
-                    connected: appState.connected
-                };
-
-                // Reset UI elements
-                document.querySelectorAll('.test-btn').forEach(btn => btn.classList.remove('active'));
-                document.querySelector('[data-amount="500"]').classList.add('active');
-
-                updatePaymentMethodUI('credit');
-                updateCustomerTypeUI('vip');
-                document.getElementById('international').checked = false;
-                updateOrderDisplay(scenarios[500]);
-                updateAmountDisplays(500);
-                clearInspectorLog();
-
-                // Simulate reset log
-                const logId = createFlowLog('Reset Demo (Offline)', 'POST', '/api/payment/reset');
-                setTimeout(() => {
-                    updateFlowLog(logId, {
-                        controller_method: 'PaymentController.resetDemo (Simulated)',
-                        service_calls: {
-                            'DemoService.initializeDefaults': ['pattern matching']
-                        },
-                        operation_description: 'Demo reset to defaults (offline mode)'
-                    });
-                }, 300);
-            }
-        } catch (error) {
-            console.error('Reset failed:', error);
-        } finally {
-            resetBtn.disabled = false;
-        }
-
-        updatePatternHighlighting();
-        updateStatusIndicators();
-    }
-
-    async function runScenarios() {
-        const scenariosBtn = document.getElementById('scenariosBtn');
-        scenariosBtn.disabled = true;
-
-        const scenarioSteps = [
-            { amount: 500, method: 'credit', customer: 'basic', international: false },
-            { amount: 1500, method: 'paypal', customer: 'premium', international: true },
-            { amount: 5000, method: 'bank', customer: 'vip', international: false }
-        ];
-
-        let stepIndex = 0;
-        const runNextStep = async () => {
-            if (stepIndex >= scenarioSteps.length) {
-                const finalLogId = createFlowLog('Scenarios Complete', 'GET', '/api/demo/scenarios/status');
-                setTimeout(() => {
-                    updateFlowLog(finalLogId, {
-                        controller_method: 'DemoController.getScenariosStatus',
-                        service_calls: {
-                            'ScenarioService.getResults': ['pattern matching']
-                        },
-                        operation_description: 'All scenarios completed successfully'
-                    });
-                    scenariosBtn.disabled = false;
-                }, 300);
-                return;
-            }
-
-            const step = scenarioSteps[stepIndex];
-
-            // Apply scenario changes
-            await setQuickTest(step.amount);
-            await selectPaymentMethod(step.method);
-            await selectCustomerType(step.customer);
-            document.getElementById('international').checked = step.international;
-            await toggleInternational();
-
-            // Process payment for this scenario
-            await processPayment();
-
-            stepIndex++;
-            setTimeout(runNextStep, 3000);
-        };
-
-        setTimeout(runNextStep, 1000);
-    }
-
     // Pattern highlighting and status updates
     function updatePatternHighlighting() {
         // Remove all existing highlights
@@ -1513,7 +1407,7 @@
     document.addEventListener('DOMContentLoaded', initApp);
 
     // Periodic connection check
-    setInterval(checkConnection, 30000); // Check every 30 seconds
+    setInterval(checkConnection, 60000); // Check every 60 seconds
 </script>
 </body>
 </html>

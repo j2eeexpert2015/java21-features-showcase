@@ -32,7 +32,7 @@ public class PaymentController {
     // Main payment processing endpoint
     @PostMapping("/process")
     public ApiResponse processPayment(@RequestBody(required = false) PaymentRequest request) {
-        logger.info(">>> POST /api/payment/process - Payment processing request received");
+        logger.info(" POST /api/payment/process - Payment processing request received");
 
         PaymentRequest activeRequest = (request != null) ? request : currentState;
         logger.info("Processing payment: method={}, amount=${}, customer={}, international={}",
@@ -62,7 +62,7 @@ public class PaymentController {
     // Update payment method - triggers pattern selection
     @PutMapping("/method/{method}")
     public ApiResponse selectPaymentMethod(@PathVariable String method) {
-        logger.info(">>> PUT /api/payment/method/{} - Changing payment method", method);
+        logger.info(" PUT /api/payment/method/{} - Changing payment method", method);
 
         String previousMethod = currentState.getPaymentMethod();
         currentState.setPaymentMethod(method);
@@ -79,7 +79,7 @@ public class PaymentController {
     // Update customer type - affects guard conditions
     @PutMapping("/customer/type/{type}")
     public ApiResponse selectCustomerType(@PathVariable String type) {
-        logger.info(">>> PUT /api/payment/customer/type/{} - Changing customer type", type);
+        logger.info(" PUT /api/payment/customer/type/{} - Changing customer type", type);
 
         try {
             CustomerType previousType = currentState.getCustomerType();
@@ -104,7 +104,7 @@ public class PaymentController {
     // Toggle international status - activates international guard conditions
     @PutMapping("/international/{isInternational}")
     public ApiResponse toggleInternational(@PathVariable boolean isInternational) {
-        logger.info(">>> PUT /api/payment/international/{} - Toggling international flag", isInternational);
+        logger.info(" PUT /api/payment/international/{} - Toggling international flag", isInternational);
 
         boolean previousStatus = currentState.isInternational();
         currentState.setInternational(isInternational);
@@ -126,7 +126,7 @@ public class PaymentController {
     // Update amount - triggers high-value guard conditions
     @PutMapping("/amount/{amount}")
     public ApiResponse setAmount(@PathVariable BigDecimal amount) {
-        logger.info(">>> PUT /api/payment/amount/{} - Updating payment amount", amount);
+        logger.info(" PUT /api/payment/amount/{} - Updating payment amount", amount);
 
         BigDecimal previousAmount = currentState.getAmount();
         currentState.setAmount(amount);
@@ -151,7 +151,7 @@ public class PaymentController {
     // Get current demo state for UI synchronization
     @GetMapping("/demo-state")
     public PaymentRequest getDemoState() {
-        logger.info(">>> GET /api/payment/demo-state - Returning current demo state");
+        logger.info(" GET /api/payment/demo-state - Returning current demo state");
         logger.debug("Current state: method={}, amount=${}, customer={}, international={}",
                 currentState.getPaymentMethod(), currentState.getAmount(),
                 currentState.getCustomerType(), currentState.isInternational());
@@ -161,7 +161,7 @@ public class PaymentController {
     // Reset demo to default state
     @PostMapping("/reset")
     public ApiResponse resetDemo() {
-        logger.info(">>> POST /api/payment/reset - Resetting demo to default state");
+        logger.info(" POST /api/payment/reset - Resetting demo to default state");
 
         PaymentRequest previousState = currentState;
         this.currentState = createDefaultState();
