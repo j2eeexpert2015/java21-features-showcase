@@ -277,10 +277,10 @@ public class PatternMatchingShowcase {
         return switch (payment) {
 
             // ═══════════════════════════════════════════════════════════════════
-            // CREDITCARD PATTERNS - Ordered from most specific to least specific
+            // 💳 CREDITCARD PATTERNS - Ordered from most specific to least specific
             // ═══════════════════════════════════════════════════════════════════
 
-            // Pattern breakdown for this case:
+            // 🔍 Pattern breakdown for this case:
             // • CreditCard(...)               → Type check: Is this a CreditCard?
             // • (var number, var type, ...)   → Record destructuring: extract all 6 fields
             // • when amount > 1000 && isInternational → Guard: additional business rule
@@ -290,39 +290,39 @@ public class PatternMatchingShowcase {
                     when amount.compareTo(new BigDecimal("1000")) > 0 && isInternational ->
                     "High-value international Credit Card [" + type + "] - $" + amount + " - Requires verification";
 
-            // This catches CreditCards with amount > 1000 that are NOT international
+            // 💵 This catches CreditCards with amount > 1000 that are NOT international
             // Note: Previous guard failed (not international), so we check without it
             case CreditCard(var number, var type, var cvv, var expiry, var amount, var id)
                     when amount.compareTo(new BigDecimal("1000")) > 0 ->
                     "High-value Credit Card [" + type + "] - $" + amount;
 
-            // This catches all remaining CreditCards (amount <= 1000)
+            // 💳 This catches all remaining CreditCards (amount <= 1000)
             // No guard condition = always matches if type is CreditCard
             case CreditCard(var number, var type, var cvv, var expiry, var amount, var id) ->
                     "Credit Card [" + type + "] - $" + amount;
 
             // ═══════════════════════════════════════════════════════════════════
-            // PAYPAL PATTERNS
+            // 💰 PAYPAL PATTERNS
             // ═══════════════════════════════════════════════════════════════════
 
-            // International PayPal transactions
+            // 🌍 International PayPal transactions
             case PayPal(var email, var accountId, var amount, var id) when isInternational ->
                     "International PayPal [" + email + "] - $" + amount;
 
-            // Standard PayPal (domestic)
+            // 🏠 Standard PayPal (domestic)
             case PayPal(var email, var accountId, var amount, var id) ->
                     "PayPal [" + email + "] - $" + amount;
 
             // ═══════════════════════════════════════════════════════════════════
-            // BANKTRANSFER PATTERN
+            // 🏦 BANKTRANSFER PATTERN
             // ═══════════════════════════════════════════════════════════════════
 
-            // BankTransfer has no special rules, just one case
+            // 🏦 BankTransfer has no special rules, just one case
             case BankTransfer(var routing, var account, var bankName, var amount, var id) ->
                     "Bank Transfer [" + bankName + "] - $" + amount;
 
             // ═══════════════════════════════════════════════════════════════════
-            // Note: No default case needed!
+            // ✅ Note: No default case needed!
             // Payment is a SEALED interface, so compiler knows CreditCard, PayPal,
             // and BankTransfer are the ONLY possible implementations.
             // This is called "exhaustiveness checking" - compiler guarantees we
@@ -333,12 +333,127 @@ public class PatternMatchingShowcase {
     }
 
     // ========================================================================
-    // DEMO
+    // 🎬 DEMO METHODS - Run individually for teaching
     // ========================================================================
 
-    public static void main(String[] args) {
-        PatternMatchingShowcase demo = new PatternMatchingShowcase();
+    /**
+     * 1️⃣ Demo: Switch Expressions (Java 14)
+     */
+    public void demoSwitchExpressions() {
+        System.out.println("╔═══════════════════════════════════════════════════════════════╗");
+        System.out.println("║  1️⃣  FEATURE 1: SWITCH EXPRESSIONS (Java 14)                 ║");
+        System.out.println("╚═══════════════════════════════════════════════════════════════╝");
+        System.out.println();
+        System.out.println("📊 Processing Days for All Customer Types:");
+        System.out.println();
 
+        for (CustomerType type : CustomerType.values()) {
+            int oldWay = getProcessingDaysOldWay(type);
+            int newWay = getProcessingDaysNewWay(type);
+            String label = getProcessingLabel(type);
+
+            System.out.println("🔹 " + type.getDisplayName() + " Customer:");
+            System.out.println("   OLD way: " + oldWay + " days");
+            System.out.println("   NEW way: " + newWay + " days");
+            System.out.println("   Label: " + label);
+            System.out.println();
+        }
+
+        System.out.println("✅ Benefit: Switch expressions return values directly, no break needed!");
+        System.out.println();
+        System.out.println("─".repeat(67));
+        System.out.println();
+    }
+
+    /**
+     * 2️⃣ Demo: Type Patterns (Java 16)
+     */
+    public void demoTypePatterns() {
+        // Create test data
+        Payment highValueCredit = new CreditCard(
+                "4532-1234-5678-9010", "Visa", "123", "12/25",
+                new BigDecimal("1500"), 1L
+        );
+
+        Payment paypal = new PayPal(
+                "user@example.com", "PP-12345",
+                new BigDecimal("500"), 3L
+        );
+
+        Payment bank = new BankTransfer(
+                "123456789", "987654321", "Chase Bank",
+                new BigDecimal("5000"), 4L
+        );
+
+        System.out.println("╔═══════════════════════════════════════════════════════════════╗");
+        System.out.println("║  2️⃣  FEATURE 2: TYPE PATTERNS (Java 16)                      ║");
+        System.out.println("╚═══════════════════════════════════════════════════════════════╝");
+        System.out.println();
+        System.out.println("🔍 Processing Payments - Type Pattern vs Manual Cast:");
+        System.out.println();
+
+        System.out.println("🔹 Credit Card Payment:");
+        System.out.println("   OLD way: " + processPaymentOldWay(highValueCredit));
+        System.out.println("   NEW way: " + processPaymentWithTypePattern(highValueCredit));
+        System.out.println();
+
+        System.out.println("🔹 PayPal Payment:");
+        System.out.println("   OLD way: " + processPaymentOldWay(paypal));
+        System.out.println("   NEW way: " + processPaymentWithTypePattern(paypal));
+        System.out.println();
+
+        System.out.println("🔹 Bank Transfer:");
+        System.out.println("   OLD way: " + processPaymentOldWay(bank));
+        System.out.println("   NEW way: " + processPaymentWithTypePattern(bank));
+        System.out.println();
+
+        System.out.println("✅ Benefit: instanceof + cast + variable binding in ONE step!");
+        System.out.println();
+        System.out.println("─".repeat(67));
+        System.out.println();
+    }
+
+    /**
+     * 3️⃣ Demo: Record Patterns (Java 21)
+     */
+    public void demoRecordPatterns() {
+        // Create test data
+        Payment highValueCredit = new CreditCard(
+                "4532-1234-5678-9010", "Visa", "123", "12/25",
+                new BigDecimal("1500"), 1L
+        );
+
+        Payment paypal = new PayPal(
+                "user@example.com", "PP-12345",
+                new BigDecimal("500"), 3L
+        );
+
+        System.out.println("╔═══════════════════════════════════════════════════════════════╗");
+        System.out.println("║  3️⃣  FEATURE 3: RECORD PATTERNS (Java 21)                    ║");
+        System.out.println("╚═══════════════════════════════════════════════════════════════╝");
+        System.out.println();
+        System.out.println("📦 Destructuring Records - Extracting Fields:");
+        System.out.println();
+
+        System.out.println("🔹 Credit Card Details:");
+        System.out.println("   OLD way: " + getCreditCardDetailsOldWay(highValueCredit));
+        System.out.println("   NEW way: " + getCreditCardDetailsNewWay(highValueCredit));
+        System.out.println();
+
+        System.out.println("🔹 PayPal Details:");
+        System.out.println("   Record Pattern: " + getPayPalDetailsWithRecordPattern(paypal));
+        System.out.println();
+
+        System.out.println("✅ Benefit: Extract ALL record fields in ONE step, no accessor calls!");
+        System.out.println();
+        System.out.println("─".repeat(67));
+        System.out.println();
+    }
+
+    /**
+     * 4️⃣ Demo: Pattern Matching for Switch (Java 21) - ALL FEATURES COMBINED
+     */
+    public void demoPatternMatchingForSwitch() {
         // Create test payment objects for various scenarios
         Payment highValueCredit = new CreditCard(
                 "4532-1234-5678-9010", "Visa", "123", "12/25",
@@ -360,96 +475,6 @@ public class PatternMatchingShowcase {
                 new BigDecimal("5000"), 4L
         );
 
-        // ═══════════════════════════════════════════════════════════════════════════
-        System.out.println("╔═══════════════════════════════════════════════════════════════╗");
-        System.out.println("║     JAVA 21 PATTERN MATCHING - COMPLETE DEMONSTRATION        ║");
-        System.out.println("╚═══════════════════════════════════════════════════════════════╝");
-        System.out.println();
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // FEATURE 1: SWITCH EXPRESSIONS (Java 14)
-        // ═══════════════════════════════════════════════════════════════════════════
-        System.out.println("╔═══════════════════════════════════════════════════════════════╗");
-        System.out.println("║  1️⃣  FEATURE 1: SWITCH EXPRESSIONS (Java 14)                 ║");
-        System.out.println("╚═══════════════════════════════════════════════════════════════╝");
-        System.out.println();
-        System.out.println("📊 Processing Days for All Customer Types:");
-        System.out.println();
-
-        for (CustomerType type : CustomerType.values()) {
-            int oldWay = demo.getProcessingDaysOldWay(type);
-            int newWay = demo.getProcessingDaysNewWay(type);
-            String label = demo.getProcessingLabel(type);
-
-            System.out.println("🔹 " + type.getDisplayName() + " Customer:");
-            System.out.println("   OLD way: " + oldWay + " days");
-            System.out.println("   NEW way: " + newWay + " days");
-            System.out.println("   Label: " + label);
-            System.out.println();
-        }
-
-        System.out.println("✅ Benefit: Switch expressions return values directly, no break needed!");
-        System.out.println();
-        System.out.println("─".repeat(67));
-        System.out.println();
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // FEATURE 2: TYPE PATTERNS (Java 16)
-        // ═══════════════════════════════════════════════════════════════════════════
-        System.out.println("╔═══════════════════════════════════════════════════════════════╗");
-        System.out.println("║  2️⃣  FEATURE 2: TYPE PATTERNS (Java 16)                      ║");
-        System.out.println("╚═══════════════════════════════════════════════════════════════╝");
-        System.out.println();
-        System.out.println("🔍 Processing Payments - Type Pattern vs Manual Cast:");
-        System.out.println();
-
-        System.out.println("🔹 Credit Card Payment:");
-        System.out.println("   OLD way: " + demo.processPaymentOldWay(highValueCredit));
-        System.out.println("   NEW way: " + demo.processPaymentWithTypePattern(highValueCredit));
-        System.out.println();
-
-        System.out.println("🔹 PayPal Payment:");
-        System.out.println("   OLD way: " + demo.processPaymentOldWay(paypal));
-        System.out.println("   NEW way: " + demo.processPaymentWithTypePattern(paypal));
-        System.out.println();
-
-        System.out.println("🔹 Bank Transfer:");
-        System.out.println("   OLD way: " + demo.processPaymentOldWay(bank));
-        System.out.println("   NEW way: " + demo.processPaymentWithTypePattern(bank));
-        System.out.println();
-
-        System.out.println("✅ Benefit: instanceof + cast + variable binding in ONE step!");
-        System.out.println();
-        System.out.println("─".repeat(67));
-        System.out.println();
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // FEATURE 3: RECORD PATTERNS (Java 21)
-        // ═══════════════════════════════════════════════════════════════════════════
-        System.out.println("╔═══════════════════════════════════════════════════════════════╗");
-        System.out.println("║  3️⃣  FEATURE 3: RECORD PATTERNS (Java 21)                    ║");
-        System.out.println("╚═══════════════════════════════════════════════════════════════╝");
-        System.out.println();
-        System.out.println("📦 Destructuring Records - Extracting Fields:");
-        System.out.println();
-
-        System.out.println("🔹 Credit Card Details:");
-        System.out.println("   OLD way: " + demo.getCreditCardDetailsOldWay(highValueCredit));
-        System.out.println("   NEW way: " + demo.getCreditCardDetailsNewWay(highValueCredit));
-        System.out.println();
-
-        System.out.println("🔹 PayPal Details:");
-        System.out.println("   Record Pattern: " + demo.getPayPalDetailsWithRecordPattern(paypal));
-        System.out.println();
-
-        System.out.println("✅ Benefit: Extract ALL record fields in ONE step, no accessor calls!");
-        System.out.println();
-        System.out.println("─".repeat(67));
-        System.out.println();
-
-        // ═══════════════════════════════════════════════════════════════════════════
-        // FEATURE 4: ALL COMBINED - PATTERN MATCHING FOR SWITCH (Java 21)
-        // ═══════════════════════════════════════════════════════════════════════════
         System.out.println("╔═══════════════════════════════════════════════════════════════╗");
         System.out.println("║  4️⃣  ALL FEATURES COMBINED: PATTERN MATCHING FOR SWITCH      ║");
         System.out.println("╚═══════════════════════════════════════════════════════════════╝");
@@ -462,18 +487,18 @@ public class PatternMatchingShowcase {
         System.out.println();
 
         System.out.println("  Scenario 1: High-Value ($1500) + International");
-        System.out.println("  OLD: " + demo.processPaymentCompleteOldWay(highValueCredit, true));
-        System.out.println("  NEW: " + demo.processPaymentCompleteNewWay(highValueCredit, true));
+        System.out.println("  OLD: " + processPaymentCompleteOldWay(highValueCredit, true));
+        System.out.println("  NEW: " + processPaymentCompleteNewWay(highValueCredit, true));
         System.out.println();
 
         System.out.println("  Scenario 2: High-Value ($1500) + Domestic");
-        System.out.println("  OLD: " + demo.processPaymentCompleteOldWay(highValueCredit, false));
-        System.out.println("  NEW: " + demo.processPaymentCompleteNewWay(highValueCredit, false));
+        System.out.println("  OLD: " + processPaymentCompleteOldWay(highValueCredit, false));
+        System.out.println("  NEW: " + processPaymentCompleteNewWay(highValueCredit, false));
         System.out.println();
 
         System.out.println("  Scenario 3: Low-Value ($50) + Domestic");
-        System.out.println("  OLD: " + demo.processPaymentCompleteOldWay(lowValueCredit, false));
-        System.out.println("  NEW: " + demo.processPaymentCompleteNewWay(lowValueCredit, false));
+        System.out.println("  OLD: " + processPaymentCompleteOldWay(lowValueCredit, false));
+        System.out.println("  NEW: " + processPaymentCompleteNewWay(lowValueCredit, false));
         System.out.println();
 
         // PayPal Scenarios
@@ -481,13 +506,13 @@ public class PatternMatchingShowcase {
         System.out.println();
 
         System.out.println("  Scenario 4: PayPal ($500) + International");
-        System.out.println("  OLD: " + demo.processPaymentCompleteOldWay(paypal, true));
-        System.out.println("  NEW: " + demo.processPaymentCompleteNewWay(paypal, true));
+        System.out.println("  OLD: " + processPaymentCompleteOldWay(paypal, true));
+        System.out.println("  NEW: " + processPaymentCompleteNewWay(paypal, true));
         System.out.println();
 
         System.out.println("  Scenario 5: PayPal ($500) + Domestic");
-        System.out.println("  OLD: " + demo.processPaymentCompleteOldWay(paypal, false));
-        System.out.println("  NEW: " + demo.processPaymentCompleteNewWay(paypal, false));
+        System.out.println("  OLD: " + processPaymentCompleteOldWay(paypal, false));
+        System.out.println("  NEW: " + processPaymentCompleteNewWay(paypal, false));
         System.out.println();
 
         // Bank Transfer Scenario
@@ -495,13 +520,15 @@ public class PatternMatchingShowcase {
         System.out.println();
 
         System.out.println("  Scenario 6: Bank Transfer ($5000)");
-        System.out.println("  OLD: " + demo.processPaymentCompleteOldWay(bank, false));
-        System.out.println("  NEW: " + demo.processPaymentCompleteNewWay(bank, false));
+        System.out.println("  OLD: " + processPaymentCompleteOldWay(bank, false));
+        System.out.println("  NEW: " + processPaymentCompleteNewWay(bank, false));
         System.out.println();
+    }
 
-        // ═══════════════════════════════════════════════════════════════════════════
-        // SUMMARY
-        // ═══════════════════════════════════════════════════════════════════════════
+    /**
+     * 📊 Demo: Summary of Benefits
+     */
+    public void demoSummary() {
         System.out.println("═".repeat(67));
         System.out.println();
         System.out.println("📈 SUMMARY: Pattern Matching for Switch Benefits");
@@ -518,5 +545,26 @@ public class PatternMatchingShowcase {
         System.out.println("✅ Maintainable: Easy to add new payment types or rules");
         System.out.println();
         System.out.println("═".repeat(67));
+    }
+
+    // ========================================================================
+    // 🎬 MAIN - Clean entry point for demos
+    // ========================================================================
+
+    public static void main(String[] args) {
+        PatternMatchingShowcase demo = new PatternMatchingShowcase();
+
+        System.out.println("╔═══════════════════════════════════════════════════════════════╗");
+        System.out.println("║     JAVA 21 PATTERN MATCHING - COMPLETE DEMONSTRATION        ║");
+        System.out.println("╚═══════════════════════════════════════════════════════════════╝");
+        System.out.println();
+
+        // 💡 TIP: Comment out any demo methods you don't want to run during your video
+
+        demo.demoSwitchExpressions();        // 1️⃣ Feature 1: Java 14
+        demo.demoTypePatterns();             // 2️⃣ Feature 2: Java 16
+        demo.demoRecordPatterns();           // 3️⃣ Feature 3: Java 21
+        demo.demoPatternMatchingForSwitch(); // 4️⃣ All Combined: Java 21
+        demo.demoSummary();                  // 📊 Summary
     }
 }
