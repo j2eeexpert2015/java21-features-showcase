@@ -778,10 +778,32 @@
 
     // Quick test scenarios
     const scenarios = {
-        500: { items: [{ name: 'iPhone 15 Pro', price: 999 }, { name: 'AirPods Pro', price: 249 }], total: 500 },
-        1500: { items: [{ name: 'iPhone 15 Pro', price: 999 }, { name: 'AirPods Pro', price: 498 }], total: 1500 },
-        5000: { items: [{ name: 'iPhone 15 Pro', price: 999 }, { name: 'MacBook Pro M3', price: 2500 }, { name: 'AirPods Pro x2', price: 498 }, { name: 'iPad Pro', price: 1000 }], total: 5000 }
-    };
+    500: { 
+        items: [
+            { name: 'AirPods Pro', price: 249 }, 
+            { name: 'Apple Watch Band', price: 251 }
+        ], 
+        total: 500 
+    },
+    1500: { 
+        items: [
+            { name: 'iPhone 15', price: 799 }, 
+            { name: 'AirPods Pro', price: 249 },
+            { name: 'AppleCare+ & Accessories', price: 452 }
+        ], 
+        total: 1500 
+    },
+    5000: { 
+        items: [
+            { name: 'iPhone 15 Pro Max', price: 1199 }, 
+            { name: 'MacBook Air M2', price: 1199 }, 
+            { name: 'iPad Pro 12.9"', price: 1099 },
+            { name: 'Apple Watch Ultra', price: 799 },
+            { name: 'AirPods Max', price: 704 }
+        ], 
+        total: 5000 
+    }
+};
 
     // Payment method configurations
     const paymentMethods = {
