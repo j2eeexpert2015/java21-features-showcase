@@ -994,53 +994,59 @@
     }
 
     function updateFlowLog(logId, responseData) {
-        if (!logId) return;
+    if (!logId) return;
 
-        const flowBlock = document.getElementById(logId);
-        if (!flowBlock) return;
+    const flowBlock = document.getElementById(logId);
+    if (!flowBlock) return;
 
-        const controllerElement = flowBlock.querySelector('[data-role="controller"]');
-        if (!controllerElement) return;
+    const controllerElement = flowBlock.querySelector('[data-role="controller"]');
+    if (!controllerElement) return;
 
-        // Handle error responses
-        if (responseData.error) {
-            flowBlock.classList.add('error');
-            controllerElement.innerHTML = `🔴 <span class="error-text">Error: ${responseData.error}</span>`;
-            return;
-        }
+    // Extract actual data from response_data if it exists (backend sends camelCase inside response_data)
+    const actualData = responseData.response_data || responseData;
+    const controllerMethod = actualData.controllerMethod || responseData.controller_method || 'PaymentController';
+    const serviceCalls = actualData.serviceCalls || responseData.service_calls || {};
+    const operationDesc = actualData.operationDescription || responseData.operation_description || 'Operation completed';
 
-        flowBlock.classList.add('success');
-        let html = `🔴 Controller: <strong>${responseData.controller_method || 'PaymentController'}</strong>`;
-
-        // Handle service calls from your backend's ApiResponse format
-        if (responseData.service_calls && typeof responseData.service_calls === 'object') {
-            html += `<div class="api-flow-child">🟣 Service Layer: Pattern matching executed</div>`;
-
-            Object.entries(responseData.service_calls).forEach(([serviceMethod, java21Methods]) => {
-                if (Array.isArray(java21Methods) && java21Methods.length > 0) {
-                    html += `<div class="api-flow-child">  └── <strong>${serviceMethod}</strong> → <span class="java21-method-tag">${java21Methods.join(', ')}</span></div>`;
-                    java21Methods.forEach(method => highlightJavaMethod(method));
-                } else {
-                    html += `<div class="api-flow-child">  └── <strong>${serviceMethod}</strong> → Standard processing</div>`;
-                }
-            });
-        }
-
-        if (responseData.operation_description) {
-            html += `<div class="api-flow-child">💡 <span class="success-text">${responseData.operation_description}</span></div>`;
-        }
-
-        // Handle payment response data
-        if (responseData.response_data && responseData.response_data.paymentResponse) {
-            const payment = responseData.response_data.paymentResponse;
-            html += `<div class="api-flow-child">💳 Transaction: <strong>${payment.transactionId}</strong> (${payment.status})</div>`;
-            if (payment.validationMessage) {
-                html += `<div class="api-flow-child">📝 Result: ${payment.validationMessage}</div>`;
-            }
-        }
-
-        controllerElement.innerHTML = html;
+    // Handle error responses
+    if (responseData.error || actualData.error) {
+        flowBlock.classList.add('error');
+        controllerElement.innerHTML = `🔴 <span class="error-text">Error: ${responseData.error || actualData.error}</span>`;
+        return;
     }
+
+    flowBlock.classList.add('success');
+    let html = `🔴 Controller: <strong>${controllerMethod}</strong>`;
+
+    // Handle service calls
+    if (serviceCalls && typeof serviceCalls === 'object' && Object.keys(serviceCalls).length > 0) {
+        html += `<div class="api-flow-child">🟣 Service Layer: Pattern matching executed</div>`;
+
+        Object.entries(serviceCalls).forEach(([serviceMethod, java21Methods]) => {
+            if (Array.isArray(java21Methods) && java21Methods.length > 0) {
+                html += `<div class="api-flow-child">  └── <strong>${serviceMethod}</strong> → <span class="java21-method-tag">${java21Methods.join(', ')}</span></div>`;
+                java21Methods.forEach(method => highlightJavaMethod(method));
+            } else {
+                html += `<div class="api-flow-child">  └── <strong>${serviceMethod}</strong> → Standard processing</div>`;
+            }
+        });
+    }
+
+    if (operationDesc) {
+        html += `<div class="api-flow-child">💡 <span class="success-text">${operationDesc}</span></div>`;
+    }
+
+    // Handle payment response data
+    if (actualData.paymentResponse) {
+        const payment = actualData.paymentResponse;
+        html += `<div class="api-flow-child">💳 Transaction: <strong>${payment.transactionId}</strong> (${payment.status})</div>`;
+        if (payment.validationMessage) {
+            html += `<div class="api-flow-child">📝 Result: ${payment.validationMessage}</div>`;
+        }
+    }
+
+    controllerElement.innerHTML = html;
+}
 
     function clearInspectorLog() {
         const logContainer = document.getElementById('api-log');

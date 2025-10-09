@@ -126,7 +126,7 @@ public class PaymentController {
     // Update amount - triggers high-value guard conditions
     @PutMapping("/amount/{amount}")
     public ApiResponse setAmount(@PathVariable BigDecimal amount) {
-        logger.info(" PUT /api/payment/amount/{} - Updating payment amount", amount);
+        logger.info(">>> PUT /api/payment/amount/{} - Updating payment amount", amount);
 
         BigDecimal previousAmount = currentState.getAmount();
         currentState.setAmount(amount);
@@ -143,8 +143,11 @@ public class PaymentController {
         logger.info("Amount updated: ${} -> ${} (Guard conditions: {})",
                 previousAmount, amount, triggersGuard ? "high-value triggered" : "standard");
 
-        return new ApiResponse("PaymentController.setAmount",
-                "Amount set to $" + amount)
+        String operationDesc = triggersGuard
+                ? String.format("Amount set to $%s - High-value guard triggered (> $1000)", amount)
+                : String.format("Amount set to $%s - Standard processing", amount);
+
+        return new ApiResponse("PaymentController.setAmount", operationDesc)
                 .withServiceCall("PaymentService.updateAmount", methods);
     }
 
