@@ -16,9 +16,12 @@ package org.example.service;
 import org.example.model.cart.*;
 import org.example.repository.CartRepository;
 import org.springframework.stereotype.Service;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 @Service
 public class CartService {
 
@@ -53,6 +56,8 @@ public class CartService {
                 request.getProductName(), customerId);
 
         CartState cartState = cartRepository.getCartState(customerId);
+        // ✅ Log collection size before operation for debugging
+
         int sizeBefore = cartState.getItems().size();
 
         CartItem item = new CartItem(

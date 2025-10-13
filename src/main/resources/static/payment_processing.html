@@ -34,41 +34,6 @@
             flex-shrink: 0;
         }
 
-        .header-controls {
-            position: absolute;
-            top: 50%;
-            right: 20px;
-            transform: translateY(-50%);
-            display: flex;
-            gap: 8px;
-        }
-
-        .header-btn {
-            padding: 4px 8px;
-            border: 1px solid rgba(255,255,255,0.3);
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border-radius: 4px;
-            font-size: 11px;
-            cursor: pointer;
-            backdrop-filter: blur(10px);
-            transition: all 0.2s;
-        }
-
-        .header-btn:hover {
-            background: rgba(255,255,255,0.2);
-        }
-
-        .header-btn.primary {
-            background: rgba(23,162,184,0.8);
-            border-color: rgba(23,162,184,0.8);
-        }
-
-        .header-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
         .header h1 {
             font-size: 14px;
             font-weight: 600;
@@ -369,10 +334,6 @@
             color: #005cc5;
         }
 
-        .string {
-            color: #032f62;
-        }
-
         .comment {
             color: #6a737d;
             font-style: italic;
@@ -452,7 +413,7 @@
             background-color: #212529;
             color: #f8f9fa;
             font-family: 'Courier New', Courier, monospace;
-            font-size: 0.8em;
+            font-size: 0.75em;
             padding: .5rem;
             border-radius: .25rem;
             height: 320px;
@@ -474,7 +435,7 @@
         }
 
         .api-flow-block:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
             transform: translateX(3px);
             border-left-color: #10b981;
         }
@@ -503,6 +464,8 @@
             position: relative;
             margin-top: 3px;
             opacity: 0.9;
+            font-size: 0.95em;
+            line-height: 1.4;
         }
 
         .api-flow-child::before {
@@ -514,15 +477,77 @@
             font-weight: bold;
         }
 
-        .java21-method-tag {
-            color: #ffffff;
-            background-color: #28a745;
-            padding: 1px 5px;
+        /* Pattern Matching Steps Styles */
+        .pm-execution-header {
+            color: #bb86fc;
+            font-weight: bold;
+            margin: 4px 0;
+            font-size: 1em;
+        }
+
+        .pm-step {
+            margin: 6px 0;
+            padding: 4px 0;
+            border-left: 2px solid #495057;
+            padding-left: 8px;
+        }
+
+        .pm-step-header {
+            color: #ffc107;
+            font-weight: bold;
+            margin-bottom: 2px;
+            font-size: 0.95em;
+        }
+
+        .pm-step-detail {
+            padding-left: 1rem;
+            margin: 2px 0;
+            font-size: 0.9em;
+        }
+
+        .pm-step-detail.success {
+            color: #28a745;
+        }
+
+        .pm-step-detail.failed {
+            color: #ffc107;
+        }
+
+        .pm-step-detail.error {
+            color: #dc3545;
+        }
+
+        .pm-guard-check {
+            padding-left: 1.5rem;
+            margin: 2px 0;
+            font-size: 0.85em;
+            color: #adb5bd;
+        }
+
+        .pm-guard-check.passed {
+            color: #28a745;
+        }
+
+        .pm-guard-check.failed {
+            color: #ffc107;
+        }
+
+        .pm-result {
+            margin-top: 4px;
+            padding: 3px 6px;
             border-radius: 3px;
             font-weight: bold;
-            font-size: 0.8em;
-            display: inline-block;
-            margin: 0 2px;
+            font-size: 0.9em;
+        }
+
+        .pm-result.passed {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+        }
+
+        .pm-result.failed {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
         }
 
         .clear-log-btn {
@@ -539,11 +564,6 @@
             color: #28a745;
         }
 
-        .warning-text {
-            color: #ffc107;
-        }
-
-        /* Scrollbar styles */
         .api-log-container::-webkit-scrollbar {
             width: 8px;
         }
@@ -588,7 +608,6 @@
 </div>
 
 <div class="main-container">
-    <!-- Left Panel: Order Summary -->
     <div class="panel">
         <div class="panel-header">
             <span class="panel-icon">🛒</span>
@@ -668,7 +687,6 @@
         <button class="process-btn" onclick="processPayment()" id="processBtn">🔒 Process Payment - <span id="btn-amount">$500</span></button>
     </div>
 
-    <!-- Center Panel: Pattern Matching Reference -->
     <div class="panel">
         <div class="panel-header">
             <span class="panel-icon">⚡</span>
@@ -739,7 +757,6 @@
         </div>
     </div>
 
-    <!-- Right Panel: Visual Flow Inspector -->
     <div class="panel">
         <div class="panel-header">
             <span class="panel-icon">📊</span>
@@ -754,7 +771,6 @@
 </div>
 
 <script>
-    // Configuration
     const API_BASE_URL = 'http://localhost:8080';
     const ENDPOINTS = {
         PROCESS: '/api/payment/process',
@@ -762,11 +778,9 @@
         CUSTOMER_TYPE: '/api/payment/customer/type',
         INTERNATIONAL: '/api/payment/international',
         AMOUNT: '/api/payment/amount',
-        DEMO_STATE: '/api/payment/demo-state',
-        RESET: '/api/payment/reset'
+        DEMO_STATE: '/api/payment/demo-state'
     };
 
-    // Application state
     let appState = {
         amount: 500,
         paymentMethod: 'credit',
@@ -776,36 +790,34 @@
         connected: false
     };
 
-    // Quick test scenarios
     const scenarios = {
-    500: { 
-        items: [
-            { name: 'AirPods Pro', price: 249 }, 
-            { name: 'Apple Watch Band', price: 251 }
-        ], 
-        total: 500 
-    },
-    1500: { 
-        items: [
-            { name: 'iPhone 15', price: 799 }, 
-            { name: 'AirPods Pro', price: 249 },
-            { name: 'AppleCare+ & Accessories', price: 452 }
-        ], 
-        total: 1500 
-    },
-    5000: { 
-        items: [
-            { name: 'iPhone 15 Pro Max', price: 1199 }, 
-            { name: 'MacBook Air M2', price: 1199 }, 
-            { name: 'iPad Pro 12.9"', price: 1099 },
-            { name: 'Apple Watch Ultra', price: 799 },
-            { name: 'AirPods Max', price: 704 }
-        ], 
-        total: 5000 
-    }
-};
+        500: {
+            items: [
+                { name: 'AirPods Pro', price: 249 },
+                { name: 'Apple Watch Band', price: 251 }
+            ],
+            total: 500
+        },
+        1500: {
+            items: [
+                { name: 'iPhone 15', price: 799 },
+                { name: 'AirPods Pro', price: 249 },
+                { name: 'AppleCare+ & Accessories', price: 452 }
+            ],
+            total: 1500
+        },
+        5000: {
+            items: [
+                { name: 'iPhone 15 Pro Max', price: 1199 },
+                { name: 'MacBook Air M2', price: 1199 },
+                { name: 'iPad Pro 12.9"', price: 1099 },
+                { name: 'Apple Watch Ultra', price: 799 },
+                { name: 'AirPods Max', price: 704 }
+            ],
+            total: 5000
+        }
+    };
 
-    // Payment method configurations
     const paymentMethods = {
         credit: {
             name: 'CreditCard',
@@ -827,14 +839,107 @@
         }
     };
 
-    // Customer type configurations
     const customerTypes = {
-        basic: { tier: 'Basic', discount: 0, priority: 'Standard' },
-        premium: { tier: 'Premium', discount: 5, priority: 'High' },
-        vip: { tier: 'VIP', discount: 10, priority: 'Express' }
+        basic: { tier: 'Basic', priority: 'Standard' },
+        premium: { tier: 'Premium', priority: 'High' },
+        vip: { tier: 'VIP', priority: 'Express' }
     };
 
-    // API Helper Functions
+    // Generate mock pattern matching steps for offline mode
+    function generateMockPatternSteps() {
+        const steps = [];
+        const method = paymentMethods[appState.paymentMethod];
+
+        // Step 1: Type Check
+        steps.push({
+            stepType: 'TYPE_CHECK',
+            description: `Payment is ${method.name}`,
+            matchedType: method.name,
+            timestamp: new Date().toISOString()
+        });
+
+        // Step 2: Destructuring
+        const destructuredValues = appState.paymentMethod === 'credit'
+            ? `type=Visa, cvv=***`
+            : appState.paymentMethod === 'paypal'
+            ? `email=user@example.com, accountId=PP-${Date.now().toString().slice(-6)}`
+            : `routing=021000021, account=****1234`;
+
+        steps.push({
+            stepType: 'DESTRUCTURING',
+            description: `Record pattern destructured ${method.name} components`,
+            matchedType: method.name,
+            extractedValues: destructuredValues,
+            timestamp: new Date().toISOString()
+        });
+
+        // Step 3+: Guard Evaluations (if applicable)
+        if (appState.amount > 1000 && appState.isInternational) {
+            // Case 1: amount > 1000 && international - PASSED
+            steps.push({
+                stepType: 'GUARD_EVALUATION',
+                description: `Guard condition for high-value international transactions`,
+                guardExpression: 'amount > 1000 && international',
+                passed: true,
+                caseNumber: 1,
+                evaluationDetails: [
+                    {
+                        condition: 'amount > 1000',
+                        result: true,
+                        actualValue: `$${appState.amount.toLocaleString()} > $1,000`
+                    },
+                    {
+                        condition: 'international',
+                        result: true,
+                        actualValue: 'TRUE'
+                    }
+                ],
+                timestamp: new Date().toISOString()
+            });
+        } else if (appState.amount > 1000 && !appState.isInternational) {
+            // Case 1: amount > 1000 && international - FAILED
+            steps.push({
+                stepType: 'GUARD_EVALUATION',
+                description: `Checking guard for high-value international case`,
+                guardExpression: 'amount > 1000 && international',
+                passed: false,
+                caseNumber: 1,
+                evaluationDetails: [
+                    {
+                        condition: 'amount > 1000',
+                        result: true,
+                        actualValue: `$${appState.amount.toLocaleString()} > $1,000`
+                    },
+                    {
+                        condition: 'international',
+                        result: false,
+                        actualValue: 'FALSE'
+                    }
+                ],
+                timestamp: new Date().toISOString()
+            });
+
+            // Case 2: amount > 1000 - PASSED
+            steps.push({
+                stepType: 'GUARD_EVALUATION',
+                description: `Guard condition for high-value domestic transactions`,
+                guardExpression: 'amount > 1000',
+                passed: true,
+                caseNumber: 2,
+                evaluationDetails: [
+                    {
+                        condition: 'amount > 1000',
+                        result: true,
+                        actualValue: `$${appState.amount.toLocaleString()} > $1,000`
+                    }
+                ],
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        return steps;
+    }
+
     async function apiCall(method, endpoint, data = null) {
         const logId = createFlowLog(
             `${method.toUpperCase()} Request`,
@@ -863,7 +968,6 @@
 
             const responseData = await response.json();
 
-            // Update flow log with success
             updateFlowLog(logId, {
                 controller_method: responseData.controller_method || 'PaymentController',
                 service_calls: responseData.service_calls || {},
@@ -876,7 +980,6 @@
         } catch (error) {
             console.error('API Call failed:', error);
 
-            // Update flow log with error
             updateFlowLog(logId, {
                 error: error.message,
                 controller_method: 'Connection Failed'
@@ -886,7 +989,6 @@
         }
     }
 
-    // Connection management
     async function checkConnection() {
         try {
             const response = await fetch(`${API_BASE_URL}/api/payment/demo-state`, {
@@ -918,19 +1020,16 @@
         if (connected) {
             dot.classList.add('connected');
             text.textContent = 'Backend Connected';
-            // Enable all buttons
             document.querySelectorAll('button').forEach(btn => btn.disabled = false);
         } else {
             dot.classList.remove('connected');
             text.textContent = 'Backend Offline';
-            // Keep UI functional but show offline status
         }
     }
 
     function syncWithBackendState(backendState) {
         if (!backendState) return;
 
-        // Update app state from backend
         if (backendState.amount) {
             appState.amount = parseFloat(backendState.amount);
             updateAmountDisplays(appState.amount);
@@ -955,15 +1054,13 @@
         updatePatternHighlighting();
     }
 
-    // Visual Flow Inspector Functions
     function createFlowLog(userAction, method, endpoint) {
         const logContainer = document.getElementById('api-log');
         if (!logContainer) return null;
 
-        // Clear initial message if present
         const initialMessages = logContainer.querySelectorAll('.text-muted, .text-center');
         initialMessages.forEach(msg => {
-            if (msg.textContent && msg.textContent.includes('Starting') || msg.textContent.includes('Click')) {
+            if (msg.textContent && (msg.textContent.includes('Starting') || msg.textContent.includes('Click'))) {
                 logContainer.innerHTML = '';
             }
         });
@@ -984,7 +1081,6 @@
 
         logContainer.insertBefore(flowBlock, logContainer.firstChild);
 
-        // Maintain entry limit
         while (logContainer.children.length > 12) {
             logContainer.removeChild(logContainer.lastChild);
         }
@@ -993,60 +1089,137 @@
         return logId;
     }
 
-    function updateFlowLog(logId, responseData) {
-    if (!logId) return;
+    function renderPatternMatchingSteps(steps) {
+        if (!steps || steps.length === 0) return '';
 
-    const flowBlock = document.getElementById(logId);
-    if (!flowBlock) return;
+        let html = '<div class="pm-execution-header">🟣 Pattern Matching Execution:</div>';
 
-    const controllerElement = flowBlock.querySelector('[data-role="controller"]');
-    if (!controllerElement) return;
+        steps.forEach((step, index) => {
+            html += `<div class="pm-step">`;
 
-    // Extract actual data from response_data if it exists (backend sends camelCase inside response_data)
-    const actualData = responseData.response_data || responseData;
-    const controllerMethod = actualData.controllerMethod || responseData.controller_method || 'PaymentController';
-    const serviceCalls = actualData.serviceCalls || responseData.service_calls || {};
-    const operationDesc = actualData.operationDescription || responseData.operation_description || 'Operation completed';
+            // Use step.number if available, otherwise use index
+            const stepNum = step.number || (index + 1);
+            // Use step.type (from backend) or step.stepType (from mock)
+            const stepType = step.type || step.stepType;
+            const stepMessage = step.message || step.description;
+            const isPassed = step.passed !== undefined ? step.passed : true;
 
-    // Handle error responses
-    if (responseData.error || actualData.error) {
-        flowBlock.classList.add('error');
-        controllerElement.innerHTML = `🔴 <span class="error-text">Error: ${responseData.error || actualData.error}</span>`;
-        return;
-    }
+            html += `<div class="pm-step-header">📍 Step ${stepNum}: ${stepType.replace(/_/g, ' ')}</div>`;
 
-    flowBlock.classList.add('success');
-    let html = `🔴 Controller: <strong>${controllerMethod}</strong>`;
-
-    // Handle service calls
-    if (serviceCalls && typeof serviceCalls === 'object' && Object.keys(serviceCalls).length > 0) {
-        html += `<div class="api-flow-child">🟣 Service Layer: Pattern matching executed</div>`;
-
-        Object.entries(serviceCalls).forEach(([serviceMethod, java21Methods]) => {
-            if (Array.isArray(java21Methods) && java21Methods.length > 0) {
-                html += `<div class="api-flow-child">  └── <strong>${serviceMethod}</strong> → <span class="java21-method-tag">${java21Methods.join(', ')}</span></div>`;
-                java21Methods.forEach(method => highlightJavaMethod(method));
-            } else {
-                html += `<div class="api-flow-child">  └── <strong>${serviceMethod}</strong> → Standard processing</div>`;
+            if (stepType === 'TYPE_CHECK') {
+                html += `<div class="pm-step-detail success">✓ ${stepMessage}</div>`;
+                highlightJavaMethod('switch');
+                // Extract payment type from message
+                if (stepMessage.includes('CreditCard')) highlightJavaMethod('credit');
+                else if (stepMessage.includes('PayPal')) highlightJavaMethod('paypal');
+                else if (stepMessage.includes('BankTransfer')) highlightJavaMethod('bank');
             }
+
+            else if (stepType === 'DESTRUCTURING') {
+                html += `<div class="pm-step-detail success">✓ ${stepMessage}</div>`;
+                // Extract payment type from message
+                if (stepMessage.includes('CreditCard')) highlightJavaMethod('credit');
+                else if (stepMessage.includes('PayPal')) highlightJavaMethod('paypal');
+                else if (stepMessage.includes('BankTransfer')) highlightJavaMethod('bank');
+            }
+
+            else if (stepType === 'GUARD_EVALUATION') {
+                const guardExpr = step.guardExpression || '';
+                html += `<div class="pm-step-detail">🔍 Checking: ${guardExpr}</div>`;
+
+                // Use step.conditions (from backend) or step.evaluationDetails (from mock)
+                const conditions = step.conditions || step.evaluationDetails || [];
+
+                if (conditions.length > 0) {
+                    conditions.forEach(detail => {
+                        // Backend uses: name, passed, result
+                        // Mock uses: condition, result (boolean), actualValue
+                        const conditionName = detail.name || detail.condition;
+                        const conditionPassed = detail.passed !== undefined ? detail.passed : detail.result;
+                        const conditionValue = detail.result || detail.actualValue || '';
+
+                        const icon = conditionPassed ? '✓' : '✗';
+                        const cssClass = conditionPassed ? 'passed' : 'failed';
+                        html += `<div class="pm-guard-check ${cssClass}">   ${icon} ${conditionName}: ${conditionPassed ? 'TRUE' : 'FALSE'} (${conditionValue})</div>`;
+                    });
+                }
+
+                const resultClass = isPassed ? 'passed' : 'failed';
+                const resultIcon = isPassed ? '✅' : '⚠️';
+                html += `<div class="pm-result ${resultClass}">${resultIcon} ${stepMessage}</div>`;
+
+                if (isPassed) {
+                    highlightJavaMethod('guard');
+                }
+            }
+
+            html += `</div>`;
         });
+
+        return html;
     }
 
-    if (operationDesc) {
-        html += `<div class="api-flow-child">💡 <span class="success-text">${operationDesc}</span></div>`;
-    }
+    function updateFlowLog(logId, responseData) {
+        if (!logId) return;
 
-    // Handle payment response data
-    if (actualData.paymentResponse) {
-        const payment = actualData.paymentResponse;
-        html += `<div class="api-flow-child">💳 Transaction: <strong>${payment.transactionId}</strong> (${payment.status})</div>`;
-        if (payment.validationMessage) {
-            html += `<div class="api-flow-child">📝 Result: ${payment.validationMessage}</div>`;
+        const flowBlock = document.getElementById(logId);
+        if (!flowBlock) return;
+
+        const controllerElement = flowBlock.querySelector('[data-role="controller"]');
+        if (!controllerElement) return;
+
+        const actualData = responseData.response_data || responseData;
+        const controllerMethod = actualData.controllerMethod || responseData.controller_method || 'PaymentController';
+        const operationDesc = actualData.operationDescription || responseData.operation_description || 'Operation completed';
+
+        if (responseData.error || actualData.error) {
+            flowBlock.classList.add('error');
+            controllerElement.innerHTML = `🔴 <span class="error-text">Error: ${responseData.error || actualData.error}</span>`;
+            return;
         }
-    }
 
-    controllerElement.innerHTML = html;
-}
+        flowBlock.classList.add('success');
+        let html = `🔴 Controller: <strong>${controllerMethod}</strong>`;
+
+        // Check for pattern matching steps in all possible locations
+        let pmSteps = null;
+
+        // Priority 1: Check metadata.paymentResponse (from your backend structure)
+        if (actualData.metadata?.paymentResponse?.patternMatchingSteps) {
+            pmSteps = actualData.metadata.paymentResponse.patternMatchingSteps;
+        }
+        // Priority 2: Check direct patternMatchingSteps
+        else if (actualData.patternMatchingSteps && actualData.patternMatchingSteps.length > 0) {
+            pmSteps = actualData.patternMatchingSteps;
+        }
+        // Priority 3: Check nested paymentResponse
+        else if (actualData.paymentResponse?.patternMatchingSteps) {
+            pmSteps = actualData.paymentResponse.patternMatchingSteps;
+        }
+        // Priority 4: Check response_data wrapper
+        else if (responseData.response_data?.patternMatchingSteps) {
+            pmSteps = responseData.response_data.patternMatchingSteps;
+        }
+
+        if (pmSteps && pmSteps.length > 0) {
+            html += renderPatternMatchingSteps(pmSteps);
+        }
+
+        if (operationDesc) {
+            html += `<div class="api-flow-child">💡 <span class="success-text">${operationDesc}</span></div>`;
+        }
+
+        // Display transaction info - check metadata first
+        let txnData = actualData.metadata?.paymentResponse || actualData.paymentResponse || actualData;
+        if (txnData.transactionId) {
+            html += `<div class="api-flow-child">💳 Transaction: <strong>${txnData.transactionId}</strong> (${txnData.status})</div>`;
+            if (txnData.validationMessage) {
+                html += `<div class="api-flow-child">📝 Result: ${txnData.validationMessage}</div>`;
+            }
+        }
+
+        controllerElement.innerHTML = html;
+    }
 
     function clearInspectorLog() {
         const logContainer = document.getElementById('api-log');
@@ -1059,12 +1232,10 @@
 
         const safe = String(methodName).replace(/\(\)$/, '');
 
-        // Clear previous highlights
         document.querySelectorAll('.pattern-line.highlighted').forEach(line => {
             line.classList.remove('highlighted');
         });
 
-        // Map backend method names to UI patterns
         let targetSelector = null;
         switch(safe.toLowerCase()) {
             case 'switch':
@@ -1095,7 +1266,6 @@
             const line = document.querySelector(targetSelector);
             if (line) {
                 line.classList.add('highlighted');
-                // Auto-remove after animation
                 setTimeout(() => {
                     if (line.isConnected) {
                         line.classList.remove('highlighted');
@@ -1105,10 +1275,9 @@
         }
     }
 
-    // UI Update Functions
     function updateAmountDisplays(amount) {
-        document.getElementById('total-amount').textContent = `${amount.toLocaleString()}`;
-        document.getElementById('btn-amount').textContent = `${amount.toLocaleString()}`;
+        document.getElementById('total-amount').textContent = `$${amount.toLocaleString()}`;
+        document.getElementById('btn-amount').textContent = `$${amount.toLocaleString()}`;
     }
 
     function updatePaymentMethodUI(method) {
@@ -1130,11 +1299,10 @@
     function updateOrderDisplay(scenario) {
         const orderItems = document.getElementById('order-items');
         orderItems.innerHTML = scenario.items.map(item =>
-            `<div class="order-item"><span>${item.name}</span><span>${item.price.toLocaleString()}</span></div>`
+            `<div class="order-item"><span>${item.name}</span><span>$${item.price.toLocaleString()}</span></div>`
         ).join('');
     }
 
-    // Event Handler Functions
     async function setQuickTest(amount) {
         document.querySelectorAll('.test-btn').forEach(btn => btn.classList.remove('active'));
         event.target.classList.add('active');
@@ -1145,25 +1313,12 @@
         updatePatternHighlighting();
         updateStatusIndicators();
 
-        // Call backend if connected
         if (appState.connected) {
             try {
                 await apiCall('PUT', `${ENDPOINTS.AMOUNT}/${amount}`);
             } catch (error) {
                 console.error('Failed to update amount on backend:', error);
             }
-        } else {
-            // Simulate offline mode
-            const logId = createFlowLog('Set Amount (Offline)', 'PUT', `/api/payment/amount/${amount}`);
-            setTimeout(() => {
-                updateFlowLog(logId, {
-                    controller_method: 'PaymentController.setAmount (Simulated)',
-                    service_calls: {
-                        'PaymentService.updateAmount': ['pattern matching']
-                    },
-                    operation_description: `Amount set to ${amount.toLocaleString()} (offline mode)`
-                });
-            }, 300);
         }
     }
 
@@ -1181,18 +1336,6 @@
             } catch (error) {
                 console.error('Failed to update payment method on backend:', error);
             }
-        } else {
-            // Simulate offline mode
-            const logId = createFlowLog('Select Payment Method (Offline)', 'PUT', `/api/payment/method/${method}`);
-            setTimeout(() => {
-                updateFlowLog(logId, {
-                    controller_method: 'PaymentController.selectPaymentMethod (Simulated)',
-                    service_calls: {
-                        'PaymentService.setPaymentType': ['switch', paymentMethods[method].name, 'sealed']
-                    },
-                    operation_description: `Payment method changed to ${paymentMethods[method].name} (offline mode)`
-                });
-            }, 300);
         }
     }
 
@@ -1209,18 +1352,6 @@
             } catch (error) {
                 console.error('Failed to update customer type on backend:', error);
             }
-        } else {
-            // Simulate offline mode
-            const logId = createFlowLog('Select Customer Type (Offline)', 'PUT', `/api/payment/customer/type/${type}`);
-            setTimeout(() => {
-                updateFlowLog(logId, {
-                    controller_method: 'PaymentController.selectCustomerType (Simulated)',
-                    service_calls: {
-                        'CustomerService.updateType': ['pattern matching']
-                    },
-                    operation_description: `Customer type changed to ${customerTypes[type].tier} (offline mode)`
-                });
-            }, 300);
         }
     }
 
@@ -1234,18 +1365,6 @@
             } catch (error) {
                 console.error('Failed to update international status on backend:', error);
             }
-        } else {
-            // Simulate offline mode
-            const logId = createFlowLog('Toggle International (Offline)', 'PUT', `/api/payment/international/${appState.isInternational}`);
-            setTimeout(() => {
-                updateFlowLog(logId, {
-                    controller_method: 'PaymentController.toggleInternational (Simulated)',
-                    service_calls: {
-                        'ValidationService.setInternational': ['when']
-                    },
-                    operation_description: `International: ${appState.isInternational ? 'enabled' : 'disabled'} (offline mode)`
-                });
-            }, 300);
         }
     }
 
@@ -1261,7 +1380,6 @@
 
         try {
             if (appState.connected) {
-                // Create payment request matching your backend format
                 const paymentRequest = {
                     customerId: 1,
                     paymentMethod: appState.paymentMethod,
@@ -1272,21 +1390,19 @@
 
                 const response = await apiCall('POST', ENDPOINTS.PROCESS, paymentRequest);
 
-                // Update UI with response
                 if (response.paymentResponse) {
                     updateProcessingResults(response.paymentResponse);
                 }
 
             } else {
-                // Simulate offline processing
                 const logId = createFlowLog('Process Payment (Offline)', 'POST', '/api/payment/process');
+
+                // Generate mock pattern matching steps for offline mode
+                const mockSteps = generateMockPatternSteps();
+
                 setTimeout(() => {
                     updateFlowLog(logId, {
                         controller_method: 'PaymentController.processPayment (Simulated)',
-                        service_calls: {
-                            'PaymentService.processPayment': ['switch', paymentMethods[appState.paymentMethod].name, 'sealed'],
-                            'ValidationService.validatePayment': appState.amount > 1000 ? ['when'] : []
-                        },
                         operation_description: `Payment processed successfully (offline simulation)`,
                         response_data: {
                             paymentResponse: {
@@ -1294,7 +1410,8 @@
                                 status: 'SIMULATED_SUCCESS',
                                 amount: appState.amount,
                                 paymentMethod: paymentMethods[appState.paymentMethod].name,
-                                validationMessage: 'Offline simulation - payment would be processed'
+                                validationMessage: 'Offline simulation - payment would be processed',
+                                patternMatchingSteps: mockSteps
                             }
                         }
                     });
@@ -1304,7 +1421,6 @@
         } catch (error) {
             console.error('Payment processing failed:', error);
         } finally {
-            // Reset button state
             setTimeout(() => {
                 appState.processing = false;
                 processBtn.disabled = false;
@@ -1315,47 +1431,37 @@
     }
 
     function updateProcessingResults(paymentResponse) {
-        // Update status indicators with real results
         document.getElementById('processing-status').textContent =
             `${paymentResponse.status} - Transaction: ${paymentResponse.transactionId}`;
 
-        // Update validation status with response message
         if (paymentResponse.validationMessage) {
             document.getElementById('validation-status').textContent = paymentResponse.validationMessage;
         }
     }
 
-    // Pattern highlighting and status updates
     function updatePatternHighlighting() {
-        // Remove all existing highlights
         document.querySelectorAll('.pattern-line').forEach(line => {
             line.classList.remove('highlighted');
         });
 
-        // Add highlights with auto-remove after animation
         const linesToHighlight = [];
 
-        // Always highlight switch pattern
         const switchLine = document.querySelector('[data-pattern="switch"]');
         linesToHighlight.push(switchLine);
 
-        // Highlight current payment method pattern
         const methodLine = document.querySelector(`[data-pattern="${appState.paymentMethod}"]`);
         if (methodLine) {
             linesToHighlight.push(methodLine);
         }
 
-        // Highlight guard condition if amount > 1000 OR international
         if (appState.amount > 1000 || appState.isInternational) {
             const guardLine = document.querySelector('[data-pattern="guard"]');
             linesToHighlight.push(guardLine);
         }
 
-        // Always highlight sealed interface
         const sealedLine = document.querySelector('[data-pattern="sealed"]');
         linesToHighlight.push(sealedLine);
 
-        // Apply highlights
         linesToHighlight.forEach(line => {
             if (line) {
                 line.classList.add('highlighted');
@@ -1367,7 +1473,6 @@
         const method = paymentMethods[appState.paymentMethod];
         const customer = customerTypes[appState.customerType];
 
-        // Update text content
         document.getElementById('payment-detection').textContent = `Pattern: ${method.name} identified`;
 
         let guardText;
@@ -1398,17 +1503,14 @@
         document.getElementById('processing-status').textContent = processingText;
     }
 
-    // Initialize application
     async function initApp() {
         updatePatternHighlighting();
         updateStatusIndicators();
         updateAmountDisplays(appState.amount);
         updateOrderDisplay(scenarios[500]);
 
-        // Set default active states
         document.querySelector('[data-amount="500"]').classList.add('active');
 
-        // Check backend connection
         const logId = createFlowLog('App Initialization', 'GET', '/api/payment/demo-state');
 
         const connected = await checkConnection();
@@ -1416,26 +1518,19 @@
         if (connected) {
             updateFlowLog(logId, {
                 controller_method: 'PaymentController.getDemoState',
-                service_calls: {
-                    'PaymentService.setupPatternMatching': ['switch', 'sealed'],
-                    'ValidationService.initializeRules': ['guard', 'when']
-                },
                 operation_description: 'Backend connected - Demo synchronized with server state'
             });
         } else {
             updateFlowLog(logId, {
                 controller_method: 'Frontend Only Mode',
-                service_calls: {},
                 operation_description: 'Backend offline - Demo running in simulation mode'
             });
         }
     }
 
-    // Initialize when page loads
     document.addEventListener('DOMContentLoaded', initApp);
 
-    // Periodic connection check
-    setInterval(checkConnection, 60000); // Check every 60 seconds
+    setInterval(checkConnection, 60000);
 </script>
 </body>
 </html>
