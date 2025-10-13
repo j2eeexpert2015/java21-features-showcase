@@ -4,11 +4,13 @@ package org.example.service;
 import org.example.model.cart.*;
 import org.example.repository.CartRepository;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 @Service
 public class CartService {
 
+    private static final Logger logger = LoggerFactory.getLogger(CartService.class);
     private final CartRepository cartRepository;
 
     public CartService(CartRepository cartRepository) {
@@ -17,7 +19,11 @@ public class CartService {
 
     // Add item to end of cart using Java 21 addLast()
     public void addItem(Long customerId, CartItemRequest request) {
+        logger.info("SERVICE: Adding item '{}' to cart for customer {}",
+                request.getProductName(), customerId);
         CartState cartState = cartRepository.getCartState(customerId);
+        // ✅ Log collection size before operation for debugging
+        int sizeBefore = cartState.getItems().size();
 
         CartItem item = new CartItem(
                 CartItem.generateId(),
@@ -31,6 +37,8 @@ public class CartService {
         cartState.updateMetadata();
 
         cartRepository.saveCartState(customerId, cartState);
+        logger.info("SERVICE: Item added successfully. Cart size: {} -> {}",
+                sizeBefore, cartState.getItems().size());
     }
 
     // Add priority item to front using Java 21 addFirst()
