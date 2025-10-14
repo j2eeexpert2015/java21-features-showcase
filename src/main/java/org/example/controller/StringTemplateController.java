@@ -39,7 +39,7 @@ public class StringTemplateController {
             return new ApiResponse("StringTemplateController.generateEmail",
                     "Email template generated using STR processor")
                     .withServiceCall("StringTemplateService.generateEmail",
-                            List.of("STR", "Expression embedding", "Safety"))
+                            List.of("STR", "Expression embedding"))
                     .withMetadata("templateResponse", response);
 
         } catch (Exception e) {
@@ -75,25 +75,25 @@ public class StringTemplateController {
     }
 
     @PostMapping("/sql")
-    public ApiResponse generateSafeSQL(@RequestBody(required = false) TemplateRequest request) {
-        logger.info(">>> POST /api/templates/sql - Safe SQL template generation request");
+    public ApiResponse generateSQL(@RequestBody(required = false) TemplateRequest request) {
+        logger.info(">>> POST /api/templates/sql - SQL template generation request");
 
         TemplateRequest activeRequest = (request != null) ? request : currentState;
 
         try {
             TemplateResponse response = templateService.generateSafeSQL(activeRequest);
-            logger.info("Safe SQL template generated successfully using custom processor");
+            logger.info("SQL template generated successfully using custom processor");
 
-            return new ApiResponse("StringTemplateController.generateSafeSQL",
-                    "Safe SQL template generated using custom processor")
-                    .withServiceCall("StringTemplateService.generateSafeSQL",
-                            List.of("Custom", "Safety", "Injection prevention"))
+            return new ApiResponse("StringTemplateController.generateSQL",
+                    "SQL template generated using custom processor")
+                    .withServiceCall("StringTemplateService.generateSQL",
+                            List.of("Custom", "Expression embedding"))
                     .withMetadata("templateResponse", response);
 
         } catch (Exception e) {
-            logger.error("Safe SQL template generation failed: {}", e.getMessage(), e);
-            return new ApiResponse("StringTemplateController.generateSafeSQL",
-                    "Safe SQL template generation error: " + e.getMessage())
+            logger.error("SQL template generation failed: {}", e.getMessage(), e);
+            return new ApiResponse("StringTemplateController.generateSQL",
+                    "SQL template generation error: " + e.getMessage())
                     .withError(e.getMessage());
         }
     }
