@@ -178,6 +178,13 @@
             min-height: 200px;
             max-height: 280px;
             overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+
+        .template-output-section.processing {
+            filter: blur(3px);
+            opacity: 0.5;
+            pointer-events: none;
         }
 
         .form-control, .form-select {
@@ -256,7 +263,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* IMPROVED API REFERENCE TABLE STYLES */
         .api-reference-table {
             font-size: 0.78em;
             border-collapse: separate;
@@ -310,7 +316,6 @@
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
 
-        /* STANDARDIZED VISUAL FLOW INSPECTOR - MATCHES OTHER DEMOS */
         .api-log-container {
             background-color: #212529;
             color: #f8f9fa;
@@ -452,7 +457,6 @@
             background: #868e96;
         }
 
-        /* Custom tooltip styles */
         .custom-tooltip {
             position: relative;
             display: inline-block;
@@ -508,18 +512,15 @@
             .api-log-container {
                 height: 200px;
             }
-
             .custom-tooltip .tooltip-content {
                 font-size: 0.7rem;
                 padding: 6px 10px;
                 white-space: normal;
                 max-width: 200px;
             }
-
             .api-reference-table {
                 font-size: 0.75em;
             }
-
             .api-reference-table td, .api-reference-table th {
                 padding: 0.4rem 0.25rem;
             }
@@ -551,23 +552,23 @@
                             <div class="row">
                                 <div class="col-6 mb-2">
                                     <label class="form-label">Customer Name</label>
-                                    <input type="text" class="form-control" id="customerName" value="John Doe">
+                                    <input type="text" class="form-control" id="customerName" value="">
                                 </div>
                                 <div class="col-6 mb-2">
                                     <label class="form-label">Order ID</label>
-                                    <input type="text" class="form-control" id="orderId" value="ORD-123456">
+                                    <input type="text" class="form-control" id="orderId" value="">
                                 </div>
                                 <div class="col-6 mb-2">
                                     <label class="form-label">Amount</label>
-                                    <input type="text" class="form-control" id="amount" value="1299.99">
+                                    <input type="text" class="form-control" id="amount" value="">
                                 </div>
                                 <div class="col-6 mb-2">
                                     <label class="form-label">Items Count</label>
-                                    <input type="number" class="form-control" id="itemsCount" value="3">
+                                    <input type="number" class="form-control" id="itemsCount" value="">
                                 </div>
                                 <div class="col-12 mb-2">
                                     <label class="form-label">Search Query (SQL Demo)</label>
-                                    <input type="text" class="form-control" id="searchQuery" value="John" placeholder="Customer search">
+                                    <input type="text" class="form-control" id="searchQuery" value="" placeholder="Customer search">
                                 </div>
                             </div>
                             <div class="row">
@@ -614,7 +615,6 @@
                                 <tr id="code-FMT"><td><code>FMT</code></td><td>Formatted output processor</td></tr>
                                 <tr id="code-custom"><td><code>Custom</code></td><td>Custom template processors</td></tr>
                                 <tr id="code-expression"><td><code>\{expr}</code></td><td>Expression embedding syntax</td></tr>
-                                <tr id="code-safety"><td><code>Safety</code></td><td>Compile-time injection prevention</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -646,7 +646,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Configuration
     const API_BASE_URL = 'http://localhost:8080';
     const ENDPOINTS = {
         EMAIL: '/api/templates/email',
@@ -656,32 +655,23 @@
         RESET: '/api/templates/reset'
     };
 
-    // Application state
     let appState = {
-        customerName: 'John Doe',
-        orderId: 'ORD-123456',
-        amount: 1299.99,
-        itemsCount: 3,
-        searchQuery: 'John',
+        customerName: '',
+        orderId: '',
+        amount: 0,
+        itemsCount: 0,
+        searchQuery: '',
         connected: false,
         processing: false
     };
 
-    // API Helper Functions
     async function apiCall(method, endpoint, data = null) {
-        const logId = createFlowLog(
-            `${method.toUpperCase()} Request`,
-            method.toUpperCase(),
-            endpoint
-        );
+        const logId = createFlowLog(`${method.toUpperCase()} Request`, method.toUpperCase(), endpoint);
 
         try {
             const config = {
                 method: method.toUpperCase(),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include'
+                headers: {'Content-Type': 'application/json'}
             };
 
             if (data && (method.toUpperCase() === 'POST' || method.toUpperCase() === 'PUT')) {
@@ -696,7 +686,6 @@
 
             const responseData = await response.json();
 
-            // Update flow log with success
             updateFlowLog(logId, {
                 controller_method: responseData.controllerMethod || 'StringTemplateController',
                 service_calls: responseData.serviceCalls || {},
@@ -708,35 +697,41 @@
 
         } catch (error) {
             console.error('API Call failed:', error);
-
-            // Update flow log with error
             updateFlowLog(logId, {
                 error: error.message,
                 controller_method: 'Connection Failed'
             });
-
             throw error;
         }
     }
 
-    // Connection management
     async function checkConnection() {
         try {
             const response = await fetch(`${API_BASE_URL}/api/templates/demo-state`, {
                 method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include'
+                headers: {'Content-Type': 'application/json'}
             });
 
             if (response.ok) {
                 appState.connected = true;
                 updateConnectionStatus(true);
-                const demoState = await response.json();
-                syncWithBackendState(demoState);
+                const apiResponse = await response.json();
+
+                if (apiResponse.metadata && apiResponse.metadata.demoState) {
+                    syncWithBackendState(apiResponse.metadata.demoState);
+                }
                 return true;
             }
         } catch (error) {
             console.log('Backend not available:', error.message);
+
+            if (!appState.customerName) {
+                document.getElementById('customerName').value = 'John Doe';
+                document.getElementById('orderId').value = 'ORD-123456';
+                document.getElementById('amount').value = '1299.99';
+                document.getElementById('itemsCount').value = '3';
+                document.getElementById('searchQuery').value = 'John';
+            }
         }
 
         appState.connected = false;
@@ -751,51 +746,42 @@
         if (connected) {
             dot.classList.add('connected');
             text.textContent = 'Backend Connected';
-            // Enable all buttons
             document.querySelectorAll('button').forEach(btn => btn.disabled = false);
         } else {
             dot.classList.remove('connected');
             text.textContent = 'Backend Offline';
-            // Keep UI functional but show offline status
         }
     }
 
     function syncWithBackendState(backendState) {
         if (!backendState) return;
 
-        // Update app state from backend
         if (backendState.customerName) {
             appState.customerName = backendState.customerName;
             document.getElementById('customerName').value = backendState.customerName;
         }
-
         if (backendState.orderId) {
             appState.orderId = backendState.orderId;
             document.getElementById('orderId').value = backendState.orderId;
         }
-
         if (backendState.amount) {
             appState.amount = parseFloat(backendState.amount);
             document.getElementById('amount').value = backendState.amount;
         }
-
         if (backendState.itemsCount) {
             appState.itemsCount = parseInt(backendState.itemsCount);
             document.getElementById('itemsCount').value = backendState.itemsCount;
         }
-
         if (backendState.searchQuery) {
             appState.searchQuery = backendState.searchQuery;
             document.getElementById('searchQuery').value = backendState.searchQuery;
         }
     }
 
-    // Visual Flow Inspector Functions
     function createFlowLog(userAction, method, endpoint) {
         const logContainer = document.getElementById('api-log');
         if (!logContainer) return null;
 
-        // Clear initial message if present
         const initialMessages = logContainer.querySelectorAll('.text-muted, .text-center');
         initialMessages.forEach(msg => {
             if (msg.textContent && (msg.textContent.includes('Starting') || msg.textContent.includes('Click'))) {
@@ -819,7 +805,6 @@
 
         logContainer.insertBefore(flowBlock, logContainer.firstChild);
 
-        // Maintain entry limit
         while (logContainer.children.length > 12) {
             logContainer.removeChild(logContainer.lastChild);
         }
@@ -837,7 +822,6 @@
         const controllerElement = flowBlock.querySelector('[data-role="controller"]');
         if (!controllerElement) return;
 
-        // Handle error responses
         if (responseData.error) {
             flowBlock.classList.add('error');
             controllerElement.innerHTML = `🔴 <span class="error-text">Error: ${responseData.error}</span>`;
@@ -847,7 +831,6 @@
         flowBlock.classList.add('success');
         let html = `🔴 Controller: <strong>${responseData.controller_method || 'StringTemplateController'}</strong>`;
 
-        // Handle service calls from your backend's ApiResponse format
         if (responseData.service_calls && Object.keys(responseData.service_calls).length > 0) {
             html += `<div class="api-flow-child">🟣 Service Layer: Template processing executed</div>`;
 
@@ -865,7 +848,6 @@
             html += `<div class="api-flow-child">💡 <span class="success-text">${responseData.operation_description}</span></div>`;
         }
 
-        // Handle template response data
         if (responseData.templateResponse || responseData.response_data?.templateResponse || responseData.metadata?.templateResponse) {
             const template = responseData.templateResponse || responseData.response_data?.templateResponse || responseData.metadata?.templateResponse;
             html += `<div class="api-flow-child">📄 Template: <strong>${template.templateType}</strong> (${template.processorUsed})</div>`;
@@ -888,7 +870,6 @@
 
         const safe = String(methodName).replace(/\(\)$/, '');
 
-        // Clear previous highlights
         document.querySelectorAll('.api-reference-table tr[data-highlight="1"]').forEach(row => {
             const cells = Array.from(row.cells);
             cells.forEach(cell => {
@@ -902,7 +883,6 @@
             row.removeAttribute('data-highlight');
         });
 
-        // Map backend method names to UI patterns
         let targetSelector = null;
         switch(safe.toLowerCase()) {
             case 'str':
@@ -934,7 +914,6 @@
         if (targetSelector) {
             const row = document.querySelector(targetSelector);
             if (row) {
-                // Apply highlighting
                 const cells = Array.from(row.cells);
                 const bg = '#fffbea';
                 const border = '#ffc107';
@@ -950,7 +929,6 @@
 
                 row.setAttribute('data-highlight', '1');
 
-                // Auto-remove highlighting
                 setTimeout(() => {
                     if (row.isConnected) {
                         cells.forEach(cell => {
@@ -968,17 +946,18 @@
         }
     }
 
-    // Template Generation Functions
     async function generateEmail() {
         if (appState.processing) return;
 
         const emailBtn = document.getElementById('emailBtn');
+        const outputSection = document.getElementById('template-output');
         const originalText = emailBtn.innerHTML;
 
         appState.processing = true;
         emailBtn.disabled = true;
         emailBtn.classList.add('processing');
         emailBtn.innerHTML = '<div class="spinner"></div> Processing...';
+        outputSection.classList.add('processing');
 
         try {
             const templateRequest = {
@@ -1004,7 +983,6 @@
                     }, 'email');
                 }
             } else {
-                // Offline simulation
                 const logId = createFlowLog('Generate Email (Offline)', 'POST', '/api/templates/email');
                 setTimeout(() => {
                     updateFlowLog(logId, {
@@ -1023,12 +1001,11 @@
         } catch (error) {
             console.error('Email generation failed:', error);
         } finally {
-            setTimeout(() => {
-                appState.processing = false;
-                emailBtn.disabled = false;
-                emailBtn.classList.remove('processing');
-                emailBtn.innerHTML = originalText;
-            }, 2000);
+            appState.processing = false;
+            emailBtn.disabled = false;
+            emailBtn.classList.remove('processing');
+            emailBtn.innerHTML = originalText;
+            outputSection.classList.remove('processing');
         }
     }
 
@@ -1036,12 +1013,14 @@
         if (appState.processing) return;
 
         const smsBtn = document.getElementById('smsBtn');
+        const outputSection = document.getElementById('template-output');
         const originalText = smsBtn.innerHTML;
 
         appState.processing = true;
         smsBtn.disabled = true;
         smsBtn.classList.add('processing');
         smsBtn.innerHTML = '<div class="spinner"></div> Processing...';
+        outputSection.classList.add('processing');
 
         try {
             const templateRequest = {
@@ -1067,7 +1046,6 @@
                     }, 'sms');
                 }
             } else {
-                // Offline simulation
                 const logId = createFlowLog('Generate SMS (Offline)', 'POST', '/api/templates/sms');
                 setTimeout(() => {
                     updateFlowLog(logId, {
@@ -1086,12 +1064,11 @@
         } catch (error) {
             console.error('SMS generation failed:', error);
         } finally {
-            setTimeout(() => {
-                appState.processing = false;
-                smsBtn.disabled = false;
-                smsBtn.classList.remove('processing');
-                smsBtn.innerHTML = originalText;
-            }, 2000);
+            appState.processing = false;
+            smsBtn.disabled = false;
+            smsBtn.classList.remove('processing');
+            smsBtn.innerHTML = originalText;
+            outputSection.classList.remove('processing');
         }
     }
 
@@ -1099,12 +1076,14 @@
         if (appState.processing) return;
 
         const sqlBtn = document.getElementById('sqlBtn');
+        const outputSection = document.getElementById('template-output');
         const originalText = sqlBtn.innerHTML;
 
         appState.processing = true;
         sqlBtn.disabled = true;
         sqlBtn.classList.add('processing');
         sqlBtn.innerHTML = '<div class="spinner"></div> Processing...';
+        outputSection.classList.add('processing');
 
         try {
             const templateRequest = {
@@ -1130,7 +1109,6 @@
                     }, 'sql');
                 }
             } else {
-                // Offline simulation
                 const logId = createFlowLog('Generate Safe SQL (Offline)', 'POST', '/api/templates/sql');
                 setTimeout(() => {
                     updateFlowLog(logId, {
@@ -1149,16 +1127,14 @@
         } catch (error) {
             console.error('SQL generation failed:', error);
         } finally {
-            setTimeout(() => {
-                appState.processing = false;
-                sqlBtn.disabled = false;
-                sqlBtn.classList.remove('processing');
-                sqlBtn.innerHTML = originalText;
-            }, 2000);
+            appState.processing = false;
+            sqlBtn.disabled = false;
+            sqlBtn.classList.remove('processing');
+            sqlBtn.innerHTML = originalText;
+            outputSection.classList.remove('processing');
         }
     }
 
-    // Simulation functions for offline mode
     function simulateEmailGeneration(data) {
         return {
             type: 'email',
@@ -1215,7 +1191,6 @@ WHERE c.name = ?
         };
     }
 
-    // Display template output
     function displayTemplate(content, type) {
         const outputContainer = document.getElementById('template-output');
 
@@ -1266,9 +1241,7 @@ WHERE c.name = ?
         `;
     }
 
-    // Initialize application
     async function initApp() {
-        // Check backend connection
         const logId = createFlowLog('App Initialization', 'GET', '/api/templates/demo-state');
 
         const connected = await checkConnection();
@@ -1276,25 +1249,20 @@ WHERE c.name = ?
         if (connected) {
             updateFlowLog(logId, {
                 controller_method: 'StringTemplateController.getDemoState',
-                service_calls: {
-                    'StringTemplateService.initializeProcessors': ['STR', 'FMT', 'Custom']
-                },
-                operation_description: 'Backend connected - String Templates Demo ready'
+                service_calls: {},
+                operation_description: 'Backend connected - Demo ready'
             });
         } else {
             updateFlowLog(logId, {
                 controller_method: 'Frontend Only Mode',
                 service_calls: {},
-                operation_description: 'Backend offline - Demo running in simulation mode'
+                operation_description: 'Backend offline - Running in simulation mode'
             });
         }
     }
 
-    // Initialize when page loads
     document.addEventListener('DOMContentLoaded', initApp);
-
-    // Periodic connection check
-    setInterval(checkConnection, 30000); // Check every 30 seconds
+    setInterval(checkConnection, 30000);
 </script>
 </body>
 </html>
