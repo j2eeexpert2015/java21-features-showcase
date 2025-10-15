@@ -90,19 +90,19 @@ public class StringTemplateService {
         );
     }
 
-    // Custom Safe Template for SQL - prevents injection
     public TemplateResponse generateSafeSQL(TemplateRequest request) {
         logger.info("=== SAFE SQL TEMPLATE GENERATION START ===");
         logger.info("Using custom safe processor for SQL injection prevention");
-        logger.info("Search query: '{}'", request.getSearchQuery());
+        logger.info("Customer: '{}', Order ID: '{}', Amount: ${}, Items: {}",
+                request.getCustomerName(), request.getOrderId(),
+                request.getAmount(), request.getItemsCount());
 
-        String templateSource = "SAFE.\"SELECT * FROM customers WHERE name = \\{searchQuery} AND status = 'active'\"";
+        String templateSource = "SAFE.\"SELECT * FROM orders WHERE customer_name = \\{customerName} AND order_id = \\{orderId} AND total_amount >= \\{amount} AND item_count <= \\{itemsCount}\"";
+        // Custom safe SQL generation - input sanitization
+        String safeQuery = generateParameterizedSQL(request);
 
-        // Custom safe SQL generation - parameterized to prevent injection
-        String safeQuery = generateParameterizedSQL(request.getSearchQuery());
-
-        logger.info("✓ Custom processor completed - parameterized query generated");
-        logger.info("✓ Security: SQL injection prevented with parameter binding");
+        logger.info("✓ Custom processor completed - safe query generated");
+        logger.info("✓ Security: Input sanitized to prevent SQL injection");
         logger.info("================================");
 
         return new TemplateResponse(
@@ -115,21 +115,30 @@ public class StringTemplateService {
     }
 
     // Helper method for safe SQL generation
-    private String generateParameterizedSQL(String searchQuery) {
+    private String generateParameterizedSQL(TemplateRequest request) {
         // Sanitize input - remove potentially dangerous characters
-        String sanitizedQuery = searchQuery != null ?
-                searchQuery.replaceAll("[';\"\\-\\-]", "").trim() : "";
+        String sanitizedCustomerName = request.getCustomerName() != null ?
+                request.getCustomerName().replaceAll("[';\"\\-\\-]", "").trim() : "";
+
+        String sanitizedOrderId = request.getOrderId() != null ?
+                request.getOrderId().replaceAll("[';\"\\-\\-]", "").trim() : "";
 
         return STR."""
-            -- Generated Safe SQL Query
-            SELECT c.id, c.name, c.email, c.status 
-            FROM customers c 
-            WHERE c.name = ? 
-              AND c.status = 'active' 
-              AND c.created_date >= CURRENT_DATE - INTERVAL 365 DAY;
+        -- Generated Safe SQL Query (Demo)
+        -- All inputs sanitized: dangerous characters removed
 
-            -- Parameters (safely escaped):
-            -- Parameter 1: "\{sanitizedQuery}"
-            """;
+        SELECT o.order_id, o.customer_name, o.total_amount, o.item_count, o.status, o.order_date
+        FROM orders o
+        WHERE o.customer_name = '\{sanitizedCustomerName}'
+          AND o.order_id = '\{sanitizedOrderId}'
+          AND o.total_amount >= \{request.getAmount()}
+          AND o.item_count <= \{request.getItemsCount()}
+          AND o.status = 'active'
+          AND o.order_date >= CURRENT_DATE - INTERVAL 365 DAY
+        ORDER BY o.order_date DESC;
+
+        -- Security Note: In production, use PreparedStatement with ? placeholders
+        -- This demo shows input sanitization as a String Template security example
+        """;
     }
 }

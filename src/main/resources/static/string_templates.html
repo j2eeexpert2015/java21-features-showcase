@@ -237,17 +237,6 @@
             display: inline-block;
         }
 
-        .custom-processor-tag {
-            background: linear-gradient(45deg, #9b59b6, #8e44ad);
-            color: white;
-            padding: 0.1rem 0.4rem;
-            border-radius: 8px;
-            font-size: 0.65rem;
-            font-weight: 600;
-            margin: 0.125rem;
-            display: inline-block;
-        }
-
         .spinner {
             display: inline-block;
             width: 12px;
@@ -409,15 +398,6 @@
             border-right: 2px solid var(--method-highlight-border) !important;
         }
 
-        .security-safe {
-            color: #28a745;
-            font-weight: bold;
-        }
-        .security-unsafe {
-            color: #dc3545;
-            font-weight: bold;
-        }
-
         .template-preview {
             background: #ffffff;
             border: 2px solid #e9ecef;
@@ -567,7 +547,7 @@
                                     <input type="number" class="form-control" id="itemsCount" value="">
                                 </div>
                                 <div class="col-12 mb-2">
-                                    <label class="form-label">Search Query (SQL Demo)</label>
+                                    <label class="form-label">Search Query</label>
                                     <input type="text" class="form-control" id="searchQuery" value="" placeholder="Customer search">
                                 </div>
                             </div>
@@ -578,7 +558,7 @@
                                             <span class="str-processor-tag">STR</span> Email
                                         </button>
                                         <div class="tooltip-content">
-                                            Generate order confirmation email using STR processor for safe string interpolation with customer data
+                                            Generate order confirmation email using STR processor for safe string interpolation
                                         </div>
                                     </div>
                                 </div>
@@ -588,17 +568,17 @@
                                             <span class="fmt-processor-tag">FMT</span> SMS
                                         </button>
                                         <div class="tooltip-content">
-                                            Create SMS notification using FMT processor with formatted currency and number display
+                                            Create SMS notification using FMT processor with formatted currency display
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-4">
                                     <div class="custom-tooltip">
                                         <button class="btn btn-warning btn-compact w-100" onclick="generateSQL()" id="sqlBtn">
-                                            <span class="custom-processor-tag">SAFE</span> SQL
+                                            <span class="custom-processor-tag">SQL</span> Query
                                         </button>
                                         <div class="tooltip-content">
-                                            Build secure database query using custom processor that prevents SQL injection attacks
+                                            Build database query using string templates
                                         </div>
                                     </div>
                                 </div>
@@ -851,9 +831,6 @@
         if (responseData.templateResponse || responseData.response_data?.templateResponse || responseData.metadata?.templateResponse) {
             const template = responseData.templateResponse || responseData.response_data?.templateResponse || responseData.metadata?.templateResponse;
             html += `<div class="api-flow-child">📄 Template: <strong>${template.templateType}</strong> (${template.processorUsed})</div>`;
-            if (template.securityStatus) {
-                html += `<div class="api-flow-child">🛡️ Security: ${template.securityStatus}</div>`;
-            }
         }
 
         controllerElement.innerHTML = html;
@@ -896,18 +873,12 @@
                 targetSelector = '#code-FMT';
                 break;
             case 'custom':
-            case 'safe':
             case 'custom template processors':
                 targetSelector = '#code-custom';
                 break;
             case 'expression embedding':
             case 'expression':
                 targetSelector = '#code-expression';
-                break;
-            case 'safety':
-            case 'injection prevention':
-            case 'compile-time injection prevention':
-                targetSelector = '#code-safety';
                 break;
         }
 
@@ -978,8 +949,7 @@
                         title: 'Order Confirmation Email',
                         template: templateData.templateSource || 'STR template processed',
                         output: templateData.generatedContent,
-                        processorUsed: templateData.processorUsed || 'STR Processor',
-                        securityStatus: templateData.securityStatus || 'safe'
+                        processorUsed: templateData.processorUsed || 'STR Processor'
                     }, 'email');
                 }
             } else {
@@ -988,7 +958,7 @@
                     updateFlowLog(logId, {
                         controller_method: 'StringTemplateController.generateEmail (Simulated)',
                         service_calls: {
-                            'StringTemplateService.generateEmail': ['STR', 'Expression embedding', 'Safety']
+                            'StringTemplateService.generateEmail': ['STR', 'Expression embedding']
                         },
                         operation_description: 'Email template generated using STR processor (offline simulation)'
                     });
@@ -1027,8 +997,7 @@
                 customerName: document.getElementById('customerName').value,
                 orderId: document.getElementById('orderId').value,
                 amount: parseFloat(document.getElementById('amount').value),
-                itemsCount: parseInt(document.getElementById('itemsCount').value),
-                searchQuery: document.getElementById('searchQuery').value
+                itemsCount: parseInt(document.getElementById('itemsCount').value)
             };
 
             if (appState.connected) {
@@ -1041,8 +1010,7 @@
                         title: 'SMS Notification',
                         template: templateData.templateSource || 'FMT template processed',
                         output: templateData.generatedContent,
-                        processorUsed: templateData.processorUsed || 'FMT Processor',
-                        securityStatus: templateData.securityStatus || 'safe'
+                        processorUsed: templateData.processorUsed || 'FMT Processor'
                     }, 'sms');
                 }
             } else {
@@ -1097,26 +1065,25 @@
             if (appState.connected) {
                 const response = await apiCall('POST', ENDPOINTS.SQL, templateRequest);
 
-                if (response.templateResponse || response.response_data?.templateResponse) {
-                    const templateData = response.templateResponse || response.response_data.templateResponse;
+                if (response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse) {
+                    const templateData = response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse;
                     displayTemplate({
                         type: 'sql',
-                        title: 'Safe Database Query',
-                        template: templateData.templateSource || 'SAFE template processed',
+                        title: 'Database Query',
+                        template: templateData.templateSource || 'SQL template processed',
                         output: templateData.generatedContent,
-                        processorUsed: templateData.processorUsed || 'Custom Safe Processor',
-                        securityStatus: templateData.securityStatus || 'safe'
+                        processorUsed: templateData.processorUsed || 'Custom Processor'
                     }, 'sql');
                 }
             } else {
-                const logId = createFlowLog('Generate Safe SQL (Offline)', 'POST', '/api/templates/sql');
+                const logId = createFlowLog('Generate SQL (Offline)', 'POST', '/api/templates/sql');
                 setTimeout(() => {
                     updateFlowLog(logId, {
-                        controller_method: 'StringTemplateController.generateSafeSQL (Simulated)',
+                        controller_method: 'StringTemplateController.generateSQL (Simulated)',
                         service_calls: {
-                            'StringTemplateService.generateSafeSQL': ['Custom', 'Safety', 'Injection prevention']
+                            'StringTemplateService.generateSQL': ['Custom', 'Expression embedding']
                         },
-                        operation_description: 'Safe SQL template generated using custom processor (offline simulation)'
+                        operation_description: 'SQL template generated using custom processor (offline simulation)'
                     });
 
                     const sqlContent = simulateSQLGeneration(templateRequest);
@@ -1153,8 +1120,7 @@ Thank you for shopping with TechMart!
 
 Best regards,
 The TechMart Team`,
-            processorUsed: 'STR Processor',
-            securityStatus: 'safe'
+            processorUsed: 'STR Processor'
         };
     }
 
@@ -1167,29 +1133,40 @@ The TechMart Team`,
 Order ${data.orderId} confirmed!
 Total: ${data.amount.toFixed(2)} for ${data.itemsCount} items.
 Track: techmart.com/track/${data.orderId}`,
-            processorUsed: 'FMT Processor',
-            securityStatus: 'safe'
+            processorUsed: 'FMT Processor'
         };
     }
 
     function simulateSQLGeneration(data) {
-        return {
-            type: 'sql',
-            title: 'Safe Database Query',
-            template: 'SAFE."SELECT * FROM customers WHERE name = \\{searchQuery} AND status = \'active\'"',
-            output: `-- Generated Safe SQL Query
-SELECT c.id, c.name, c.email, c.status
-FROM customers c
-WHERE c.name = ?
-  AND c.status = 'active'
-  AND c.created_date >= CURRENT_DATE - INTERVAL 365 DAY;
+    // Sanitize inputs (matching backend logic)
+    const sanitizedCustomerName = data.customerName ?
+        data.customerName.replace(/[';"\-\-]/g, '').trim() : '';
 
--- Parameters (safely escaped):
--- Parameter 1: "${data.searchQuery}"`,
-            processorUsed: 'Custom Safe Processor',
-            securityStatus: 'safe'
-        };
-    }
+    const sanitizedOrderId = data.orderId ?
+        data.orderId.replace(/[';"\-\-]/g, '').trim() : '';
+
+    return {
+        type: 'sql',
+        title: 'Database Query',
+        template: 'SAFE."SELECT * FROM orders WHERE customer_name = \\{customerName} AND order_id = \\{orderId} AND total_amount >= \\{amount} AND item_count <= \\{itemsCount}"',
+        output: `-- Generated Safe SQL Query (Demo)
+-- All inputs sanitized: dangerous characters removed
+
+SELECT o.order_id, o.customer_name, o.total_amount, o.item_count, o.status, o.order_date
+FROM orders o
+WHERE o.customer_name = '${sanitizedCustomerName}'
+  AND o.order_id = '${sanitizedOrderId}'
+  AND o.total_amount >= ${data.amount}
+  AND o.item_count <= ${data.itemsCount}
+  AND o.status = 'active'
+  AND o.order_date >= CURRENT_DATE - INTERVAL 365 DAY
+ORDER BY o.order_date DESC;
+
+-- Security Note: In production, use PreparedStatement with ? placeholders
+-- This demo shows input sanitization as a String Template security example`,
+        processorUsed: 'Custom Safe Processor'
+    };
+}
 
     function displayTemplate(content, type) {
         const outputContainer = document.getElementById('template-output');
@@ -1212,14 +1189,10 @@ WHERE c.name = ?
                 break;
         }
 
-        const securityIcon = content.securityStatus === 'safe' ? '🛡️' : '⚠️';
-        const securityClass = content.securityStatus === 'safe' ? 'security-safe' : 'security-unsafe';
-
         outputContainer.innerHTML = `
             <div class="template-preview ${typeClass}">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h6>${typeIcon} ${content.title}</h6>
-                    <span class="${securityClass}">${securityIcon} ${content.securityStatus.toUpperCase()}</span>
                 </div>
 
                 <div class="mb-2">
