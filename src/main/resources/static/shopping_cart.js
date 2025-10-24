@@ -411,34 +411,6 @@ function initializeShoppingCartDemo() {
     // Load initial cart state from backend
     loadInitialCartState();
 
-    // Show welcome message in Visual Flow Inspector
-    const logId = createFlowLog('Demo Initialization', 'GET', '/api/demo/init');
-    setTimeout(async () => {
-        try {
-            const response = await fetch(`${DEMO_CONFIG.baseUrl}/api/demo/init`);
-            if (response.ok) {
-                const result = await response.json();
-                updateFlowLog(logId, result);
-            } else {
-                updateFlowLog(logId, {
-                    controllerMethod: 'DemoController.initialize',
-                    serviceCalls: {
-                        'DemoService.setupSequencedCollections': ['LinkedHashSet', 'ArrayList']
-                    },
-                    operationDescription: 'Shopping Cart Demo ready with Java 21 Sequenced Collections'
-                });
-            }
-        } catch (error) {
-            updateFlowLog(logId, {
-                controllerMethod: 'DemoController.initialize',
-                serviceCalls: {
-                    'DemoService.setupSequencedCollections': ['LinkedHashSet', 'ArrayList']
-                },
-                operationDescription: 'Shopping Cart Demo ready with Java 21 Sequenced Collections (Frontend-only mode)'
-            });
-        }
-    }, 500);
-
     console.log('✅ Shopping Cart Demo Ready');
     console.log('🔧 Backend URL:', DEMO_CONFIG.baseUrl);
     console.log('👤 Customer ID:', DEMO_CONFIG.customerId);
