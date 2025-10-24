@@ -1,0 +1,390 @@
+/* Combined CSS from all files */
+:root {
+    --primary-color: #007bff;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    --white: #ffffff;
+    --light-bg: #f8f9fa;
+    --border-color: #dee2e6;
+    --text-dark: #212529;
+    --text-muted: #6c757d;
+    --method-highlight-bg: #fffbea;
+    --method-highlight-border: #ffc107;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--light-bg);
+    margin: 0;
+    padding: 0;
+}
+
+.container-fluid {
+    padding: 0.5rem !important;
+}
+
+.my-3 {
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.main-container {
+    background: var(--white);
+    margin: 0 auto;
+    border: 1px solid var(--border-color);
+    border-radius: .5rem;
+    overflow: hidden;
+    max-width: 1200px;
+}
+
+.demo-header {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    color: var(--white);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 3px solid #4facfe;
+}
+
+.demo-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: headerShimmer 4s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes headerShimmer {
+    0%, 100% {
+        transform: rotate(0deg) scale(1);
+        opacity: 0.3;
+    }
+    50% {
+        transform: rotate(180deg) scale(1.1);
+        opacity: 0.6;
+    }
+}
+
+.demo-header h1 {
+    font-weight: 700;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.demo-header h1 i {
+    font-size: 1.8rem;
+    color: #fff;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.demo-header p {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 0;
+    font-size: 1.1rem;
+    opacity: 0.95;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.java21-badge {
+    display: inline-block;
+    background: linear-gradient(45deg, #10b981, #06b6d4);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    animation: badgePulse 3s infinite;
+}
+
+@keyframes badgePulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 4px 16px rgba(16, 185, 129, 0.5);
+    }
+}
+
+.demo-page-container {
+    padding: 0.5rem;
+}
+
+.demo-card {
+    border: 1px solid var(--border-color);
+    border-radius: .375rem;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: var(--white);
+    display: flex;
+    flex-direction: column;
+}
+
+.demo-card h5, .demo-card h6 {
+    font-weight: 600;
+    margin-bottom: .375rem;
+    font-size: 0.95rem;
+}
+
+.cart-items-display {
+    flex-grow: 1;
+    background: var(--light-bg);
+    border: 1px solid var(--border-color);
+    border-radius: .25rem;
+    padding: .5rem;
+    min-height: 200px;
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.cart-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+.cart-item-row:last-child { border-bottom: none; }
+
+.badge { font-weight: 500; }
+
+.cart-actions {
+    padding-top: .75rem;
+    margin-top: .75rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.product-add-btn-compact { 
+    font-size: 0.75rem; 
+    padding: 0.375rem 0.5rem;
+    height: auto;
+}
+.product-add-btn-compact i {
+    font-size: 0.875rem;
+}
+
+.product-add-btn { font-size: 0.8rem; }
+.product-add-btn i {
+    display: block;
+    font-size: 1.25rem;
+    margin-bottom: .25rem;
+}
+
+.action-button { font-size: 0.9rem; }
+.remove-btn {
+    font-size: 0.75rem;
+    padding: .2rem .4rem;
+}
+
+/* API Reference Table */
+.api-reference-table { font-size: 0.85em; }
+.api-reference-table td, .api-reference-table th {
+    padding: .4rem;
+    vertical-align: middle;
+}
+.api-reference-table code {
+    background-color: #e9ecef;
+    padding: .2em .4em;
+    border-radius: .25rem;
+}
+
+/* Visual Flow Inspector Styles */
+.api-log-container {
+    background-color: #212529;
+    color: #f8f9fa;
+    border: 1px solid var(--border-color);
+    border-radius: .375rem;
+    padding: .75rem;
+    margin-bottom: 0.5rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    max-height: 350px;
+    overflow-y: auto;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.api-log-entry {
+    padding: .5rem;
+    margin-bottom: .375rem;
+    border-radius: .25rem;
+    border-left: 3px solid transparent;
+    background-color: #343a40;
+    position: relative;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.api-log-entry.status-success {
+    border-left-color: #28a745;
+}
+
+.api-log-entry.status-pending {
+    border-left-color: #ffc107;
+    opacity: 0.7;
+}
+
+.api-log-entry.status-error {
+    border-left-color: #dc3545;
+}
+
+.log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: .25rem;
+    font-weight: bold;
+}
+
+.log-action {
+    color: #17a2b8;
+    font-weight: 600;
+}
+
+.log-http-method {
+    display: inline-block;
+    padding: 0.2rem 0.4rem;
+    border-radius: .25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-left: .5rem;
+}
+
+.http-post { background-color: #28a745; color: white; }
+.http-get { background-color: #17a2b8; color: white; }
+.http-delete { background-color: #dc3545; color: white; }
+.http-put { background-color: #fd7e14; color: white; }
+
+.log-timestamp {
+    color: #adb5bd;
+    font-size: 0.75rem;
+}
+
+.log-detail {
+    padding: .375rem 0;
+    font-size: 0.8rem;
+}
+
+.log-detail-line {
+    padding: .25rem 0;
+    color: #dee2e6;
+}
+
+.method-highlight {
+    background-color: var(--method-highlight-bg);
+    border: 1px solid var(--method-highlight-border);
+    color: #856404;
+    padding: 0.2rem 0.4rem;
+    border-radius: .25rem;
+    font-weight: 600;
+    font-family: monospace;
+}
+
+.service-call {
+    color: #fd7e14;
+    font-weight: 600;
+}
+
+.collection-type {
+    color: #20c997;
+    font-weight: 600;
+}
+
+.api-endpoint {
+    color: #6c757d;
+    font-style: italic;
+}
+
+.api-status-success {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.api-status-error {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.visual-flow-description {
+    padding: .5rem 0;
+    color: #adb5bd;
+    font-style: italic;
+    border-top: 1px solid #495057;
+    margin-top: .375rem;
+}
+
+.log-controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.log-control-btn {
+    font-size: 0.75rem;
+    padding: .25rem .5rem;
+}
+
+/* Notification container */
+#toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    max-width: 350px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+    .demo-header h1 {
+        font-size: 1.5rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .java21-badge {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+
+    .cart-item-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .api-log-container {
+        font-size: 0.75rem;
+    }
+}
