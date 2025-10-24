@@ -54,13 +54,25 @@ function createFlowLog(userAction, method, endpoint) {
 }
 
 function updateFlowLog(logId, responseData) {
-    if (!logId) return;
+    console.log('🔍 updateFlowLog called with logId:', logId);
+    console.log('🔍 responseData:', responseData);
+
+    if (!logId) {
+        console.log('❌ No logId provided');
+        return;
+    }
 
     const flowBlock = document.getElementById(logId);
-    if (!flowBlock) return;
+    if (!flowBlock) {
+        console.log('❌ Flow block not found for logId:', logId);
+        return;
+    }
 
     const controllerElement = flowBlock.querySelector('[data-role="controller"]');
-    if (!controllerElement) return;
+    if (!controllerElement) {
+        console.log('❌ Controller element not found');
+        return;
+    }
 
     // Handle error responses
     if (responseData.error) {
@@ -70,18 +82,33 @@ function updateFlowLog(logId, responseData) {
 
     let html = `🔴 Controller: <strong>${responseData.controllerMethod || responseData.controller_method || 'ShoppingCartController.handleRequest'}</strong>`;
 
+    // Clear previous highlights before showing new ones
+    console.log('🧹 Clearing all previous highlights');
+    clearAllMethodHighlights();
+
+    // Collect all methods to highlight
+    const methodsToHighlight = [];
+
     // Handle service calls
     if (responseData.serviceCalls && typeof responseData.serviceCalls === 'object') {
+        console.log('📦 serviceCalls found:', responseData.serviceCalls);
         html += `<div class="api-flow-child">🟣 Service Layer: Multiple methods called</div>`;
 
         Object.entries(responseData.serviceCalls).forEach(([serviceMethod, java21Methods]) => {
+            console.log(`  📌 Processing service: ${serviceMethod}`, java21Methods);
             if (java21Methods && java21Methods.length > 0) {
                 html += `<div class="api-flow-child">  └── <strong>${serviceMethod}</strong> → <span class="java21-method-tag">${java21Methods.join(', ')}</span></div>`;
-                java21Methods.forEach(method => highlightJavaMethod(method));
+                // Collect methods to highlight
+                java21Methods.forEach(method => {
+                    console.log('    ➕ Adding method to highlight:', method);
+                    methodsToHighlight.push(method);
+                });
             } else {
                 html += `<div class="api-flow-child">  └── <strong>${serviceMethod}</strong> → Standard Collection API</div>`;
             }
         });
+    } else {
+        console.log('⚠️ No serviceCalls in responseData');
     }
 
     if (responseData.operationDescription) {
@@ -89,6 +116,16 @@ function updateFlowLog(logId, responseData) {
     }
 
     controllerElement.innerHTML = html;
+
+    // Highlight all collected methods after DOM update
+    console.log('✨ Total methods to highlight:', methodsToHighlight);
+    setTimeout(() => {
+        console.log('⏰ Now highlighting methods...');
+        methodsToHighlight.forEach(method => {
+            console.log('  🎯 Calling highlightJavaMethod for:', method);
+            highlightJavaMethod(method);
+        });
+    }, 50);
 }
 
 function clearInspectorLog() {
@@ -102,24 +139,16 @@ function highlightJavaMethod(methodName) {
     if (!methodName) return;
 
     const safe = String(methodName).replace(/\(\)$/, '');
-
-    // Clear previous highlights
-    document.querySelectorAll('tr[data-highlight="1"]').forEach(row => {
-        const cells = Array.from(row.cells);
-        cells.forEach(cell => {
-            cell.style.removeProperty('box-shadow');
-            cell.style.removeProperty('background-color');
-            cell.style.removeProperty('border-top');
-            cell.style.removeProperty('border-bottom');
-            cell.style.removeProperty('border-left');
-            cell.style.removeProperty('border-right');
-        });
-        row.removeAttribute('data-highlight');
-    });
+    console.log('Highlighting method:', safe);
 
     // Find target row
     const row = document.getElementById(`code-${safe}`);
-    if (!row) return;
+    if (!row) {
+        console.log('Row not found for:', safe);
+        return;
+    }
+
+    console.log('Found row for:', safe);
 
     // Apply highlighting
     const cells = Array.from(row.cells);
@@ -151,6 +180,22 @@ function highlightJavaMethod(methodName) {
             row.removeAttribute('data-highlight');
         }
     }, 2500);
+}
+
+function clearAllMethodHighlights() {
+    // Clear all previous highlights
+    document.querySelectorAll('tr[data-highlight="1"]').forEach(row => {
+        const cells = Array.from(row.cells);
+        cells.forEach(cell => {
+            cell.style.removeProperty('box-shadow');
+            cell.style.removeProperty('background-color');
+            cell.style.removeProperty('border-top');
+            cell.style.removeProperty('border-bottom');
+            cell.style.removeProperty('border-left');
+            cell.style.removeProperty('border-right');
+        });
+        row.removeAttribute('data-highlight');
+    });
 }
 
 /* ================================

@@ -97,8 +97,6 @@ public class CartService {
                 request.getProductName(), customerId);
 
         CartState cartState = cartRepository.getCartState(customerId);
-        int sizeBefore = cartState.getItems().size();
-
         CartItem item = new CartItem(
                 CartItem.generateId(),
                 new Product(request.getProductName(), request.getPrice()),
@@ -114,7 +112,7 @@ public class CartService {
 
         cartState.updateMetadata();
         cartRepository.saveCartState(customerId, cartState);
-
+        int sizeBefore = cartState.getItems().size();
         logger.info("SERVICE: Priority item added to FRONT. Cart size: {} -> {}",
                 sizeBefore, cartState.getItems().size());
     }
