@@ -204,16 +204,16 @@ function clearAllMethodHighlights() {
 
 function addProductToCart(productId, productName, price) {
     const payload = { productId, productName, quantity: 1, price };
-    apiCall('POST', `/api/cart/${DEMO_CONFIG.customerId}/items`, payload, `Add ${productName}`);
+    apiCall('POST', `/api/cart/${DEMO_CONFIG.customerId}/addlastitem`, payload, `Add ${productName}`);
 }
 
 function addPriorityItem(productId, productName, price) {
     const payload = { productId, productName, quantity: 1, price };
-    apiCall('POST', `/api/cart/${DEMO_CONFIG.customerId}/priority-items`, payload, `Add ${productName} (Priority)`);
+    apiCall('POST', `/api/cart/${DEMO_CONFIG.customerId}/addfirstitem`, payload, `Add ${productName} (Priority)`);
 }
 
 function undoLastAction() {
-    apiCall('POST', `/api/cart/${DEMO_CONFIG.customerId}/undo`, null, 'Undo Last Action');
+    apiCall('POST', `/api/cart/${DEMO_CONFIG.customerId}/removelastitem`, null, 'Undo Last Action');
 }
 
 function clearCart() {

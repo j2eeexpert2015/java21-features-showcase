@@ -21,7 +21,7 @@ public class CartController {
     }
 
     // Add regular item to cart end
-    @PostMapping("/{customerId}/items")
+    @PostMapping("/{customerId}/addlastitem")
     public ApiResponse addItem(@PathVariable Long customerId, @RequestBody CartItemRequest request) {
         logger.info(">>> Received request to add item: {} for customer: {}", request.getProductName(), customerId);
 
@@ -36,7 +36,7 @@ public class CartController {
     }
 
     // Add priority item to cart front
-    @PostMapping("/{customerId}/priority-items")
+    @PostMapping("/{customerId}/addfirstitem")
     public ApiResponse addPriorityItem(@PathVariable Long customerId, @RequestBody CartItemRequest request) {
         logger.info(">>> Received request to add priority item: {} for customer: {}", request.getProductName(), customerId);
 
@@ -64,7 +64,7 @@ public class CartController {
     }
 
     // Undo last addition
-    @PostMapping("/{customerId}/undo")
+    @PostMapping("/{customerId}/removelastitem")
     public ApiResponse undoLastAction(@PathVariable Long customerId) {
         logger.info(">>> Received request to undo last action for customer: {}", customerId);
 
