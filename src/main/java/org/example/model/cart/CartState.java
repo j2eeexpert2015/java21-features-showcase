@@ -26,7 +26,8 @@ public class CartState {
     private SequencedCollection<CartItem> items = new ArrayList<>();
     private SequencedCollection<CartItem> actionHistory = new ArrayList<>();
 
-    // Metadata for demonstrating Java 21 getFirst() and getLast()
+    // ✅ FIX #2: Maintain metadata for first/last item tracking using Java 21 APIs
+    // These fields are dynamically updated after every cart modification
     private Product oldestItem;
     private Product newestItem;
 
@@ -40,18 +41,20 @@ public class CartState {
      * - Safer: No IndexOutOfBoundsException risk
      * - Intent-revealing: Code clearly shows "get the first/last element"
      * - Consistent API: Works across all SequencedCollection implementations
+     *
+     * 🔧 NOTE:
+     * Call this method after every add/remove/clear operation to keep UI metadata correct.
      */
     public void updateMetadata() {
-        if (!items.isEmpty()) {
-            // ✅ Java 21 API: getFirst() - cleaner than get(0)
-            this.oldestItem = items.getFirst().getProduct();
-
-            // ✅ Java 21 API: getLast() - cleaner than get(size() - 1)
-            this.newestItem = items.getLast().getProduct();
-        } else {
+        if (items == null || items.isEmpty()) {
             this.oldestItem = null;
             this.newestItem = null;
+            return;
         }
+
+        // ✅ Java 21 SequencedCollection APIs
+        this.oldestItem = items.getFirst().getProduct(); // getFirst() = oldest
+        this.newestItem = items.getLast().getProduct();  // getLast() = newest
     }
 
     /**
@@ -64,12 +67,6 @@ public class CartState {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    // ❌ MISTAKE:  Returning generic List in getters
-    // public List<CartItem> getItems() { return items; }
-    // public void setItems(List<CartItem> items) { this.items = items; }
-
-    // ✅ FIX : Return SequencedCollection to preserve API contract
-    // 💡 BEST PRACTICE: Match return type with field type for clarity
     /**
      * @return SequencedCollection guaranteeing insertion order is maintained
      */
@@ -82,14 +79,9 @@ public class CartState {
      */
     public void setItems(SequencedCollection<CartItem> items) {
         this.items = items;
+        updateMetadata(); // auto-refresh metadata when items are set
     }
 
-    // ❌ MISTAKE : Action history should also be SequencedCollection
-    // public List<CartItem> getActionHistory() { return actionHistory; }
-    // public void setActionHistory(List<CartItem> actionHistory) { this.actionHistory = actionHistory; }
-
-    // ✅ FIX : Return SequencedCollection for action history
-    // 💡 BEST PRACTICE: History by nature is sequential - use SequencedCollection!
     /**
      * @return SequencedCollection of actions for undo/redo functionality
      * Uses getLast() and removeLast() for stack-like LIFO behavior
@@ -102,7 +94,8 @@ public class CartState {
         this.actionHistory = actionHistory;
     }
 
-    // Metadata getters/setters - these are fine as-is
+    // ✅ FIX #3: Metadata getters/setters
+    // These are exposed for frontend visualization (used by shopping_cart.js)
     public Product getOldestItem() { return oldestItem; }
     public void setOldestItem(Product oldestItem) { this.oldestItem = oldestItem; }
 
