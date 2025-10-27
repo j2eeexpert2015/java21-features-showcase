@@ -83,9 +83,12 @@
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                     <parameters>true</parameters>
+                    <!-- Compile with preview + incubator Vector module -->
                     <compilerArgs>
                         <arg>--enable-preview</arg>
                         <arg>-Xlint:preview</arg>
+                        <arg>--add-modules</arg>
+                        <arg>jdk.incubator.vector</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>
