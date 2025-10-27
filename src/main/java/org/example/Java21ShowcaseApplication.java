@@ -17,8 +17,8 @@ public class Java21ShowcaseApplication {
     // the embedded web server (Tomcat), and deploys the application.
     public static void main(String[] args) {
         // Log statements to provide feedback during startup.
-        System.out.println("🚀 Starting TechMart Java 21 Features Showcase...");
+        System.out.println("Starting TechMart Java 21 Features Showcase...");
         SpringApplication.run(Java21ShowcaseApplication.class, args);
-        System.out.println("✅ TechMart application is ready!");
+        System.out.println("TechMart application is ready!");
     }
 }
