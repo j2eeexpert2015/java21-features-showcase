@@ -233,8 +233,9 @@ function syncWithBackendState(backendState) {
     document.getElementById('international').checked = backendState.international;
   }
 
-  updateStatusIndicators();
-  updatePatternHighlighting();
+  // **FIX:** Do NOT call update functions here
+  // updateStatusIndicators();
+  // updatePatternHighlighting();
 }
 
 function createFlowLog(userAction, method, endpoint) {
@@ -274,6 +275,9 @@ function createFlowLog(userAction, method, endpoint) {
 
 function renderPatternMatchingSteps(steps) {
   if (!steps || steps.length === 0) return '';
+
+  // **FIX #2:** Clear highlights ONCE before the loop begins.
+  document.querySelectorAll('.pattern-line.highlighted').forEach(line => line.classList.remove('highlighted'));
 
   let html = '<div class="pm-execution-header">🟣 Pattern Matching Execution:</div>';
 
@@ -358,6 +362,7 @@ function updateFlowLog(logId, responseData) {
   }
 
   if (pmSteps && pmSteps.length > 0) {
+    // This function WILL call highlightJavaMethod
     html += renderPatternMatchingSteps(pmSteps);
   }
 
@@ -380,13 +385,43 @@ function clearInspectorLog() {
   const logContainer = document.getElementById('api-log');
   if (!logContainer) return;
   logContainer.innerHTML = '<div class="text-muted text-center py-2">Log cleared. Perform actions to see API calls...</div>';
+
+  // **FIX:** Also reset the middle panel
+  resetStatusPanels();
 }
+
+// ***NEW FUNCTION***
+// Resets the middle panel to its default state
+function resetStatusPanels() {
+    // 1. Reset Pattern Matching Reference highlights
+    document.querySelectorAll('.pattern-line.highlighted').forEach(line => line.classList.remove('highlighted'));
+
+    // 2. Reset Current Pattern Status text
+    document.getElementById('payment-detection').textContent = 'Pattern: Awaiting processing...';
+
+    const guardIcon = document.querySelector('#status-section .status-item:nth-child(2) .status-icon');
+    guardIcon.className = 'status-icon pending';
+    guardIcon.textContent = '○';
+    document.getElementById('guard-condition').textContent = 'Guard: Awaiting processing...';
+
+    const validationIcon = document.querySelector('#status-section .status-item:nth-child(3) .status-icon');
+    validationIcon.className = 'status-icon success';
+    validationIcon.textContent = '✓';
+    document.getElementById('validation-status').textContent = 'Ready for processing';
+
+    const processingIcon = document.querySelector('#status-section .status-item:nth-child(4) .status-icon');
+    processingIcon.className = 'status-icon play';
+    processingIcon.textContent = '▶';
+    document.getElementById('processing-status').textContent = 'Click Process to execute';
+}
+
 
 function highlightJavaMethod(methodName) {
   if (!methodName) return;
   const safe = String(methodName).replace(/\(\)$/, '');
 
-  document.querySelectorAll('.pattern-line.highlighted').forEach(line => line.classList.remove('highlighted'));
+  // **FIX #1:** The line clearing highlights has been REMOVED from here.
+  // document.querySelectorAll('.pattern-line.highlighted').forEach(line => line.classList.remove('highlighted'));
 
   let targetSelector = null;
   switch (safe.toLowerCase()) {
@@ -406,7 +441,8 @@ function highlightJavaMethod(methodName) {
     const line = document.querySelector(targetSelector);
     if (line) {
       line.classList.add('highlighted');
-      setTimeout(() => { if (line.isConnected) line.classList.remove('highlighted'); }, 3000);
+      // **FIX:** Removed the timeout so the highlight persists
+      // setTimeout(() => { if (line.isConnected) line.classList.remove('highlighted'); }, 3000);
     }
   }
 }
@@ -437,14 +473,15 @@ function updateOrderDisplay(scenario) {
 
 async function setQuickTest(amount) {
   document.querySelectorAll('.test-btn').forEach(btn => btn.classList.remove('active'));
-  // relies on inline handler context providing `event`
   if (typeof event !== 'undefined' && event.target) event.target.classList.add('active');
 
   appState.amount = amount;
   updateOrderDisplay(scenarios[amount]);
   updateAmountDisplays(amount);
-  updatePatternHighlighting();
-  updateStatusIndicators();
+
+  // **FIX:** Removed calls to updatePatternHighlighting() and updateStatusIndicators()
+  // updatePatternHighlighting();
+  // updateStatusIndicators();
 
   if (appState.connected) {
     try { await apiCall('PUT', `${ENDPOINTS.AMOUNT}/${amount}`); }
@@ -460,8 +497,10 @@ async function selectPaymentMethod(method) {
   }
 
   appState.paymentMethod = method;
-  updatePatternHighlighting();
-  updateStatusIndicators();
+
+  // **FIX:** Removed calls to updatePatternHighlighting() and updateStatusIndicators()
+  // updatePatternHighlighting();
+  // updateStatusIndicators();
 
   if (appState.connected) {
     try { await apiCall('PUT', `${ENDPOINTS.METHOD}/${method}`); }
@@ -474,7 +513,9 @@ async function selectCustomerType(type) {
   if (typeof event !== 'undefined' && event.target) event.target.classList.add('active');
 
   appState.customerType = type;
-  updateStatusIndicators();
+
+  // **FIX:** Removed call to updateStatusIndicators()
+  // updateStatusIndicators();
 
   if (appState.connected) {
     try { await apiCall('PUT', `${ENDPOINTS.CUSTOMER_TYPE}/${type.toUpperCase()}`); }
@@ -484,7 +525,9 @@ async function selectCustomerType(type) {
 
 async function toggleInternational() {
   appState.isInternational = document.getElementById('international').checked;
-  updateStatusIndicators();
+
+  // **FIX:** Removed call to updateStatusIndicators()
+  // updateStatusIndicators();
 
   if (appState.connected) {
     try { await apiCall('PUT', `${ENDPOINTS.INTERNATIONAL}/${appState.isInternational}`); }
@@ -502,6 +545,9 @@ async function processPayment() {
   processBtn.classList.add('processing');
   processBtn.innerHTML = '<div class="spinner"></div> Processing...';
 
+  // **FIX:** Reset panels at the START of processing
+  resetStatusPanels();
+
   try {
     if (appState.connected) {
       const paymentRequest = {
@@ -513,7 +559,26 @@ async function processPayment() {
       };
 
       const response = await apiCall('POST', ENDPOINTS.PROCESS, paymentRequest);
-      if (response.paymentResponse) updateProcessingResults(response.paymentResponse);
+
+      // **FIX:** Update status panel AFTER API call
+      updateStatusIndicators(); // This updates the "preview" text
+
+      // This logic handles the nested response structure
+      let paymentResponseData = null;
+      if (response && response.response_data && response.response_data.metadata && response.response_data.metadata.paymentResponse) {
+          paymentResponseData = response.response_data.metadata.paymentResponse;
+      } else if (response && response.response_data && response.response_data.paymentResponse) {
+          paymentResponseData = response.response_data.paymentResponse;
+      } else if (response && response.metadata && response.metadata.paymentResponse) {
+          paymentResponseData = response.metadata.paymentResponse;
+      } else if (response && response.paymentResponse) {
+          paymentResponseData = response.paymentResponse;
+      }
+
+      if (paymentResponseData) {
+          updateProcessingResults(paymentResponseData); // This adds final transaction ID
+      }
+
     } else {
       const logId = createFlowLog('Process Payment (Offline)', 'POST', '/api/payment/process');
       const mockSteps = generateMockPatternSteps();
@@ -533,6 +598,15 @@ async function processPayment() {
             }
           }
         });
+
+        // **FIX:** Update status panel AFTER offline simulation
+        updateStatusIndicators();
+        updateProcessingResults({
+            status: 'SIMULATED_SUCCESS',
+            transactionId: 'TXN-OFFLINE-' + Date.now().toString().slice(-6),
+            validationMessage: 'Offline simulation - payment would be processed'
+        });
+
       }, 1000);
     }
   } catch (error) {
@@ -543,19 +617,30 @@ async function processPayment() {
       processBtn.disabled = false;
       processBtn.classList.remove('processing');
       processBtn.innerHTML = originalText;
-    }, 2000);
+    }, 1000); // Shortened delay
   }
 }
 
 function updateProcessingResults(paymentResponse) {
+  // This function now just adds the final transaction details
   document.getElementById('processing-status').textContent =
     `${paymentResponse.status} - Transaction: ${paymentResponse.transactionId}`;
 
   if (paymentResponse.validationMessage) {
+    const validationIcon = document.querySelector('#status-section .status-item:nth-child(3) .status-icon');
+    if(paymentResponse.status === 'SUCCESS' || paymentResponse.status === 'PENDING') {
+        validationIcon.className = 'status-icon success';
+        validationIcon.textContent = '✓';
+    } else {
+        validationIcon.className = 'status-icon warning';
+        validationIcon.textContent = '⚠';
+    }
     document.getElementById('validation-status').textContent = paymentResponse.validationMessage;
   }
 }
 
+// **NOTE:** This function is no longer called by inputs,
+// but is left here in case you want to re-enable "live preview" later.
 function updatePatternHighlighting() {
   document.querySelectorAll('.pattern-line').forEach(line => line.classList.remove('highlighted'));
 
@@ -576,6 +661,8 @@ function updatePatternHighlighting() {
 }
 
 function updateStatusIndicators() {
+  // This function now correctly acts as the "result" display,
+  // called ONLY after processing.
   const method = paymentMethods[appState.paymentMethod];
   const customer = customerTypes[appState.customerType];
 
@@ -583,7 +670,7 @@ function updateStatusIndicators() {
 
   let guardText; let guardIcon;
   if (appState.amount > 1000) {
-    guardText = `Amount > $1,000 — Additional verification required`;
+    guardText = `Amount > $1,000 — High-value guard evaluated`;
     guardIcon = document.querySelector('#status-section .status-item:nth-child(2) .status-icon');
     guardIcon.className = 'status-icon warning'; guardIcon.textContent = '⚠';
   } else {
@@ -597,14 +684,16 @@ function updateStatusIndicators() {
   if (appState.isInternational) validationText += ' + International compliance';
   document.getElementById('validation-status').textContent = validationText;
 
-  let processingText = `Ready - ${method.processingTime}`;
-  if (!appState.connected) processingText += ' (Offline Mode)';
-  document.getElementById('processing-status').textContent = processingText;
+  // This line will be overwritten by updateProcessingResults, which is correct.
+  document.getElementById('processing-status').textContent = `Processing...`;
 }
 
 async function initApp() {
-  updatePatternHighlighting();
-  updateStatusIndicators();
+  // **FIX:** Removed calls to updatePatternHighlighting() and updateStatusIndicators()
+
+  // Reset panels to default on load
+  resetStatusPanels();
+
   updateAmountDisplays(appState.amount);
   updateOrderDisplay(scenarios[500]);
 
@@ -621,7 +710,7 @@ async function initApp() {
   } else {
     updateFlowLog(logId, {
       controller_method: 'Frontend Only Mode',
-      operation_description: 'Backend offline - Demo running in simulation mode'
+      operation_description: 'Backend offline - Running in simulation mode'
     });
   }
 }
