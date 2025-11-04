@@ -1,3 +1,17 @@
+/*
+* Corrected payment_processing.js
+*
+* FIX 1: (Instant Update)
+* - Removed updatePatternHighlighting() and updateStatusIndicators() from input handlers.
+* - Added resetStatusPanels() to clear panels on init, clear, and process.
+* - processPayment() now calls updateStatusIndicators() *after* API call.
+*
+* FIX 2: (Highlighting Bug)
+* - REMOVED highlight clearing from highlightJavaMethod().
+* - ADDED highlight clearing to the TOP of renderPatternMatchingSteps().
+* - REMOVED 3-second timeout from highlightJavaMethod() to make highlights persist.
+*/
+
 const API_BASE_URL = 'http://localhost:8080';
 const ENDPOINTS = {
   PROCESS: '/api/payment/process',
@@ -233,7 +247,7 @@ function syncWithBackendState(backendState) {
     document.getElementById('international').checked = backendState.international;
   }
 
-  // **FIX:** Do NOT call update functions here
+  // **FIX 1:** Do NOT call update functions here
   // updateStatusIndicators();
   // updatePatternHighlighting();
 }
@@ -276,7 +290,7 @@ function createFlowLog(userAction, method, endpoint) {
 function renderPatternMatchingSteps(steps) {
   if (!steps || steps.length === 0) return '';
 
-  // **FIX #2:** Clear highlights ONCE before the loop begins.
+  // **FIX 2 (Highlighting):** Clear highlights ONCE before the loop begins.
   document.querySelectorAll('.pattern-line.highlighted').forEach(line => line.classList.remove('highlighted'));
 
   let html = '<div class="pm-execution-header">🟣 Pattern Matching Execution:</div>';
@@ -351,14 +365,13 @@ function updateFlowLog(logId, responseData) {
   let html = `🔴 Controller: <strong>${controllerMethod}</strong>`;
 
   let pmSteps = null;
-  if (actualData.metadata?.paymentResponse?.patternMatchingSteps) {
+  // **FIX:** Added better logic to find the nested paymentResponse
+  if (actualData?.metadata?.paymentResponse?.patternMatchingSteps) {
     pmSteps = actualData.metadata.paymentResponse.patternMatchingSteps;
-  } else if (actualData.patternMatchingSteps && actualData.patternMatchingSteps.length > 0) {
-    pmSteps = actualData.patternMatchingSteps;
-  } else if (actualData.paymentResponse?.patternMatchingSteps) {
+  } else if (actualData?.paymentResponse?.patternMatchingSteps) {
     pmSteps = actualData.paymentResponse.patternMatchingSteps;
-  } else if (responseData.response_data?.patternMatchingSteps) {
-    pmSteps = responseData.response_data.patternMatchingSteps;
+  } else if (actualData?.patternMatchingSteps) {
+    pmSteps = actualData.patternMatchingSteps;
   }
 
   if (pmSteps && pmSteps.length > 0) {
@@ -370,7 +383,8 @@ function updateFlowLog(logId, responseData) {
     html += `<div class="api-flow-child">💡 <span class="success-text">${operationDesc}</span></div>`;
   }
 
-  let txnData = actualData.metadata?.paymentResponse || actualData.paymentResponse || actualData;
+  // **FIX:** Added better logic to find the nested paymentResponse
+  let txnData = actualData?.metadata?.paymentResponse || actualData?.paymentResponse || actualData;
   if (txnData.transactionId) {
     html += `<div class="api-flow-child">💳 Transaction: <strong>${txnData.transactionId}</strong> (${txnData.status})</div>`;
     if (txnData.validationMessage) {
@@ -386,11 +400,11 @@ function clearInspectorLog() {
   if (!logContainer) return;
   logContainer.innerHTML = '<div class="text-muted text-center py-2">Log cleared. Perform actions to see API calls...</div>';
 
-  // **FIX:** Also reset the middle panel
+  // **FIX 1:** Also reset the middle panel
   resetStatusPanels();
 }
 
-// ***NEW FUNCTION***
+// **FIX 1:** ***NEW FUNCTION***
 // Resets the middle panel to its default state
 function resetStatusPanels() {
     // 1. Reset Pattern Matching Reference highlights
@@ -420,7 +434,7 @@ function highlightJavaMethod(methodName) {
   if (!methodName) return;
   const safe = String(methodName).replace(/\(\)$/, '');
 
-  // **FIX #1:** The line clearing highlights has been REMOVED from here.
+  // **FIX 2 (Highlighting):** The line clearing highlights has been REMOVED from here.
   // document.querySelectorAll('.pattern-line.highlighted').forEach(line => line.classList.remove('highlighted'));
 
   let targetSelector = null;
@@ -479,7 +493,7 @@ async function setQuickTest(amount) {
   updateOrderDisplay(scenarios[amount]);
   updateAmountDisplays(amount);
 
-  // **FIX:** Removed calls to updatePatternHighlighting() and updateStatusIndicators()
+  // **FIX 1:** Removed calls to updatePatternHighlighting() and updateStatusIndicators()
   // updatePatternHighlighting();
   // updateStatusIndicators();
 
@@ -498,7 +512,7 @@ async function selectPaymentMethod(method) {
 
   appState.paymentMethod = method;
 
-  // **FIX:** Removed calls to updatePatternHighlighting() and updateStatusIndicators()
+  // **FIX 1:** Removed calls to updatePatternHighlighting() and updateStatusIndicators()
   // updatePatternHighlighting();
   // updateStatusIndicators();
 
@@ -514,7 +528,7 @@ async function selectCustomerType(type) {
 
   appState.customerType = type;
 
-  // **FIX:** Removed call to updateStatusIndicators()
+  // **FIX 1:** Removed call to updateStatusIndicators()
   // updateStatusIndicators();
 
   if (appState.connected) {
@@ -526,7 +540,7 @@ async function selectCustomerType(type) {
 async function toggleInternational() {
   appState.isInternational = document.getElementById('international').checked;
 
-  // **FIX:** Removed call to updateStatusIndicators()
+  // **FIX 1:** Removed call to updateStatusIndicators()
   // updateStatusIndicators();
 
   if (appState.connected) {
@@ -545,7 +559,7 @@ async function processPayment() {
   processBtn.classList.add('processing');
   processBtn.innerHTML = '<div class="spinner"></div> Processing...';
 
-  // **FIX:** Reset panels at the START of processing
+  // **FIX 1:** Reset panels at the START of processing
   resetStatusPanels();
 
   try {
@@ -560,8 +574,8 @@ async function processPayment() {
 
       const response = await apiCall('POST', ENDPOINTS.PROCESS, paymentRequest);
 
-      // **FIX:** Update status panel AFTER API call
-      updateStatusIndicators(); // This updates the "preview" text
+      // **FIX 1:** Update status panel AFTER API call
+      updateStatusIndicators(); // This updates the status text
 
       // This logic handles the nested response structure
       let paymentResponseData = null;
@@ -599,7 +613,7 @@ async function processPayment() {
           }
         });
 
-        // **FIX:** Update status panel AFTER offline simulation
+        // **FIX 1:** Update status panel AFTER offline simulation
         updateStatusIndicators();
         updateProcessingResults({
             status: 'SIMULATED_SUCCESS',
@@ -628,7 +642,7 @@ function updateProcessingResults(paymentResponse) {
 
   if (paymentResponse.validationMessage) {
     const validationIcon = document.querySelector('#status-section .status-item:nth-child(3) .status-icon');
-    if(paymentResponse.status === 'SUCCESS' || paymentResponse.status === 'PENDING') {
+    if(paymentResponse.status === 'SUCCESS' || paymentResponse.status === 'PENDING' || paymentResponse.status === 'SIMULATED_SUCCESS') {
         validationIcon.className = 'status-icon success';
         validationIcon.textContent = '✓';
     } else {
@@ -689,7 +703,7 @@ function updateStatusIndicators() {
 }
 
 async function initApp() {
-  // **FIX:** Removed calls to updatePatternHighlighting() and updateStatusIndicators()
+  // **FIX 1:** Removed calls to updatePatternHighlighting() and updateStatusIndicators()
 
   // Reset panels to default on load
   resetStatusPanels();
