@@ -7,7 +7,7 @@ public class BasicSequencedCollectionDemo {
     public static void main(String[] args) {
         System.out.println("=== BasicSequencedCollectionDemo ===");
 
-        demonstrateSequencedCollectionInterface();
+        //demonstrateSequencedCollectionInterface();
         demonstrateReversedView();
         System.out.println();
     }
