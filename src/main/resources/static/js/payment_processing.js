@@ -414,8 +414,9 @@ function resetStatusPanels() {
     document.getElementById('payment-detection').textContent = 'Pattern: Awaiting processing...';
 
     const guardIcon = document.querySelector('#status-section .status-item:nth-child(2) .status-icon');
-    guardIcon.className = 'status-icon pending';
-    guardIcon.textContent = '○';
+    // **FIX 3 (Guard Icon):** Set default to 'success' (✓) to match the HTML
+    guardIcon.className = 'status-icon success';
+    guardIcon.textContent = '✓';
     document.getElementById('guard-condition').textContent = 'Guard: Awaiting processing...';
 
     const validationIcon = document.querySelector('#status-section .status-item:nth-child(3) .status-icon');
