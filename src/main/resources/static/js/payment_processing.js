@@ -427,7 +427,7 @@ function resetStatusPanels() {
     const processingIcon = document.querySelector('#status-section .status-item:nth-child(4) .status-icon');
     processingIcon.className = 'status-icon play';
     processingIcon.textContent = '▶';
-    document.getElementById('processing-status').textContent = 'Click Process to execute';
+    document.getElementById('processing-status').textContent = 'Click Process Payment to execute';
 }
 
 
