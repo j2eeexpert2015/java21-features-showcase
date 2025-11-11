@@ -1,7 +1,14 @@
 package org.example.model.cart;
 
 import java.math.BigDecimal;
-
+/**
+ * CartItem - Represents a single item in the shopping cart
+ *
+ * Design decisions:
+ * - Final fields for immutability
+ * - Unique ID for tracking individual cart entries
+ * - Separate quantity and unit price
+ */
 public class CartItem {
     private Long id;
     private Product product;
@@ -17,7 +24,10 @@ public class CartItem {
         this.unitPrice = unitPrice;
     }
 
-    // Generate unique ID for demo purposes
+    /**
+     * Generates unique ID for each cart item
+     * In production, use UUID or database sequence
+     */
     public static Long generateId() {
         return System.currentTimeMillis();
     }
@@ -33,4 +43,9 @@ public class CartItem {
 
     public BigDecimal getUnitPrice() { return unitPrice; }
     public void setUnitPrice(BigDecimal unitPrice) { this.unitPrice = unitPrice; }
+    @Override
+    public String toString() {
+        return String.format("CartItem[id=%d, product=%s, qty=%d, price=%s]",
+                id, product.getName(), quantity, unitPrice);
+    }
 }
