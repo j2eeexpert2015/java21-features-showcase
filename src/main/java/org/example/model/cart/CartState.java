@@ -5,7 +5,12 @@ import java.util.SequencedCollection;
 import java.math.BigDecimal;
 
 /**
- * CartState - Demonstrates Java 21 Sequenced Collections Best Practices
+ * CartState - The complete state of a customer's shopping cart
+ *
+ * This class demonstrates Java 21 Sequenced Collections best practices:
+ * - Uses SequencedCollection instead of List for explicit ordering
+ * - Leverages getFirst() and getLast() for metadata
+ * - Maintains both items and action history
  *
  * 🎯 KEY IMPROVEMENT: Using SequencedCollection instead of List
  *

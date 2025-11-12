@@ -53,8 +53,9 @@ public class CartSequenceScenario {
 
         /* Another undo */
         if (!cartList.isEmpty()) {
-            cartList.removeLast();
-            System.out.println("Another undo: " + cartList);
+            CartItem removed = cartList.removeLast();
+            System.out.println("Again Removed :" + removed);
+            System.out.println("Cart after undo: " + cartList);
         } else {
             System.out.println("Cannot undo: Cart is empty");
         }
