@@ -20,8 +20,6 @@ import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 @Service
 public class CartService {
 
@@ -167,7 +165,7 @@ public class CartService {
 
             // JAVA 21 API: getLast() - Peek at most recent action (non-destructive)
             CartItem lastAdded = cartState.getActionHistory().getLast();
-            String itemName = lastAdded.getProduct().getName();
+            String itemName = lastAdded.getProduct().name();
 
             // JAVA 21 API: removeLast() - Remove most recent action from history (destructive)
             cartState.getActionHistory().removeLast();
