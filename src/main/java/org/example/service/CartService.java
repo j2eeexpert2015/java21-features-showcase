@@ -13,6 +13,7 @@
  */
 package org.example.service;
 
+import org.example.dto.cart.CartItemRequest;
 import org.example.model.cart.*;
 import org.example.repository.CartRepository;
 import org.springframework.stereotype.Service;

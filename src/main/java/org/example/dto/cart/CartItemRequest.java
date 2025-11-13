@@ -1,4 +1,4 @@
-package org.example.model.cart;
+package org.example.dto.cart;
 
 import java.math.BigDecimal;
 
