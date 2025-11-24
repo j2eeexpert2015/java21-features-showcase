@@ -176,11 +176,11 @@ public class StringTemplateController {
 
     private TemplateRequest createDefaultState() {
         TemplateRequest request = new TemplateRequest();
-        request.setCustomerName("John Doe");
-        request.setOrderId("ORD-123456");
+        request.setCustomerName("Sarah Johnson");
+        request.setOrderId("ORD-1001");
         request.setAmount(new BigDecimal("1299.99"));
         request.setItemsCount(3);
-        request.setSearchQuery("John");
+        request.setSearchQuery("sarah.johnson@example.com");
         return request;
     }
 }

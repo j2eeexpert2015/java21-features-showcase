@@ -65,11 +65,11 @@ async function checkConnection() {
     console.log('Backend not available:', error.message);
 
     if (!appState.customerName) {
-      document.getElementById('customerName').value = 'John Doe';
-      document.getElementById('orderId').value = 'ORD-123456';
+      document.getElementById('customerName').value = 'Sarah Johnson';
+      document.getElementById('orderId').value = 'ORD-1001';
       document.getElementById('amount').value = '1299.99';
       document.getElementById('itemsCount').value = '3';
-      document.getElementById('searchQuery').value = 'John';
+      document.getElementById('searchQuery').value = 'sarah.johnson@example.com';
     }
   }
 
