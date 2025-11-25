@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static java.util.FormatProcessor.FMT;
+import static org.example.service.SafeSQLProcessor.SAFE;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -107,7 +108,18 @@ public class StringTemplateService {
 
         String templateSource = "SAFE.\"SELECT * FROM orders WHERE customer_name = \\{customerName} AND order_id = \\{orderId} AND total_amount >= \\{amount} AND item_count <= \\{itemsCount}\"";
         // Custom safe SQL generation - input sanitization
-        String safeQuery = generateParameterizedSQL(request);
+        //String safeQuery = generateParameterizedSQL(request);
+        // NOW this is an actual custom processor!
+        String safeQuery = SAFE."""
+        SELECT o.order_id, o.customer_name, o.total_amount
+        FROM orders o
+        WHERE o.customer_name = '\{request.getCustomerName()}'
+          AND o.order_id = '\{request.getOrderId()}'
+          AND o.total_amount >= \{request.getAmount()}
+        ORDER BY o.order_date DESC
+        """;
+
+        logger.info("✓ Custom SAFE processor completed");
 
         logger.info("✓ Custom processor completed - safe query generated");
         logger.info("✓ Security: Input sanitized to prevent SQL injection");
