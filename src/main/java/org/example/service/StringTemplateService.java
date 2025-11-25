@@ -6,6 +6,7 @@ import org.example.dto.template.TemplateResponse;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static java.util.FormatProcessor.FMT;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -58,35 +59,42 @@ public class StringTemplateService {
     // Java 21 String Template for SMS using formatted output
     public TemplateResponse generateSMS(TemplateRequest request) {
         logger.info("=== SMS TEMPLATE GENERATION START ===");
-        logger.info("Using String.format() for formatted output");
-        logger.info("Customer: {}, Order: {}, Amount: ${}",
+        logger.info("Using FMT template processor for formatted output");
+        logger.info("Customer: {}, Order: {}, Amount: {}",
                 request.getCustomerName(), request.getOrderId(), request.getAmount());
 
-        String templateSource = "FMT.\"Order \\{orderId} confirmed! Total: \\{amount:$.2f} for \\{itemsCount} items\"";
+        // What we show in Panel 3 as the "template source"
+        String templateSource = """
+            FMT.\"\"\"\
+                TechMart Alert
+                Customer: %-20s\\{request.getCustomerName()}
+                Order ID: %-15s\\{request.getOrderId()}
+                Amount:   $%,10.2f\\{request.getAmount()}
+                Items:    %5d\\{request.getItemsCount()}
+                Status:   APPROVED
+                \"\"\"\
+            """;
 
-        // Formatted string output - simulating FMT processor behavior
-        String smsContent = String.format("""
+        // 🔥 Actual Java 21 FMT template execution
+        String smsContent = FMT."""
             TechMart Alert
-            Order %s confirmed!
-            Total: $%.2f for %d items.
-            Track: techmart.com/track/%s
-            """,
-                request.getOrderId(),
-                request.getAmount(),
-                request.getItemsCount(),
-                request.getOrderId()
-        );
+            Customer: %-20s\{request.getCustomerName()}
+            Order ID: %-15s\{request.getOrderId()}
+            Amount:   $%,10.2f\{request.getAmount()}
+            Items:    %5d\{request.getItemsCount()}
+            Status:   APPROVED
+            """;
 
-        logger.info("✓ Formatted output completed - currency and numbers formatted");
-        logger.info("✓ Security: Content sanitized and formatted");
+        logger.info("✓ FMT template executed successfully");
+        logger.info("Generated SMS content:\n{}", smsContent);
         logger.info("================================");
 
         return new TemplateResponse(
-                "sms",
-                templateSource,
-                smsContent,
-                "FMT Processor",
-                "safe"
+                "sms",              // templateType
+                templateSource,     // templateSource (for Panel 3)
+                smsContent,         // generatedContent
+                "FMT Processor",    // processorUsed
+                "safe"              // securityStatus
         );
     }
 
