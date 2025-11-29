@@ -15,6 +15,8 @@ import java.io.IOException;
  *
  * VM Options required to see the magic:
  * -XX:+UseZGC -XX:+ZGenerational -Xmx4G -Xlog:gc*
+ * java -XX:+UseG1GC -cp target/classes org.example.concepts.zgc.ZGCAllocationBomb
+ * java -XX:+UseZGC -XX:+ZGenerational -cp target/classes org.example.concepts.zgc.ZGCAllocationBomb
  */
 public class ZGCAllocationBomb {
 
