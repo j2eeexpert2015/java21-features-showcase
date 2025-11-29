@@ -13,30 +13,37 @@ import java.util.concurrent.atomic.AtomicLong;
  * EXPERIMENT INSTRUCTIONS
  * -------------------------------------------------------------------------
  *
- * 1. RUN COMMANDS (Execute from project root after 'mvn clean compile')
+ * 1. COMPILE (from project root):
+ * mvn clean compile
  *
- * Scenario A: "The Old Way" (Non-Generational ZGC / Without Gen ZGC)
- * Command: java -cp target/classes -Xmx2G -XX:+UseZGC -XX:-ZGenerational org.example.concepts.zgc.RetailMemoryStress
- * Expectation: Throughput drops or stalls. High CPU scanning the 200MB Catalog repeatedly.
+ * 2. RUN COMMANDS (Choose one scenario):
  *
- * Scenario B: "The New Way" (Generational ZGC / With Gen ZGC)
- * Command: java -cp target/classes -Xmx2G -XX:+UseZGC -XX:+ZGenerational org.example.concepts.zgc.RetailMemoryStress
- * Expectation: Stable throughput. Catalog is ignored. Young Gen is swept instantly.
+ * [SCENARIO A] "The Old Way" (Non-Generational ZGC)
+ * Use this to see Allocation Stalls and throughput drops.
+ * -----------------------------------------------------
+ * java -cp target/classes -Xmx2G -XX:+UseZGC -XX:-ZGenerational org.example.concepts.zgc.RetailMemoryStress
+ *
+ * [SCENARIO B] "The New Way" (Generational ZGC)
+ * Use this to see stable throughput and sub-millisecond pauses.
+ * -----------------------------------------------------
+ * java -cp target/classes -Xmx2G -XX:+UseZGC -XX:+ZGenerational org.example.concepts.zgc.RetailMemoryStress
  *
  * -------------------------------------------------------------------------
  * WHAT TO CHECK & WHEN
  * -------------------------------------------------------------------------
  *
- * 1. IN VISUALVM (Install "VisualGC" plugin first)
- * - When: Attach immediately when the app pauses at "READY TO ATTACH".
- * - Check: The "Visual GC" tab.
- * - Non-Gen Result: You see a single large space (often mapped to "Old Gen") fluctuating wildly.
- * There is no clear separation of short-lived vs long-lived data.
- * - Gen Result: You see distinct "Eden" vs "Old Gen" spaces.
- * "Eden" fills and clears instantly (Sawtooth pattern).
- * "Old Gen" (Catalog) stays completely flat and untouched.
+ * 1. IN VISUALVM (Use the "Monitor" Tab, NOT "Visual GC")
+ * NOTE: The "Visual GC" plugin does not fully support ZGC layouts.
+ * Use the standard "Monitor" tab instead.
  *
- * 2. IN JDK MISSION CONTROL (JMC)
+ * - When: Attach immediately when the app pauses at "READY TO ATTACH".
+ * - Check: The "Heap" graph in the "Monitor" tab.
+ * - Non-Gen Result: The heap usage graph will look like a giant wave, climbing
+ * towards the 2GB max and crashing down repeatedly.
+ * - Gen Result: The heap usage graph will be flat and stable, hovering just
+ * above the 200MB baseline (the Catalog).
+ *
+ * 2. IN JDK MISSION CONTROL (JMC) - The Gold Standard
  * - When: Start a "Flight Recording" (1 min) when the app pauses.
  * - Action: Go back to console and press [ENTER] to start the traffic.
  * - Check: "Event Browser" -> Search for "ZAllocationStall".
