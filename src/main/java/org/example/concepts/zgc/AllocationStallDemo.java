@@ -21,6 +21,9 @@ import java.util.concurrent.atomic.*;
  *   G1GC: java -Xms256m -Xmx256m -XX:+UseG1GC -XX:+FlightRecorder -XX:StartFlightRecording=duration=120s,filename=g1gc-stalls.jfr -Xlog:gc*,gc+heap=debug:file=g1gc-stalls.log -cp target/classes org.example.concepts.zgc.AllocationStallDemo
  *   ZGC:  java -Xms256m -Xmx256m -XX:+UseZGC -XX:+ZGenerational -XX:+FlightRecorder -XX:StartFlightRecording=duration=120s,filename=zgc-smooth.jfr -Xlog:gc*,gc+heap=debug:file=zgc-smooth.log -cp target/classes org.example.concepts.zgc.AllocationStallDemo
  *
+ *  G1GC: java -Xms256m -Xmx256m -XX:+UseG1GC -XX:StartFlightRecording=duration=120s,filename=g1gc-stalls.jfr -Xlog:gc*,gc+heap=debug:file=g1gc-stalls.log -cp target/classes org.example.concepts.zgc.AllocationStallDemo
+ *  ZGC:  java -Xms256m -Xmx256m -XX:+UseZGC -XX:+ZGenerational -XX:StartFlightRecording=duration=120s,filename=zgc-smooth.jfr -Xlog:gc*,gc+heap=debug:file=zgc-smooth.log -cp target/classes org.example.concepts.zgc.AllocationStallDemo
+ *
  * EXTREME (guaranteed stalls with G1GC):
  *   java -Xms192m -Xmx192m -XX:+UseG1GC -cp target/classes org.example.concepts.zgc.AllocationStallDemo
  *
