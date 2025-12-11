@@ -1,38 +1,35 @@
-<?xml version="1.0" ?>
+<?xml version='1.0' encoding='UTF-8'?>
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
   <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="GC Comparison - 5 Minutes">
-      <stringProp name="TestPlan.comments">Compare G1GC vs ZGC Generational vs ZGC NonGen</stringProp>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="GC Comparison - STRESS TEST (10 minutes)">
+      <stringProp name="TestPlan.comments">WARNING: STRESS TEST - High Load!
+    
+Requires: 3GB heap per application
+Update startup scripts to: -Xmx3g -Xms3g
+
+Settings:
+- 5 threads per app (15 total)
+- 10 second ramp-up
+- 600 seconds (10 minutes)
+- 2000ms delay
+- 200MB short-lived + 50MB survivor per request
+
+This generates ~75GB/min memory churn per app!</stringProp>
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments">
         <collectionProp name="Arguments.arguments">
           <elementProp name="SHORT_LIVED_MB" elementType="Argument">
             <stringProp name="Argument.name">SHORT_LIVED_MB</stringProp>
-            <stringProp name="Argument.value">160</stringProp>
+            <stringProp name="Argument.value">200</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="SURVIVOR_MB" elementType="Argument">
             <stringProp name="Argument.name">SURVIVOR_MB</stringProp>
-            <stringProp name="Argument.value">40</stringProp>
+            <stringProp name="Argument.value">50</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
-          <elementProp name="THREADS" elementType="Argument">
-            <stringProp name="Argument.name">THREADS</stringProp>
-            <stringProp name="Argument.value">3</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
-          <elementProp name="RAMP_UP" elementType="Argument">
-            <stringProp name="Argument.name">RAMP_UP</stringProp>
-            <stringProp name="Argument.value">5</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
-          <elementProp name="DURATION" elementType="Argument">
-            <stringProp name="Argument.name">DURATION</stringProp>
-            <stringProp name="Argument.value">300</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
-          <elementProp name="DELAY" elementType="Argument">
-            <stringProp name="Argument.name">DELAY</stringProp>
-            <stringProp name="Argument.value">3000</stringProp>
+          <elementProp name="DELAY_MS" elementType="Argument">
+            <stringProp name="Argument.name">DELAY_MS</stringProp>
+            <stringProp name="Argument.value">2000</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
@@ -40,9 +37,9 @@
     </TestPlan>
     <hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="G1GC - Port 8080">
-        <intProp name="ThreadGroup.num_threads">${THREADS}</intProp>
-        <intProp name="ThreadGroup.ramp_time">${RAMP_UP}</intProp>
-        <longProp name="ThreadGroup.duration">${DURATION}</longProp>
+        <intProp name="ThreadGroup.num_threads">5</intProp>
+        <intProp name="ThreadGroup.ramp_time">10</intProp>
+        <longProp name="ThreadGroup.duration">600</longProp>
         <longProp name="ThreadGroup.delay">0</longProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
@@ -65,19 +62,19 @@
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
           <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
-            <collectionProp name="Arguments.arguments"/>
+            <collectionProp name="Arguments.arguments" />
           </elementProp>
         </HTTPSamplerProxy>
-        <hashTree/>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="3 Second Delay" enabled="true">
-          <stringProp name="ConstantTimer.delay">${DELAY}</stringProp>
+        <hashTree />
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Delay: ${DELAY_MS}ms" enabled="true">
+          <stringProp name="ConstantTimer.delay">${DELAY_MS}</stringProp>
         </ConstantTimer>
-        <hashTree/>
+        <hashTree />
       </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ZGC Gen - Port 8081" enabled="true">
-        <intProp name="ThreadGroup.num_threads">${THREADS}</intProp>
-        <intProp name="ThreadGroup.ramp_time">${RAMP_UP}</intProp>
-        <longProp name="ThreadGroup.duration">${DURATION}</longProp>
+        <intProp name="ThreadGroup.num_threads">5</intProp>
+        <intProp name="ThreadGroup.ramp_time">10</intProp>
+        <longProp name="ThreadGroup.duration">600</longProp>
         <longProp name="ThreadGroup.delay">0</longProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
@@ -100,19 +97,19 @@
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
           <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
-            <collectionProp name="Arguments.arguments"/>
+            <collectionProp name="Arguments.arguments" />
           </elementProp>
         </HTTPSamplerProxy>
-        <hashTree/>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="3 Second Delay" enabled="true">
-          <stringProp name="ConstantTimer.delay">${DELAY}</stringProp>
+        <hashTree />
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Delay: ${DELAY_MS}ms" enabled="true">
+          <stringProp name="ConstantTimer.delay">${DELAY_MS}</stringProp>
         </ConstantTimer>
-        <hashTree/>
+        <hashTree />
       </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ZGC NonGen - Port 8082" enabled="true">
-        <intProp name="ThreadGroup.num_threads">${THREADS}</intProp>
-        <intProp name="ThreadGroup.ramp_time">${RAMP_UP}</intProp>
-        <longProp name="ThreadGroup.duration">${DURATION}</longProp>
+        <intProp name="ThreadGroup.num_threads">5</intProp>
+        <intProp name="ThreadGroup.ramp_time">10</intProp>
+        <longProp name="ThreadGroup.duration">600</longProp>
         <longProp name="ThreadGroup.delay">0</longProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
@@ -135,14 +132,14 @@
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
           <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
-            <collectionProp name="Arguments.arguments"/>
+            <collectionProp name="Arguments.arguments" />
           </elementProp>
         </HTTPSamplerProxy>
-        <hashTree/>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="3 Second Delay" enabled="true">
-          <stringProp name="ConstantTimer.delay">${DELAY}</stringProp>
+        <hashTree />
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Delay: ${DELAY_MS}ms" enabled="true">
+          <stringProp name="ConstantTimer.delay">${DELAY_MS}</stringProp>
         </ConstantTimer>
-        <hashTree/>
+        <hashTree />
       </hashTree>
       <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
         <boolProp name="ResultCollector.error_logging">false</boolProp>
@@ -178,9 +175,9 @@
             <connectTime>true</connectTime>
           </value>
         </objProp>
-        <stringProp name="filename"/>
+        <stringProp name="filename" />
       </ResultCollector>
-      <hashTree/>
+      <hashTree />
       <kg.apc.jmeter.vizualizers.CorrectedResultCollector guiclass="kg.apc.jmeter.vizualizers.ResponseTimesOverTimeGui" testclass="kg.apc.jmeter.vizualizers.CorrectedResultCollector" testname="jp@gc - Response Times Over Time" enabled="true">
         <boolProp name="ResultCollector.error_logging">false</boolProp>
         <objProp>
@@ -215,17 +212,17 @@
             <connectTime>true</connectTime>
           </value>
         </objProp>
-        <stringProp name="filename"/>
+        <stringProp name="filename" />
         <longProp name="interval_grouping">500</longProp>
         <boolProp name="graph_aggregated">false</boolProp>
-        <stringProp name="include_sample_labels"/>
-        <stringProp name="exclude_sample_labels"/>
-        <stringProp name="start_offset"/>
-        <stringProp name="end_offset"/>
+        <stringProp name="include_sample_labels" />
+        <stringProp name="exclude_sample_labels" />
+        <stringProp name="start_offset" />
+        <stringProp name="end_offset" />
         <boolProp name="include_checkbox_state">false</boolProp>
         <boolProp name="exclude_checkbox_state">false</boolProp>
       </kg.apc.jmeter.vizualizers.CorrectedResultCollector>
-      <hashTree/>
+      <hashTree />
       <kg.apc.jmeter.vizualizers.CorrectedResultCollector guiclass="kg.apc.jmeter.vizualizers.ResponseTimesDistributionGui" testclass="kg.apc.jmeter.vizualizers.CorrectedResultCollector" testname="jp@gc - Response Times Distribution" enabled="true">
         <boolProp name="ResultCollector.error_logging">false</boolProp>
         <objProp>
@@ -260,17 +257,17 @@
             <connectTime>true</connectTime>
           </value>
         </objProp>
-        <stringProp name="filename"/>
+        <stringProp name="filename" />
         <longProp name="interval_grouping">100</longProp>
         <boolProp name="graph_aggregated">false</boolProp>
-        <stringProp name="include_sample_labels"/>
-        <stringProp name="exclude_sample_labels"/>
-        <stringProp name="start_offset"/>
-        <stringProp name="end_offset"/>
+        <stringProp name="include_sample_labels" />
+        <stringProp name="exclude_sample_labels" />
+        <stringProp name="start_offset" />
+        <stringProp name="end_offset" />
         <boolProp name="include_checkbox_state">false</boolProp>
         <boolProp name="exclude_checkbox_state">false</boolProp>
       </kg.apc.jmeter.vizualizers.CorrectedResultCollector>
-      <hashTree/>
+      <hashTree />
       <kg.apc.jmeter.vizualizers.CorrectedResultCollector guiclass="kg.apc.jmeter.vizualizers.ResponseTimesPercentilesGui" testclass="kg.apc.jmeter.vizualizers.CorrectedResultCollector" testname="jp@gc - Response Times Percentiles" enabled="true">
         <boolProp name="ResultCollector.error_logging">false</boolProp>
         <objProp>
@@ -305,17 +302,17 @@
             <connectTime>true</connectTime>
           </value>
         </objProp>
-        <stringProp name="filename"/>
+        <stringProp name="filename" />
         <longProp name="interval_grouping">500</longProp>
         <boolProp name="graph_aggregated">false</boolProp>
-        <stringProp name="include_sample_labels"/>
-        <stringProp name="exclude_sample_labels"/>
-        <stringProp name="start_offset"/>
-        <stringProp name="end_offset"/>
+        <stringProp name="include_sample_labels" />
+        <stringProp name="exclude_sample_labels" />
+        <stringProp name="start_offset" />
+        <stringProp name="end_offset" />
         <boolProp name="include_checkbox_state">false</boolProp>
         <boolProp name="exclude_checkbox_state">false</boolProp>
       </kg.apc.jmeter.vizualizers.CorrectedResultCollector>
-      <hashTree/>
+      <hashTree />
     </hashTree>
   </hashTree>
 </jmeterTestPlan>
