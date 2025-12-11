@@ -548,8 +548,8 @@
       }
     },
     {
-      "title": "Max GC Pause Time (ms)",
-      "description": "Maximum stop-the-world pause - Lower is Better",
+      "title": "GC Summary Stats",
+      "description": "Max Pause (ms) and Total Pause Count - Compare latency vs frequency",
       "type": "stat",
       "gridPos": {
         "h": 6,
@@ -559,22 +559,58 @@
       },
       "targets": [
         {
-          "expr": "max by (job) (jvm_gc_pause_seconds_max{action!~\".*cycle.*\"}) * 1000",
-          "legendFormat": "{{job}}",
+          "expr": "max by (gc_type) (jvm_gc_pause_seconds_max{action!~\".*cycle.*\"}) * 1000",
+          "legendFormat": "{{gc_type}} - Max Pause",
           "refId": "A"
+        },
+        {
+          "expr": "sum by (gc_type) (jvm_gc_pause_seconds_count{action!~\".*cycle.*\"})",
+          "legendFormat": "{{gc_type}} - Count",
+          "refId": "B"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "mappings": [],
-          "unit": "ms",
           "decimals": 1
         },
         "overrides": [
           {
             "matcher": {
               "id": "byRegexp",
-              "options": "G1GC"
+              "options": ".*Max Pause"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*Count"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "G1GC - Max Pause"
             },
             "properties": [
               {
@@ -583,17 +619,28 @@
                   "fixedColor": "red",
                   "mode": "fixed"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "G1GC"
               }
             ]
           },
           {
             "matcher": {
-              "id": "byRegexp",
-              "options": "Generational-ZGC"
+              "id": "byName",
+              "options": "G1GC - Count"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Generational-ZGC - Max Pause"
             },
             "properties": [
               {
@@ -602,17 +649,28 @@
                   "fixedColor": "green",
                   "mode": "fixed"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Gen-ZGC"
               }
             ]
           },
           {
             "matcher": {
-              "id": "byRegexp",
-              "options": "^ZGC$"
+              "id": "byName",
+              "options": "Generational-ZGC - Count"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ZGC - Max Pause"
             },
             "properties": [
               {
@@ -621,10 +679,21 @@
                   "fixedColor": "blue",
                   "mode": "fixed"
                 }
-              },
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ZGC - Count"
+            },
+            "properties": [
               {
-                "id": "displayName",
-                "value": "ZGC"
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
               }
             ]
           }
