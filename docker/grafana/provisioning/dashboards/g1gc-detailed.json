@@ -2,7 +2,7 @@
   "annotations": {
     "list": []
   },
-  "title": "G1GC Detailed Metrics",
+  "title": "G1GC Detailed",
   "uid": "g1gc-detailed",
   "version": 7,
   "timezone": "browser",
@@ -30,12 +30,12 @@
       },
       "targets": [
         {
-          "expr": "max(jvm_gc_pause_seconds_max{job=\"g1gc-app\", action!~\".*cycle.*\"}) * 1000",
+          "expr": "max(jvm_gc_pause_seconds_max{job=\"G1GC\", action!~\".*cycle.*\"}) * 1000",
           "legendFormat": "Max Pause",
           "refId": "A"
         },
         {
-          "expr": "sum(rate(jvm_gc_pause_seconds_sum{job=\"g1gc-app\", action!~\".*cycle.*\"}[1m])) / sum(rate(jvm_gc_pause_seconds_count{job=\"g1gc-app\"}[1m])) * 1000",
+          "expr": "sum(rate(jvm_gc_pause_seconds_sum{job=\"G1GC\", action!~\".*cycle.*\"}[1m])) / sum(rate(jvm_gc_pause_seconds_count{job=\"G1GC\"}[1m])) * 1000",
           "legendFormat": "Avg Pause",
           "refId": "B"
         }
@@ -95,7 +95,7 @@
       },
       "targets": [
         {
-          "expr": "sum(jvm_gc_pause_seconds_count{job=\"g1gc-app\", action!~\".*cycle.*\"})",
+          "expr": "sum(jvm_gc_pause_seconds_count{job=\"G1GC\", action!~\".*cycle.*\"})",
           "legendFormat": "Total Pauses",
           "refId": "A"
         }
@@ -132,7 +132,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(jvm_gc_pause_seconds_count{job=\"g1gc-app\", action!~\".*cycle.*\"}[1m]))",
+          "expr": "sum(rate(jvm_gc_pause_seconds_count{job=\"G1GC\", action!~\".*cycle.*\"}[1m]))",
           "legendFormat": "Pause Rate",
           "refId": "A"
         }
@@ -177,12 +177,12 @@
       },
       "targets": [
         {
-          "expr": "sum(jvm_memory_used_bytes{job=\"g1gc-app\", area=\"heap\"}) / 1024 / 1024",
+          "expr": "sum(jvm_memory_used_bytes{job=\"G1GC\", area=\"heap\"}) / 1024 / 1024",
           "legendFormat": "Heap Used",
           "refId": "A"
         },
         {
-          "expr": "max(jvm_memory_max_bytes{job=\"g1gc-app\", area=\"heap\"}) / 1024 / 1024",
+          "expr": "max(jvm_memory_max_bytes{job=\"G1GC\", area=\"heap\"}) / 1024 / 1024",
           "legendFormat": "Heap Max",
           "refId": "B"
         }
@@ -242,12 +242,12 @@
       },
       "targets": [
         {
-          "expr": "avg(process_cpu_usage{job=\"g1gc-app\"})",
+          "expr": "avg(process_cpu_usage{job=\"G1GC\"})",
           "legendFormat": "Process CPU",
           "refId": "A"
         },
         {
-          "expr": "avg(system_cpu_usage{job=\"g1gc-app\"})",
+          "expr": "avg(system_cpu_usage{job=\"G1GC\"})",
           "legendFormat": "System CPU",
           "refId": "B"
         }
@@ -309,7 +309,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(jvm_gc_pause_seconds_sum{job=\"g1gc-app\", action!~\".*cycle.*\"}[1m])) * 100",
+          "expr": "sum(rate(jvm_gc_pause_seconds_sum{job=\"G1GC\", action!~\".*cycle.*\"}[1m])) * 100",
           "legendFormat": "GC Overhead %",
           "refId": "A"
         }
@@ -353,22 +353,22 @@
         "y": 16
       },
       "targets": [
-  {
-    "expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"g1gc-app\"}[1m]))) * 1000",
-    "legendFormat": "P99",
-    "refId": "A"
-  },
-  {
-    "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"g1gc-app\"}[1m]))) * 1000",
-    "legendFormat": "P95",
-    "refId": "B"
-  },
-  {
-    "expr": "histogram_quantile(0.50, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"g1gc-app\"}[1m]))) * 1000",
-    "legendFormat": "P50",
-    "refId": "C"
-  }
-],
+        {
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"G1GC\", uri=~\"/api/.*\"}[1m]))) * 1000",
+          "legendFormat": "P99",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"G1GC\", uri=~\"/api/.*\"}[1m]))) * 1000",
+          "legendFormat": "P95",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"G1GC\", uri=~\"/api/.*\"}[1m]))) * 1000",
+          "legendFormat": "P50",
+          "refId": "C"
+        }
+      ],
       "fieldConfig": {
         "defaults": {
           "unit": "ms",
@@ -439,7 +439,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(jvm_gc_memory_allocated_bytes_total{job=\"g1gc-app\"}[1m])) / 1024 / 1024",
+          "expr": "sum(rate(jvm_gc_memory_allocated_bytes_total{job=\"G1GC\"}[1m])) / 1024 / 1024",
           "legendFormat": "Allocation Rate",
           "refId": "A"
         }
@@ -484,7 +484,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (cause) (increase(jvm_gc_pause_seconds_count{job=\"g1gc-app\", action!~\".*cycle.*\"}[1m]))",
+          "expr": "sum by (cause) (increase(jvm_gc_pause_seconds_count{job=\"G1GC\", action!~\".*cycle.*\"}[1m]))",
           "legendFormat": "{{cause}}",
           "refId": "A"
         }
@@ -577,22 +577,22 @@
       },
       "targets": [
         {
-          "expr": "max(jvm_gc_pause_seconds_max{job=\"g1gc-app\", action!~\".*cycle.*\"}) * 1000",
+          "expr": "max(jvm_gc_pause_seconds_max{job=\"G1GC\", action!~\".*cycle.*\"}) * 1000",
           "legendFormat": "Max Pause (ms)",
           "refId": "A"
         },
         {
-          "expr": "sum(jvm_gc_pause_seconds_count{job=\"g1gc-app\", action!~\".*cycle.*\"})",
+          "expr": "sum(jvm_gc_pause_seconds_count{job=\"G1GC\", action!~\".*cycle.*\"})",
           "legendFormat": "Total Pauses",
           "refId": "B"
         },
         {
-          "expr": "sum(jvm_memory_used_bytes{job=\"g1gc-app\", area=\"heap\"}) / 1024 / 1024",
+          "expr": "sum(jvm_memory_used_bytes{job=\"G1GC\", area=\"heap\"}) / 1024 / 1024",
           "legendFormat": "Heap Used (MB)",
           "refId": "C"
         },
         {
-          "expr": "sum(rate(jvm_gc_pause_seconds_sum{job=\"g1gc-app\", action!~\".*cycle.*\"}[1m])) * 100",
+          "expr": "sum(rate(jvm_gc_pause_seconds_sum{job=\"G1GC\", action!~\".*cycle.*\"}[1m])) * 100",
           "legendFormat": "GC Overhead (%)",
           "refId": "D"
         }

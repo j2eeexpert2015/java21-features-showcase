@@ -30,17 +30,17 @@
       },
       "targets": [
         {
-          "expr": "max(jvm_gc_pause_seconds_max{job=\"g1gc-app\", action!~\".*cycle.*\"}) * 1000",
+          "expr": "max(jvm_gc_pause_seconds_max{job=\"G1GC\", action!~\".*cycle.*\"}) * 1000",
           "legendFormat": "G1GC - Max Pause",
           "refId": "A"
         },
         {
-          "expr": "max(jvm_gc_pause_seconds_max{job=\"zgc-app\", action!~\".*cycle.*\"}) * 1000",
+          "expr": "max(jvm_gc_pause_seconds_max{job=\"Generational-ZGC\", action!~\".*cycle.*\"}) * 1000",
           "legendFormat": "Generational ZGC - Max Pause",
           "refId": "B"
         },
         {
-          "expr": "max(jvm_gc_pause_seconds_max{job=\"zgc-nongen-app\", action!~\".*cycle.*\"}) * 1000",
+          "expr": "max(jvm_gc_pause_seconds_max{job=\"ZGC\", action!~\".*cycle.*\"}) * 1000",
           "legendFormat": "ZGC - Max Pause",
           "refId": "C"
         }
@@ -117,17 +117,17 @@
       },
       "targets": [
         {
-          "expr": "sum(jvm_gc_pause_seconds_count{job=\"g1gc-app\", action!~\".*cycle.*\"})",
+          "expr": "sum(jvm_gc_pause_seconds_count{job=\"G1GC\", action!~\".*cycle.*\"})",
           "legendFormat": "G1GC - Total Pauses",
           "refId": "A"
         },
         {
-          "expr": "sum(jvm_gc_pause_seconds_count{job=\"zgc-app\", action!~\".*cycle.*\"})",
+          "expr": "sum(jvm_gc_pause_seconds_count{job=\"Generational-ZGC\", action!~\".*cycle.*\"})",
           "legendFormat": "Generational ZGC - Total Pauses",
           "refId": "B"
         },
         {
-          "expr": "sum(jvm_gc_pause_seconds_count{job=\"zgc-nongen-app\", action!~\".*cycle.*\"})",
+          "expr": "sum(jvm_gc_pause_seconds_count{job=\"ZGC\", action!~\".*cycle.*\"})",
           "legendFormat": "ZGC - Total Pauses",
           "refId": "C"
         }
@@ -202,17 +202,17 @@
       },
       "targets": [
         {
-          "expr": "sum(jvm_memory_used_bytes{job=\"g1gc-app\", area=\"heap\"}) / 1024 / 1024",
+          "expr": "sum(jvm_memory_used_bytes{job=\"G1GC\", area=\"heap\"}) / 1024 / 1024",
           "legendFormat": "G1GC - Heap Used",
           "refId": "A"
         },
         {
-          "expr": "sum(jvm_memory_used_bytes{job=\"zgc-app\", area=\"heap\"}) / 1024 / 1024",
+          "expr": "sum(jvm_memory_used_bytes{job=\"Generational-ZGC\", area=\"heap\"}) / 1024 / 1024",
           "legendFormat": "Generational ZGC - Heap Used",
           "refId": "B"
         },
         {
-          "expr": "sum(jvm_memory_used_bytes{job=\"zgc-nongen-app\", area=\"heap\"}) / 1024 / 1024",
+          "expr": "sum(jvm_memory_used_bytes{job=\"ZGC\", area=\"heap\"}) / 1024 / 1024",
           "legendFormat": "ZGC - Heap Used",
           "refId": "C"
         }
@@ -287,17 +287,17 @@
       },
       "targets": [
         {
-          "expr": "avg(process_cpu_usage{job=\"g1gc-app\"})",
+          "expr": "avg(process_cpu_usage{job=\"G1GC\"})",
           "legendFormat": "G1GC - CPU",
           "refId": "A"
         },
         {
-          "expr": "avg(process_cpu_usage{job=\"zgc-app\"})",
+          "expr": "avg(process_cpu_usage{job=\"Generational-ZGC\"})",
           "legendFormat": "Generational ZGC - CPU",
           "refId": "B"
         },
         {
-          "expr": "avg(process_cpu_usage{job=\"zgc-nongen-app\"})",
+          "expr": "avg(process_cpu_usage{job=\"ZGC\"})",
           "legendFormat": "ZGC - CPU",
           "refId": "C"
         }
@@ -374,17 +374,17 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(jvm_gc_pause_seconds_sum{job=\"g1gc-app\", action!~\".*cycle.*\"}[1m])) * 100",
+          "expr": "sum(rate(jvm_gc_pause_seconds_sum{job=\"G1GC\", action!~\".*cycle.*\"}[1m])) * 100",
           "legendFormat": "G1GC - Overhead %",
           "refId": "A"
         },
         {
-          "expr": "sum(rate(jvm_gc_pause_seconds_sum{job=\"zgc-app\", action!~\".*cycle.*\"}[1m])) * 100",
+          "expr": "sum(rate(jvm_gc_pause_seconds_sum{job=\"Generational-ZGC\", action!~\".*cycle.*\"}[1m])) * 100",
           "legendFormat": "Generational ZGC - Overhead %",
           "refId": "B"
         },
         {
-          "expr": "sum(rate(jvm_gc_pause_seconds_sum{job=\"zgc-nongen-app\", action!~\".*cycle.*\"}[1m])) * 100",
+          "expr": "sum(rate(jvm_gc_pause_seconds_sum{job=\"ZGC\", action!~\".*cycle.*\"}[1m])) * 100",
           "legendFormat": "ZGC - Overhead %",
           "refId": "C"
         }
@@ -459,17 +459,17 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"g1gc-app\", uri=~\"/api/.*\"}[1m]))) * 1000",
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"G1GC\", uri=~\"/api/.*\"}[1m]))) * 1000",
           "legendFormat": "G1GC - P99 Latency",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"zgc-app\", uri=~\"/api/.*\"}[1m]))) * 1000",
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"Generational-ZGC\", uri=~\"/api/.*\"}[1m]))) * 1000",
           "legendFormat": "Generational ZGC - P99 Latency",
           "refId": "B"
         },
         {
-          "expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"zgc-nongen-app\", uri=~\"/api/.*\"}[1m]))) * 1000",
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"ZGC\", uri=~\"/api/.*\"}[1m]))) * 1000",
           "legendFormat": "ZGC - P99 Latency",
           "refId": "C"
         }
@@ -544,17 +544,17 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(jvm_gc_memory_allocated_bytes_total{job=\"g1gc-app\"}[1m])) / 1024 / 1024",
+          "expr": "sum(rate(jvm_gc_memory_allocated_bytes_total{job=\"G1GC\"}[1m])) / 1024 / 1024",
           "legendFormat": "G1GC - Allocation Rate",
           "refId": "A"
         },
         {
-          "expr": "sum(rate(jvm_gc_memory_allocated_bytes_total{job=\"zgc-app\"}[1m])) / 1024 / 1024",
+          "expr": "sum(rate(jvm_gc_memory_allocated_bytes_total{job=\"Generational-ZGC\"}[1m])) / 1024 / 1024",
           "legendFormat": "Generational ZGC - Allocation Rate",
           "refId": "B"
         },
         {
-          "expr": "sum(rate(jvm_gc_memory_allocated_bytes_total{job=\"zgc-nongen-app\"}[1m])) / 1024 / 1024",
+          "expr": "sum(rate(jvm_gc_memory_allocated_bytes_total{job=\"ZGC\"}[1m])) / 1024 / 1024",
           "legendFormat": "ZGC - Allocation Rate",
           "refId": "C"
         }
@@ -629,32 +629,32 @@
       },
       "targets": [
         {
-          "expr": "max(jvm_gc_pause_seconds_max{job=\"g1gc-app\", action!~\".*cycle.*\"}) * 1000",
+          "expr": "max(jvm_gc_pause_seconds_max{job=\"G1GC\", action!~\".*cycle.*\"}) * 1000",
           "legendFormat": "G1GC Max Pause (ms)",
           "refId": "A"
         },
         {
-          "expr": "max(jvm_gc_pause_seconds_max{job=\"zgc-app\", action!~\".*cycle.*\"}) * 1000",
+          "expr": "max(jvm_gc_pause_seconds_max{job=\"Generational-ZGC\", action!~\".*cycle.*\"}) * 1000",
           "legendFormat": "Generational ZGC Max Pause (ms)",
           "refId": "B"
         },
         {
-          "expr": "max(jvm_gc_pause_seconds_max{job=\"zgc-nongen-app\", action!~\".*cycle.*\"}) * 1000",
+          "expr": "max(jvm_gc_pause_seconds_max{job=\"ZGC\", action!~\".*cycle.*\"}) * 1000",
           "legendFormat": "ZGC Max Pause (ms)",
           "refId": "C"
         },
         {
-          "expr": "sum(jvm_gc_pause_seconds_count{job=\"g1gc-app\", action!~\".*cycle.*\"})",
+          "expr": "sum(jvm_gc_pause_seconds_count{job=\"G1GC\", action!~\".*cycle.*\"})",
           "legendFormat": "G1GC Total Pauses",
           "refId": "D"
         },
         {
-          "expr": "sum(jvm_gc_pause_seconds_count{job=\"zgc-app\", action!~\".*cycle.*\"})",
+          "expr": "sum(jvm_gc_pause_seconds_count{job=\"Generational-ZGC\", action!~\".*cycle.*\"})",
           "legendFormat": "Generational ZGC Total Pauses",
           "refId": "E"
         },
         {
-          "expr": "sum(jvm_gc_pause_seconds_count{job=\"zgc-nongen-app\", action!~\".*cycle.*\"})",
+          "expr": "sum(jvm_gc_pause_seconds_count{job=\"ZGC\", action!~\".*cycle.*\"})",
           "legendFormat": "ZGC Total Pauses",
           "refId": "F"
         }

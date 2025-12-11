@@ -4,7 +4,7 @@ global:
 
 scrape_configs:
   # G1GC instance on port 8080
-  - job_name: 'g1gc-app'
+  - job_name: 'G1GC'
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['host.docker.internal:8080']
@@ -13,7 +13,7 @@ scrape_configs:
           instance_name: 'g1gc'
 
   # Generational ZGC instance on port 8081  
-  - job_name: 'zgc-app'
+  - job_name: 'Generational-ZGC'
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['host.docker.internal:8081']
@@ -22,7 +22,7 @@ scrape_configs:
           instance_name: 'generational-zgc'
 
   # ZGC (Non-Generational) instance on port 8082
-  - job_name: 'zgc-nongen-app'
+  - job_name: 'ZGC'
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['host.docker.internal:8082']
