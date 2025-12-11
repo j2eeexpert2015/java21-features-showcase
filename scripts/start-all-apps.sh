@@ -70,21 +70,22 @@ echo ""
 
 # Start G1GC on port ${G1GC_PORT}
 echo "[1/3] Starting G1GC on port ${G1GC_PORT}..."
+echo "Command: java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseG1GC --enable-preview -jar ${JAR_PATH} --server.port=${G1GC_PORT}"
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS
-    osascript -e "tell app \"Terminal\" to do script \"cd '$(pwd)' && java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseG1GC -jar ${JAR_PATH} --server.port=${G1GC_PORT}\""
+    osascript -e "tell app \"Terminal\" to do script \"cd '$(pwd)' && java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseG1GC --enable-preview -jar ${JAR_PATH} --server.port=${G1GC_PORT}\""
 elif [ "$TERMINAL_CMD" = "gnome-terminal" ]; then
     # GNOME Terminal
-    gnome-terminal --title="G1GC (Port ${G1GC_PORT})" -- bash -c "java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseG1GC -jar ${JAR_PATH} --server.port=${G1GC_PORT}; exec bash"
+    gnome-terminal --title="G1GC (Port ${G1GC_PORT})" -- bash -c "java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseG1GC --enable-preview -jar ${JAR_PATH} --server.port=${G1GC_PORT}; exec bash"
 elif [ "$TERMINAL_CMD" = "konsole" ]; then
     # KDE Konsole
-    konsole --title "G1GC (Port ${G1GC_PORT})" -e bash -c "java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseG1GC -jar ${JAR_PATH} --server.port=${G1GC_PORT}; exec bash" &
+    konsole --title "G1GC (Port ${G1GC_PORT})" -e bash -c "java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseG1GC --enable-preview -jar ${JAR_PATH} --server.port=${G1GC_PORT}; exec bash" &
 elif [ "$TERMINAL_CMD" = "xterm" ]; then
     # xterm
-    xterm -title "G1GC (Port ${G1GC_PORT})" -e "java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseG1GC -jar ${JAR_PATH} --server.port=${G1GC_PORT}" &
+    xterm -title "G1GC (Port ${G1GC_PORT})" -e "java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseG1GC --enable-preview -jar ${JAR_PATH} --server.port=${G1GC_PORT}" &
 else
     # Background mode
-    nohup java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseG1GC -jar ${JAR_PATH} --server.port=${G1GC_PORT} > /dev/null 2>&1 &
+    nohup java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseG1GC --enable-preview -jar ${JAR_PATH} --server.port=${G1GC_PORT} > /dev/null 2>&1 &
 fi
 
 # Wait 5 seconds
@@ -92,21 +93,22 @@ sleep 5
 
 # Start Generational ZGC on port ${GENZGC_PORT}
 echo "[2/3] Starting Generational ZGC on port ${GENZGC_PORT}..."
+echo "Command: java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseZGC -XX:+ZGenerational --enable-preview -jar ${JAR_PATH} --server.port=${GENZGC_PORT}"
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS
-    osascript -e "tell app \"Terminal\" to do script \"cd '$(pwd)' && java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseZGC -XX:+ZGenerational -jar ${JAR_PATH} --server.port=${GENZGC_PORT}\""
+    osascript -e "tell app \"Terminal\" to do script \"cd '$(pwd)' && java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseZGC -XX:+ZGenerational --enable-preview -jar ${JAR_PATH} --server.port=${GENZGC_PORT}\""
 elif [ "$TERMINAL_CMD" = "gnome-terminal" ]; then
     # GNOME Terminal
-    gnome-terminal --title="Generational ZGC (Port ${GENZGC_PORT})" -- bash -c "java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseZGC -XX:+ZGenerational -jar ${JAR_PATH} --server.port=${GENZGC_PORT}; exec bash"
+    gnome-terminal --title="Generational ZGC (Port ${GENZGC_PORT})" -- bash -c "java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseZGC -XX:+ZGenerational --enable-preview -jar ${JAR_PATH} --server.port=${GENZGC_PORT}; exec bash"
 elif [ "$TERMINAL_CMD" = "konsole" ]; then
     # KDE Konsole
-    konsole --title "Generational ZGC (Port ${GENZGC_PORT})" -e bash -c "java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseZGC -XX:+ZGenerational -jar ${JAR_PATH} --server.port=${GENZGC_PORT}; exec bash" &
+    konsole --title "Generational ZGC (Port ${GENZGC_PORT})" -e bash -c "java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseZGC -XX:+ZGenerational --enable-preview -jar ${JAR_PATH} --server.port=${GENZGC_PORT}; exec bash" &
 elif [ "$TERMINAL_CMD" = "xterm" ]; then
     # xterm
-    xterm -title "Generational ZGC (Port ${GENZGC_PORT})" -e "java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseZGC -XX:+ZGenerational -jar ${JAR_PATH} --server.port=${GENZGC_PORT}" &
+    xterm -title "Generational ZGC (Port ${GENZGC_PORT})" -e "java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseZGC -XX:+ZGenerational --enable-preview -jar ${JAR_PATH} --server.port=${GENZGC_PORT}" &
 else
     # Background mode
-    nohup java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseZGC -XX:+ZGenerational -jar ${JAR_PATH} --server.port=${GENZGC_PORT} > /dev/null 2>&1 &
+    nohup java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseZGC -XX:+ZGenerational --enable-preview -jar ${JAR_PATH} --server.port=${GENZGC_PORT} > /dev/null 2>&1 &
 fi
 
 # Wait 5 seconds
@@ -114,21 +116,22 @@ sleep 5
 
 # Start ZGC on port ${ZGC_PORT}
 echo "[3/3] Starting ZGC on port ${ZGC_PORT}..."
+echo "Command: java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseZGC -XX:-ZGenerational --enable-preview -jar ${JAR_PATH} --server.port=${ZGC_PORT}"
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS
-    osascript -e "tell app \"Terminal\" to do script \"cd '$(pwd)' && java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseZGC -XX:-ZGenerational -jar ${JAR_PATH} --server.port=${ZGC_PORT}\""
+    osascript -e "tell app \"Terminal\" to do script \"cd '$(pwd)' && java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseZGC -XX:-ZGenerational --enable-preview -jar ${JAR_PATH} --server.port=${ZGC_PORT}\""
 elif [ "$TERMINAL_CMD" = "gnome-terminal" ]; then
     # GNOME Terminal
-    gnome-terminal --title="ZGC (Port ${ZGC_PORT})" -- bash -c "java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseZGC -XX:-ZGenerational -jar ${JAR_PATH} --server.port=${ZGC_PORT}; exec bash"
+    gnome-terminal --title="ZGC (Port ${ZGC_PORT})" -- bash -c "java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseZGC -XX:-ZGenerational --enable-preview -jar ${JAR_PATH} --server.port=${ZGC_PORT}; exec bash"
 elif [ "$TERMINAL_CMD" = "konsole" ]; then
     # KDE Konsole
-    konsole --title "ZGC (Port ${ZGC_PORT})" -e bash -c "java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseZGC -XX:-ZGenerational -jar ${JAR_PATH} --server.port=${ZGC_PORT}; exec bash" &
+    konsole --title "ZGC (Port ${ZGC_PORT})" -e bash -c "java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseZGC -XX:-ZGenerational --enable-preview -jar ${JAR_PATH} --server.port=${ZGC_PORT}; exec bash" &
 elif [ "$TERMINAL_CMD" = "xterm" ]; then
     # xterm
-    xterm -title "ZGC (Port ${ZGC_PORT})" -e "java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseZGC -XX:-ZGenerational -jar ${JAR_PATH} --server.port=${ZGC_PORT}" &
+    xterm -title "ZGC (Port ${ZGC_PORT})" -e "java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseZGC -XX:-ZGenerational --enable-preview -jar ${JAR_PATH} --server.port=${ZGC_PORT}" &
 else
     # Background mode
-    nohup java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseZGC -XX:-ZGenerational -jar ${JAR_PATH} --server.port=${ZGC_PORT} > /dev/null 2>&1 &
+    nohup java -Xmx${HEAP_SIZE} -Xms${HEAP_SIZE} -XX:+UseZGC -XX:-ZGenerational --enable-preview -jar ${JAR_PATH} --server.port=${ZGC_PORT} > /dev/null 2>&1 &
 fi
 
 echo ""

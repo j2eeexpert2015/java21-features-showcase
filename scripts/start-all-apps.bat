@@ -17,7 +17,7 @@ SET ZGC_PORT=8082
 
 REM JVM Configuration (Heap Size)
 REM Examples: 512m, 1g, 2g, 4g, 8g
-SET HEAP_SIZE=2g
+SET HEAP_SIZE=512m
 
 REM ========================================
 REM Do not change below this line
@@ -52,19 +52,22 @@ echo.
 
 REM Start G1GC
 echo [1/3] Starting G1GC on port %G1GC_PORT%...
-start "G1GC (Port %G1GC_PORT%)" java -Xmx%HEAP_SIZE% -Xms%HEAP_SIZE% -XX:+UseG1GC -jar "%JAR_PATH%" --server.port=%G1GC_PORT%
+echo Command: java -Xmx%HEAP_SIZE% -Xms%HEAP_SIZE% -XX:+UseG1GC --enable-preview -jar "%JAR_PATH%" --server.port=%G1GC_PORT%
+start "G1GC (Port %G1GC_PORT%)" java -Xmx%HEAP_SIZE% -Xms%HEAP_SIZE% -XX:+UseG1GC --enable-preview -jar "%JAR_PATH%" --server.port=%G1GC_PORT%
 
 timeout /t 5 /nobreak >nul
 
 REM Start Generational ZGC
 echo [2/3] Starting Generational ZGC on port %GENZGC_PORT%...
-start "Generational ZGC (Port %GENZGC_PORT%)" java -Xmx%HEAP_SIZE% -Xms%HEAP_SIZE% -XX:+UseZGC -XX:+ZGenerational -jar "%JAR_PATH%" --server.port=%GENZGC_PORT%
+echo Command: java -Xmx%HEAP_SIZE% -Xms%HEAP_SIZE% -XX:+UseZGC -XX:+ZGenerational --enable-preview -jar "%JAR_PATH%" --server.port=%GENZGC_PORT%
+start "Generational ZGC (Port %GENZGC_PORT%)" java -Xmx%HEAP_SIZE% -Xms%HEAP_SIZE% -XX:+UseZGC -XX:+ZGenerational --enable-preview -jar "%JAR_PATH%" --server.port=%GENZGC_PORT%
 
 timeout /t 5 /nobreak >nul
 
 REM Start ZGC
 echo [3/3] Starting ZGC on port %ZGC_PORT%...
-start "ZGC (Port %ZGC_PORT%)" java -Xmx%HEAP_SIZE% -Xms%HEAP_SIZE% -XX:+UseZGC -XX:-ZGenerational -jar "%JAR_PATH%" --server.port=%ZGC_PORT%
+echo Command: java -Xmx%HEAP_SIZE% -Xms%HEAP_SIZE% -XX:+UseZGC -XX:-ZGenerational --enable-preview -jar "%JAR_PATH%" --server.port=%ZGC_PORT%
+start "ZGC (Port %ZGC_PORT%)" java -Xmx%HEAP_SIZE% -Xms%HEAP_SIZE% -XX:+UseZGC -XX:-ZGenerational --enable-preview -jar "%JAR_PATH%" --server.port=%ZGC_PORT%
 
 echo.
 echo ========================================

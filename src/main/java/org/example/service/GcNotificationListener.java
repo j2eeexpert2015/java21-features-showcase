@@ -41,7 +41,7 @@ public class GcNotificationListener implements NotificationListener {
             if (gcBean instanceof NotificationEmitter) {
                 ((NotificationEmitter) gcBean).addNotificationListener(this, null, null);
                 registeredCount++;
-                log.info("✓ Registered listener for GC: {}", gcBean.getName());
+                log.info("Registered listener for GC: {}", gcBean.getName());
                 log.info("  - Memory Pools: {}", String.join(", ", gcBean.getMemoryPoolNames()));
             }
         }
@@ -78,17 +78,17 @@ public class GcNotificationListener implements NotificationListener {
         String eventCategory = isPause ? "PAUSE" : (isCycle ? "CYCLE" : "UNKNOWN");
 
         // Print detailed GC event information
-        log.info("┌─────────────────────────────────────────────────────────");
-        log.info("│ GC EVENT #{}", id);
-        log.info("├─────────────────────────────────────────────────────────");
-        log.info("│ Category:  {}", eventCategory);
-        log.info("│ Type:      {}", gcName);
-        log.info("│ Action:    {}", gcAction);
-        log.info("│ Cause:     {}", gcCause);
-        log.info("│ Duration:  {} ms", durationMs);
-        log.info("│ Start:     {} ms", startTime);
-        log.info("│ End:       {} ms", endTime);
-        log.info("└─────────────────────────────────────────────────────────");
+        log.info("========================================");
+        log.info("GC EVENT #{}", id);
+        log.info("========================================");
+        log.info("Category:  {}", eventCategory);
+        log.info("Type:      {}", gcName);
+        log.info("Action:    {}", gcAction);
+        log.info("Cause:     {}", gcCause);
+        log.info("Duration:  {} ms", durationMs);
+        log.info("Start:     {} ms", startTime);
+        log.info("End:       {} ms", endTime);
+        log.info("========================================");
     }
 
     /**
@@ -103,7 +103,7 @@ public class GcNotificationListener implements NotificationListener {
         }
 
         // ZGC pause events
-        if (gcName.contains("Pauses") || gcAction.equals("end of GC pause")) {
+        if (gcName.contains("Pauses") || gcAction.contains("GC pause")) {
             return true;
         }
 
@@ -120,7 +120,7 @@ public class GcNotificationListener implements NotificationListener {
         }
 
         // ZGC cycle events
-        if (gcName.contains("Cycles") || gcAction.equals("end of GC cycle")) {
+        if (gcName.contains("Cycles") || gcAction.contains("GC cycle")) {
             return true;
         }
 
