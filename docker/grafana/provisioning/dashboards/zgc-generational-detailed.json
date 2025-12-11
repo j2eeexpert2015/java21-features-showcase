@@ -2,7 +2,7 @@
   "annotations": {
     "list": []
   },
-  "title": "Generational ZGC Detailed Metrics",
+  "title": "Generational ZGC Detailed",
   "uid": "generational-zgc-detailed",
   "version": 6,
   "timezone": "browser",
@@ -474,7 +474,7 @@
       }
     },
     {
-      "title": "Generational ZGC Cycles by Reason",
+      "title": "GC Events by Cause",
       "description": "Why GC was triggered - Allocation Stall means Generational ZGC couldn't keep up!",
       "type": "timeseries",
       "gridPos": {

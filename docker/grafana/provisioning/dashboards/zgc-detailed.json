@@ -2,7 +2,7 @@
   "annotations": {
     "list": []
   },
-  "title": "ZGC Detailed Metrics",
+  "title": "ZGC Detailed",
   "uid": "zgc-nongen-detailed",
   "version": 6,
   "timezone": "browser",
@@ -474,7 +474,7 @@
       }
     },
     {
-      "title": "ZGC Cycles by Reason",
+      "title": "GC Events by Cause",
       "description": "Why GC was triggered - Allocation Stall means ZGC couldn't keep up!",
       "type": "timeseries",
       "gridPos": {
@@ -492,9 +492,9 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "reqps",
+          "unit": "short",
           "custom": {
-            "drawStyle": "line",
+            "drawStyle": "bars",
             "lineWidth": 2,
             "fillOpacity": 10,
             "stacking": {
