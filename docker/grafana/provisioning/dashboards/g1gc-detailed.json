@@ -353,22 +353,22 @@
         "y": 16
       },
       "targets": [
-        {
-          "expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"g1gc-app\", uri=~\"/api/.*\"}[1m]))) * 1000",
-          "legendFormat": "P99",
-          "refId": "A"
-        },
-        {
-          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"g1gc-app\", uri=~\"/api/.*\"}[1m]))) * 1000",
-          "legendFormat": "P95",
-          "refId": "B"
-        },
-        {
-          "expr": "histogram_quantile(0.50, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"g1gc-app\", uri=~\"/api/.*\"}[1m]))) * 1000",
-          "legendFormat": "P50",
-          "refId": "C"
-        }
-      ],
+  {
+    "expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"g1gc-app\"}[1m]))) * 1000",
+    "legendFormat": "P99",
+    "refId": "A"
+  },
+  {
+    "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"g1gc-app\"}[1m]))) * 1000",
+    "legendFormat": "P95",
+    "refId": "B"
+  },
+  {
+    "expr": "histogram_quantile(0.50, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"g1gc-app\"}[1m]))) * 1000",
+    "legendFormat": "P50",
+    "refId": "C"
+  }
+],
       "fieldConfig": {
         "defaults": {
           "unit": "ms",
