@@ -30,19 +30,9 @@
       },
       "targets": [
         {
-          "expr": "max(jvm_gc_pause_seconds_max{job=\"G1GC\", action!~\".*cycle.*\"}) * 1000",
-          "legendFormat": "G1GC - Max Pause",
+          "expr": "max by (job) (jvm_gc_pause_seconds_max{action!~\".*cycle.*\"}) * 1000",
+          "legendFormat": "{{job}}",
           "refId": "A"
-        },
-        {
-          "expr": "max(jvm_gc_pause_seconds_max{job=\"Generational-ZGC\", action!~\".*cycle.*\"}) * 1000",
-          "legendFormat": "Generational ZGC - Max Pause",
-          "refId": "B"
-        },
-        {
-          "expr": "max(jvm_gc_pause_seconds_max{job=\"ZGC\", action!~\".*cycle.*\"}) * 1000",
-          "legendFormat": "ZGC - Max Pause",
-          "refId": "C"
         }
       ],
       "fieldConfig": {
@@ -59,8 +49,8 @@
         "overrides": [
           {
             "matcher": {
-              "id": "byName",
-              "options": "G1GC - Max Pause"
+              "id": "byRegexp",
+              "options": "G1GC"
             },
             "properties": [
               {
@@ -74,8 +64,8 @@
           },
           {
             "matcher": {
-              "id": "byName",
-              "options": "Generational ZGC - Max Pause"
+              "id": "byRegexp",
+              "options": "Generational-ZGC"
             },
             "properties": [
               {
@@ -89,8 +79,8 @@
           },
           {
             "matcher": {
-              "id": "byName",
-              "options": "ZGC - Max Pause"
+              "id": "byRegexp",
+              "options": "^ZGC$"
             },
             "properties": [
               {
@@ -117,19 +107,9 @@
       },
       "targets": [
         {
-          "expr": "sum(jvm_gc_pause_seconds_count{job=\"G1GC\", action!~\".*cycle.*\"})",
-          "legendFormat": "G1GC - Total Pauses",
+          "expr": "sum by (job) (jvm_gc_pause_seconds_count{action!~\".*cycle.*\"})",
+          "legendFormat": "{{job}}",
           "refId": "A"
-        },
-        {
-          "expr": "sum(jvm_gc_pause_seconds_count{job=\"Generational-ZGC\", action!~\".*cycle.*\"})",
-          "legendFormat": "Generational ZGC - Total Pauses",
-          "refId": "B"
-        },
-        {
-          "expr": "sum(jvm_gc_pause_seconds_count{job=\"ZGC\", action!~\".*cycle.*\"})",
-          "legendFormat": "ZGC - Total Pauses",
-          "refId": "C"
         }
       ],
       "fieldConfig": {
@@ -144,8 +124,8 @@
         "overrides": [
           {
             "matcher": {
-              "id": "byName",
-              "options": "G1GC - Total Pauses"
+              "id": "byRegexp",
+              "options": "G1GC"
             },
             "properties": [
               {
@@ -159,8 +139,8 @@
           },
           {
             "matcher": {
-              "id": "byName",
-              "options": "Generational ZGC - Total Pauses"
+              "id": "byRegexp",
+              "options": "Generational-ZGC"
             },
             "properties": [
               {
@@ -174,8 +154,8 @@
           },
           {
             "matcher": {
-              "id": "byName",
-              "options": "ZGC - Total Pauses"
+              "id": "byRegexp",
+              "options": "^ZGC$"
             },
             "properties": [
               {
@@ -202,19 +182,9 @@
       },
       "targets": [
         {
-          "expr": "sum(jvm_memory_used_bytes{job=\"G1GC\", area=\"heap\"}) / 1024 / 1024",
-          "legendFormat": "G1GC - Heap Used",
+          "expr": "sum by (job) (jvm_memory_used_bytes{area=\"heap\"}) / 1024 / 1024",
+          "legendFormat": "{{job}}",
           "refId": "A"
-        },
-        {
-          "expr": "sum(jvm_memory_used_bytes{job=\"Generational-ZGC\", area=\"heap\"}) / 1024 / 1024",
-          "legendFormat": "Generational ZGC - Heap Used",
-          "refId": "B"
-        },
-        {
-          "expr": "sum(jvm_memory_used_bytes{job=\"ZGC\", area=\"heap\"}) / 1024 / 1024",
-          "legendFormat": "ZGC - Heap Used",
-          "refId": "C"
         }
       ],
       "fieldConfig": {
@@ -229,8 +199,8 @@
         "overrides": [
           {
             "matcher": {
-              "id": "byName",
-              "options": "G1GC - Heap Used"
+              "id": "byRegexp",
+              "options": "G1GC"
             },
             "properties": [
               {
@@ -244,8 +214,8 @@
           },
           {
             "matcher": {
-              "id": "byName",
-              "options": "Generational ZGC - Heap Used"
+              "id": "byRegexp",
+              "options": "Generational-ZGC"
             },
             "properties": [
               {
@@ -259,8 +229,8 @@
           },
           {
             "matcher": {
-              "id": "byName",
-              "options": "ZGC - Heap Used"
+              "id": "byRegexp",
+              "options": "^ZGC$"
             },
             "properties": [
               {
@@ -287,19 +257,9 @@
       },
       "targets": [
         {
-          "expr": "avg(process_cpu_usage{job=\"G1GC\"})",
-          "legendFormat": "G1GC - CPU",
+          "expr": "avg by (job) (process_cpu_usage)",
+          "legendFormat": "{{job}}",
           "refId": "A"
-        },
-        {
-          "expr": "avg(process_cpu_usage{job=\"Generational-ZGC\"})",
-          "legendFormat": "Generational ZGC - CPU",
-          "refId": "B"
-        },
-        {
-          "expr": "avg(process_cpu_usage{job=\"ZGC\"})",
-          "legendFormat": "ZGC - CPU",
-          "refId": "C"
         }
       ],
       "fieldConfig": {
@@ -316,8 +276,8 @@
         "overrides": [
           {
             "matcher": {
-              "id": "byName",
-              "options": "G1GC - CPU"
+              "id": "byRegexp",
+              "options": "G1GC"
             },
             "properties": [
               {
@@ -331,8 +291,8 @@
           },
           {
             "matcher": {
-              "id": "byName",
-              "options": "Generational ZGC - CPU"
+              "id": "byRegexp",
+              "options": "Generational-ZGC"
             },
             "properties": [
               {
@@ -346,8 +306,8 @@
           },
           {
             "matcher": {
-              "id": "byName",
-              "options": "ZGC - CPU"
+              "id": "byRegexp",
+              "options": "^ZGC$"
             },
             "properties": [
               {
@@ -374,19 +334,9 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(jvm_gc_pause_seconds_sum{job=\"G1GC\", action!~\".*cycle.*\"}[1m])) * 100",
-          "legendFormat": "G1GC - Overhead %",
+          "expr": "sum by (job) (rate(jvm_gc_pause_seconds_sum{action!~\".*cycle.*\"}[1m])) * 100",
+          "legendFormat": "{{job}}",
           "refId": "A"
-        },
-        {
-          "expr": "sum(rate(jvm_gc_pause_seconds_sum{job=\"Generational-ZGC\", action!~\".*cycle.*\"}[1m])) * 100",
-          "legendFormat": "Generational ZGC - Overhead %",
-          "refId": "B"
-        },
-        {
-          "expr": "sum(rate(jvm_gc_pause_seconds_sum{job=\"ZGC\", action!~\".*cycle.*\"}[1m])) * 100",
-          "legendFormat": "ZGC - Overhead %",
-          "refId": "C"
         }
       ],
       "fieldConfig": {
@@ -401,8 +351,8 @@
         "overrides": [
           {
             "matcher": {
-              "id": "byName",
-              "options": "G1GC - Overhead %"
+              "id": "byRegexp",
+              "options": "G1GC"
             },
             "properties": [
               {
@@ -416,8 +366,8 @@
           },
           {
             "matcher": {
-              "id": "byName",
-              "options": "Generational ZGC - Overhead %"
+              "id": "byRegexp",
+              "options": "Generational-ZGC"
             },
             "properties": [
               {
@@ -431,8 +381,8 @@
           },
           {
             "matcher": {
-              "id": "byName",
-              "options": "ZGC - Overhead %"
+              "id": "byRegexp",
+              "options": "^ZGC$"
             },
             "properties": [
               {
@@ -459,19 +409,9 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"G1GC\", uri=~\"/api/.*\"}[1m]))) * 1000",
-          "legendFormat": "G1GC - P99 Latency",
+          "expr": "histogram_quantile(0.99, sum by (le, job) (rate(http_server_requests_seconds_bucket{uri=~\"/api/.*\"}[1m]))) * 1000",
+          "legendFormat": "{{job}}",
           "refId": "A"
-        },
-        {
-          "expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"Generational-ZGC\", uri=~\"/api/.*\"}[1m]))) * 1000",
-          "legendFormat": "Generational ZGC - P99 Latency",
-          "refId": "B"
-        },
-        {
-          "expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"ZGC\", uri=~\"/api/.*\"}[1m]))) * 1000",
-          "legendFormat": "ZGC - P99 Latency",
-          "refId": "C"
         }
       ],
       "fieldConfig": {
@@ -486,8 +426,8 @@
         "overrides": [
           {
             "matcher": {
-              "id": "byName",
-              "options": "G1GC - P99 Latency"
+              "id": "byRegexp",
+              "options": "G1GC"
             },
             "properties": [
               {
@@ -501,8 +441,8 @@
           },
           {
             "matcher": {
-              "id": "byName",
-              "options": "Generational ZGC - P99 Latency"
+              "id": "byRegexp",
+              "options": "Generational-ZGC"
             },
             "properties": [
               {
@@ -516,8 +456,8 @@
           },
           {
             "matcher": {
-              "id": "byName",
-              "options": "ZGC - P99 Latency"
+              "id": "byRegexp",
+              "options": "^ZGC$"
             },
             "properties": [
               {
@@ -544,19 +484,9 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(jvm_gc_memory_allocated_bytes_total{job=\"G1GC\"}[1m])) / 1024 / 1024",
-          "legendFormat": "G1GC - Allocation Rate",
+          "expr": "sum by (job) (rate(jvm_gc_memory_allocated_bytes_total[1m])) / 1024 / 1024",
+          "legendFormat": "{{job}}",
           "refId": "A"
-        },
-        {
-          "expr": "sum(rate(jvm_gc_memory_allocated_bytes_total{job=\"Generational-ZGC\"}[1m])) / 1024 / 1024",
-          "legendFormat": "Generational ZGC - Allocation Rate",
-          "refId": "B"
-        },
-        {
-          "expr": "sum(rate(jvm_gc_memory_allocated_bytes_total{job=\"ZGC\"}[1m])) / 1024 / 1024",
-          "legendFormat": "ZGC - Allocation Rate",
-          "refId": "C"
         }
       ],
       "fieldConfig": {
@@ -571,8 +501,8 @@
         "overrides": [
           {
             "matcher": {
-              "id": "byName",
-              "options": "G1GC - Allocation Rate"
+              "id": "byRegexp",
+              "options": "G1GC"
             },
             "properties": [
               {
@@ -586,8 +516,8 @@
           },
           {
             "matcher": {
-              "id": "byName",
-              "options": "Generational ZGC - Allocation Rate"
+              "id": "byRegexp",
+              "options": "Generational-ZGC"
             },
             "properties": [
               {
@@ -601,8 +531,8 @@
           },
           {
             "matcher": {
-              "id": "byName",
-              "options": "ZGC - Allocation Rate"
+              "id": "byRegexp",
+              "options": "^ZGC$"
             },
             "properties": [
               {
@@ -618,8 +548,8 @@
       }
     },
     {
-      "title": "Summary Stats",
-      "description": "Key numbers at a glance",
+      "title": "Max GC Pause Time (ms)",
+      "description": "Maximum stop-the-world pause - Lower is Better",
       "type": "stat",
       "gridPos": {
         "h": 6,
@@ -629,45 +559,22 @@
       },
       "targets": [
         {
-          "expr": "max(jvm_gc_pause_seconds_max{job=\"G1GC\", action!~\".*cycle.*\"}) * 1000",
-          "legendFormat": "G1GC Max Pause (ms)",
+          "expr": "max by (job) (jvm_gc_pause_seconds_max{action!~\".*cycle.*\"}) * 1000",
+          "legendFormat": "{{job}}",
           "refId": "A"
-        },
-        {
-          "expr": "max(jvm_gc_pause_seconds_max{job=\"Generational-ZGC\", action!~\".*cycle.*\"}) * 1000",
-          "legendFormat": "Generational ZGC Max Pause (ms)",
-          "refId": "B"
-        },
-        {
-          "expr": "max(jvm_gc_pause_seconds_max{job=\"ZGC\", action!~\".*cycle.*\"}) * 1000",
-          "legendFormat": "ZGC Max Pause (ms)",
-          "refId": "C"
-        },
-        {
-          "expr": "sum(jvm_gc_pause_seconds_count{job=\"G1GC\", action!~\".*cycle.*\"})",
-          "legendFormat": "G1GC Total Pauses",
-          "refId": "D"
-        },
-        {
-          "expr": "sum(jvm_gc_pause_seconds_count{job=\"Generational-ZGC\", action!~\".*cycle.*\"})",
-          "legendFormat": "Generational ZGC Total Pauses",
-          "refId": "E"
-        },
-        {
-          "expr": "sum(jvm_gc_pause_seconds_count{job=\"ZGC\", action!~\".*cycle.*\"})",
-          "legendFormat": "ZGC Total Pauses",
-          "refId": "F"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short"
+          "mappings": [],
+          "unit": "ms",
+          "decimals": 1
         },
         "overrides": [
           {
             "matcher": {
-              "id": "byName",
-              "options": "G1GC Max Pause (ms)"
+              "id": "byRegexp",
+              "options": "G1GC"
             },
             "properties": [
               {
@@ -676,13 +583,17 @@
                   "fixedColor": "red",
                   "mode": "fixed"
                 }
+              },
+              {
+                "id": "displayName",
+                "value": "G1GC"
               }
             ]
           },
           {
             "matcher": {
-              "id": "byName",
-              "options": "Generational ZGC Max Pause (ms)"
+              "id": "byRegexp",
+              "options": "Generational-ZGC"
             },
             "properties": [
               {
@@ -691,13 +602,17 @@
                   "fixedColor": "green",
                   "mode": "fixed"
                 }
+              },
+              {
+                "id": "displayName",
+                "value": "Gen-ZGC"
               }
             ]
           },
           {
             "matcher": {
-              "id": "byName",
-              "options": "ZGC Max Pause (ms)"
+              "id": "byRegexp",
+              "options": "^ZGC$"
             },
             "properties": [
               {
@@ -706,51 +621,10 @@
                   "fixedColor": "blue",
                   "mode": "fixed"
                 }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "G1GC Total Pauses"
-            },
-            "properties": [
+              },
               {
-                "id": "color",
-                "value": {
-                  "fixedColor": "red",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Generational ZGC Total Pauses"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "green",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "ZGC Total Pauses"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "blue",
-                  "mode": "fixed"
-                }
+                "id": "displayName",
+                "value": "ZGC"
               }
             ]
           }
@@ -758,13 +632,17 @@
       },
       "options": {
         "reduceOptions": {
+          "values": false,
           "calcs": [
             "lastNotNull"
-          ]
+          ],
+          "fields": ""
         },
+        "orientation": "auto",
+        "textMode": "value_and_name",
         "colorMode": "value",
         "graphMode": "area",
-        "textMode": "auto"
+        "justifyMode": "auto"
       }
     }
   ]
