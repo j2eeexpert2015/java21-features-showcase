@@ -55,7 +55,7 @@ DEFAULT SETTINGS:
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="G1GC - ${SHORT_LIVED_MB}MB/${SURVIVOR_MB}MB">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="G1GC - ${SHORT_LIVED_MB}MB/${SURVIVOR_MB}MB" enabled="true">
           <intProp name="HTTPSampler.connect_timeout">10000</intProp>
           <intProp name="HTTPSampler.response_timeout">60000</intProp>
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
@@ -76,7 +76,7 @@ DEFAULT SETTINGS:
         </ConstantTimer>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ZGC - Port 8082">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ZGC - Port 8082" enabled="true">
         <intProp name="ThreadGroup.num_threads">3</intProp>
         <intProp name="ThreadGroup.ramp_time">5</intProp>
         <longProp name="ThreadGroup.duration">300</longProp>
@@ -90,7 +90,7 @@ DEFAULT SETTINGS:
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="ZGC - ${SHORT_LIVED_MB}MB/${SURVIVOR_MB}MB">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="ZGC - ${SHORT_LIVED_MB}MB/${SURVIVOR_MB}MB" enabled="true">
           <intProp name="HTTPSampler.connect_timeout">10000</intProp>
           <intProp name="HTTPSampler.response_timeout">60000</intProp>
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
@@ -111,7 +111,7 @@ DEFAULT SETTINGS:
         </ConstantTimer>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ZGC Generational - Port 8081">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ZGC Generational - Port 8081" enabled="true">
         <intProp name="ThreadGroup.num_threads">3</intProp>
         <intProp name="ThreadGroup.ramp_time">5</intProp>
         <longProp name="ThreadGroup.duration">300</longProp>
@@ -146,7 +146,7 @@ DEFAULT SETTINGS:
         </ConstantTimer>
         <hashTree/>
       </hashTree>
-      <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report">
+      <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
         <boolProp name="ResultCollector.error_logging">false</boolProp>
         <objProp>
           <name>saveConfig</name>
@@ -183,7 +183,7 @@ DEFAULT SETTINGS:
         <stringProp name="filename"></stringProp>
       </ResultCollector>
       <hashTree/>
-      <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report">
+      <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report" enabled="true">
         <boolProp name="ResultCollector.error_logging">false</boolProp>
         <objProp>
           <name>saveConfig</name>
@@ -220,7 +220,7 @@ DEFAULT SETTINGS:
         <stringProp name="filename"></stringProp>
       </ResultCollector>
       <hashTree/>
-      <kg.apc.jmeter.vizualizers.CorrectedResultCollector guiclass="kg.apc.jmeter.vizualizers.ResponseTimesOverTimeGui" testclass="kg.apc.jmeter.vizualizers.CorrectedResultCollector" testname="jp@gc - Response Times Over Time">
+      <kg.apc.jmeter.vizualizers.CorrectedResultCollector guiclass="kg.apc.jmeter.vizualizers.ResponseTimesOverTimeGui" testclass="kg.apc.jmeter.vizualizers.CorrectedResultCollector" testname="jp@gc - Response Times Over Time" enabled="true">
         <boolProp name="ResultCollector.error_logging">false</boolProp>
         <objProp>
           <name>saveConfig</name>
