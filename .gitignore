@@ -38,8 +38,8 @@ build/
 ### Mac OS ###
 .DS_Store
 /.idea
-*.log
+#*.log
 *.0
-*.jfr
+#*.jfr
 *.1
 *.2

@@ -17,7 +17,7 @@ SET ZGC_PORT=8082
 
 REM JVM Configuration (Heap Size)
 REM Examples: 512m, 1g, 2g, 4g, 8g
-SET HEAP_SIZE=4g
+SET HEAP_SIZE=8g
 
 REM ========================================
 REM Do not change below this line
