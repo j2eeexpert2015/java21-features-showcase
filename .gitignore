@@ -43,3 +43,6 @@ build/
 #*.jfr
 *.1
 *.2
+*.jfr
+*.log
+/logs
