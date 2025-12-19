@@ -35,10 +35,10 @@ import java.util.concurrent.atomic.AtomicLong;
  * java -cp target/classes -Xmx1G -Xms1G -XX:+UseG1GC -Xlog:gc*:file=logs/g1gc-1g.log:time,level,tags -XX:StartFlightRecording=duration=60s,filename=jfr/g1gc-1g.jfr org.example.concepts.zgc.RetailMemoryStress
  *
  * Non-Gen ZGC with 1GB:
- * java -cp target/classes -Xmx1G -Xms1G -XX:+UseZGC -XX:-ZGenerational -Xlog:gc*:file=logs/zgc-nongen-1g.log:time,level,tags -XX:StartFlightRecording=duration=60s,filename=jfr/zgc-nongen-1g.jfr org.example.concepts.zgc.RetailMemoryStress
+ * java -cp target/classes -Xmx1G -Xms1G -XX:+UseZGC -XX:-ZGenerational -Xlog:gc*:file=logs/zgc-1g.log:time,level,tags -XX:StartFlightRecording=duration=60s,filename=jfr/zgc-1g.jfr org.example.concepts.zgc.RetailMemoryStress
  *
  * Gen ZGC with 1GB:
- * java -cp target/classes -Xmx1G -Xms1G -XX:+UseZGC -XX:+ZGenerational -Xlog:gc*:file=logs/zgc-gen-1g.log:time,level,tags -XX:StartFlightRecording=duration=60s,filename=jfr/zgc-gen-1g.jfr org.example.concepts.zgc.RetailMemoryStress
+ * java -cp target/classes -Xmx1G -Xms1G -XX:+UseZGC -XX:+ZGenerational -Xlog:gc*:file=logs/generational-zgc-1g.log:time,level,tags -XX:StartFlightRecording=duration=60s,filename=jfr/generational-zgc-1g.jfr org.example.concepts.zgc.RetailMemoryStress
  *
  * Expected with 1GB: All GCs handle the workload smoothly, rare or no stalls
  *
@@ -49,21 +49,11 @@ import java.util.concurrent.atomic.AtomicLong;
  * G1GC with 512MB:
  * java -cp target/classes -Xmx512M -Xms512M -XX:+UseG1GC -Xlog:gc*:file=logs/g1gc-512m.log:time,level,tags -XX:StartFlightRecording=duration=60s,filename=jfr/g1gc-512m.jfr org.example.concepts.zgc.RetailMemoryStress
  *
- * Expected: Frequent Young GC (7-8/sec), 2-15ms pauses, stable throughput, ZERO stalls
- *
  * Non-Gen ZGC with 512MB:
- * java -cp target/classes -Xmx512M -Xms512M -XX:+UseZGC -XX:-ZGenerational -Xlog:gc*:file=logs/zgc-nongen-512m.log:time,level,tags -XX:StartFlightRecording=duration=60s,filename=jfr/zgc-nongen-512m.jfr org.example.concepts.zgc.RetailMemoryStress
- *
- * Expected: High heap pressure (90%+), THOUSANDS of allocation stalls, throughput drops to ZERO
- * Verify: grep "Allocation Stall" logs/zgc-nongen-512m.log | grep -v "0 / 0" | wc -l
- * JFR: Open jfr/zgc-nongen-512m.jfr in JMC, search "ZAllocationStall" - should show ~2300+ events
+ * java -cp target/classes -Xmx512M -Xms512M -XX:+UseZGC -XX:-ZGenerational -Xlog:gc*:file=logs/zgc-512m.log:time,level,tags -XX:StartFlightRecording=duration=60s,filename=jfr/zgc-512m.jfr org.example.concepts.zgc.RetailMemoryStress
  *
  * Gen ZGC with 512MB:
- * java -cp target/classes -Xmx512M -Xms512M -XX:+UseZGC -XX:+ZGenerational -Xlog:gc*:file=logs/zgc-gen-512m.log:time,level,tags -XX:StartFlightRecording=duration=60s,filename=jfr/zgc-gen-512m.jfr org.example.concepts.zgc.RetailMemoryStress
- *
- * Expected: Efficient heap usage, frequent Minor GC, <1ms pauses, ~30 stalls (rare), rock-solid throughput
- * Verify: grep "Allocation Stall" logs/zgc-gen-512m.log | grep "Worker" | wc -l
- * JFR: Open jfr/zgc-gen-512m.jfr in JMC, search "ZAllocationStall" - should show ~30 events only
+ * java -cp target/classes -Xmx512M -Xms512M -XX:+UseZGC -XX:+ZGenerational -Xlog:gc*:file=logs/generational-zgc-512m.log:time,level,tags -XX:StartFlightRecording=duration=60s,filename=jfr/generational-zgc-512m.jfr org.example.concepts.zgc.RetailMemoryStress
  *
  * ============================================================================
  * COMPARISON SUMMARY
