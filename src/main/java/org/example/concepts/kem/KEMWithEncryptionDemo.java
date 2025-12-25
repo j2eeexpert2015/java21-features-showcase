@@ -1,28 +1,26 @@
 package org.example.concepts.kem;
 
+import javax.crypto.Cipher;
 import javax.crypto.KEM;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.PublicKey;
 import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Base64;
 
-public class KEMDemo {
+public class KEMWithEncryptionDemo {
+
+    // ==================== KEY ESTABLISHMENT ====================
 
     // Step 1: Generate Key Pair
     public static KeyPair generateKeyPair() throws Exception {
         System.out.println("=== Step 1: Generate Key Pair ===");
 
-        /*
-         * KeyPairGenerator.getInstance("X25519")
-         *
-         * X25519 is an elliptic curve algorithm designed for key agreement.
-         *
-         * - Faster than RSA
-         * - Smaller key sizes (256-bit vs RSA's 2048-bit)
-         * - Widely used in TLS 1.3, Signal, WhatsApp, SSH
-         */
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("X25519");
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
@@ -37,36 +35,8 @@ public class KEMDemo {
     public static KEM.Encapsulated encapsulate(PublicKey publicKey) throws Exception {
         System.out.println("=== Step 2: Sender Encapsulation ===");
 
-        /*
-         * KEM.getInstance("DHKEM")
-         *
-         * DHKEM = Diffie-Hellman Key Encapsulation Mechanism
-         *
-         * - Uses Diffie-Hellman key agreement under the hood
-         * - Combined with X25519 curve for the actual math
-         * - Standardized in RFC 9180 (HPKE)
-         */
         KEM kem = KEM.getInstance("DHKEM");
-
-        /*
-         * kem.newEncapsulator(publicKey)
-         *
-         * This only CONFIGURES the encapsulator. No key derivation happens here.
-         *
-         * - Stores the public key inside the encapsulator
-         * - Prepares for encapsulation
-         */
         KEM.Encapsulator encapsulator = kem.newEncapsulator(publicKey);
-
-        /*
-         * encapsulator.encapsulate()
-         *
-         * This ACTUALLY DERIVES the shared secret.
-         *
-         * Returns KEM.Encapsulated containing:
-         *   - key()          : The derived shared secret (use this for AES encryption)
-         *   - encapsulation(): Data to send to receiver (so they can derive the same secret)
-         */
         KEM.Encapsulated encapsulated = encapsulator.encapsulate();
 
         System.out.println("KEM Algorithm: " + kem.getAlgorithm());
@@ -97,25 +67,7 @@ public class KEMDemo {
         System.out.println("=== Step 4: Receiver Decapsulation ===");
 
         KEM kem = KEM.getInstance("DHKEM");
-
-        /*
-         * kem.newDecapsulator(privateKey)
-         *
-         * This only CONFIGURES the decapsulator. No key derivation happens here.
-         *
-         * - Stores the private key inside the decapsulator
-         * - Prepares for decapsulation
-         */
         KEM.Decapsulator decapsulator = kem.newDecapsulator(privateKey);
-
-        /*
-         * decapsulator.decapsulate(encapsulation)
-         *
-         * This ACTUALLY DERIVES the shared secret.
-         *
-         * - Uses the private key + received encapsulation
-         * - Mathematically derives the SAME shared secret as the sender
-         */
         SecretKey sharedSecret = decapsulator.decapsulate(encapsulation);
 
         System.out.println("KEM Algorithm: " + kem.getAlgorithm());
@@ -124,8 +76,72 @@ public class KEMDemo {
         return sharedSecret;
     }
 
+    // ==================== DATA ENCRYPTION ====================
+
+    // Helper: Convert shared secret to AES key
+    private static SecretKey toAesKey(SecretKey sharedSecret) {
+        byte[] aesKeyBytes = Arrays.copyOf(sharedSecret.getEncoded(), 32);
+        return new SecretKeySpec(aesKeyBytes, "AES");
+    }
+
+    // Step 5: Encrypt data using the shared secret
+    public static EncryptedData encryptData(String plaintext, SecretKey sharedSecret)
+            throws Exception {
+        System.out.println("=== Step 5: Encrypt Data with Shared Secret ===");
+
+        SecretKey aesKey = toAesKey(sharedSecret);
+
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+
+        byte[] iv = new byte[12];
+        SecureRandom.getInstanceStrong().nextBytes(iv);
+
+        cipher.init(Cipher.ENCRYPT_MODE, aesKey, new GCMParameterSpec(128, iv));
+        byte[] ciphertext = cipher.doFinal(plaintext.getBytes());
+
+        System.out.println("Plaintext: " + plaintext);
+        System.out.println("IV (Base64): " + Base64.getEncoder().encodeToString(iv));
+        System.out.println("Ciphertext (Base64): " + Base64.getEncoder().encodeToString(ciphertext));
+        System.out.println("Data encrypted successfully.\n");
+
+        return new EncryptedData(ciphertext, iv);
+    }
+
+    // Step 6: Decrypt data using the shared secret
+    public static String decryptData(EncryptedData encryptedData, SecretKey sharedSecret)
+            throws Exception {
+        System.out.println("=== Step 6: Decrypt Data with Shared Secret ===");
+
+        SecretKey aesKey = toAesKey(sharedSecret);
+
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        cipher.init(Cipher.DECRYPT_MODE, aesKey,
+                new GCMParameterSpec(128, encryptedData.iv));
+        byte[] plaintext = cipher.doFinal(encryptedData.ciphertext);
+
+        String decryptedText = new String(plaintext);
+        System.out.println("Decrypted: " + decryptedText + "\n");
+
+        return decryptedText;
+    }
+
+    // Helper class to hold encrypted data
+    public static class EncryptedData {
+        public final byte[] ciphertext;
+        public final byte[] iv;
+
+        public EncryptedData(byte[] ciphertext, byte[] iv) {
+            this.ciphertext = ciphertext;
+            this.iv = iv;
+        }
+    }
+
     public static void main(String[] args) throws Exception {
-        System.out.println("KEM DEMONSTRATION\n");
+        System.out.println("KEM + AES ENCRYPTION DEMONSTRATION\n");
+
+        String message = "Payment confirmed: $1,299.00 - Order #12345";
+
+        // ==================== KEY ESTABLISHMENT ====================
 
         // Step 1: Receiver generates key pair
         KeyPair receiverKeyPair = generateKeyPair();
@@ -143,13 +159,18 @@ public class KEMDemo {
                 encapsulation
         );
 
-        // Verify shared secrets match
+        // ==================== DATA ENCRYPTION ====================
+
+        // Step 5: Sender encrypts data with shared secret
+        EncryptedData encryptedData = encryptData(message, senderSharedSecret);
+
+        // Step 6: Receiver decrypts data with shared secret
+        String decryptedMessage = decryptData(encryptedData, receiverSharedSecret);
+
+        // ==================== VERIFICATION ====================
         System.out.println("=== Verification ===");
-        boolean secretsMatch = Base64.getEncoder()
-                .encodeToString(senderSharedSecret.getEncoded())
-                .equals(Base64.getEncoder()
-                        .encodeToString(receiverSharedSecret.getEncoded()));
-        System.out.println("Shared Secrets Match: " + secretsMatch);
-        System.out.println("\nNote: In a real system, this shared secret would be used as the key for AES encryption.");
+        System.out.println("Original:  " + message);
+        System.out.println("Decrypted: " + decryptedMessage);
+        System.out.println("Match: " + message.equals(decryptedMessage));
     }
 }

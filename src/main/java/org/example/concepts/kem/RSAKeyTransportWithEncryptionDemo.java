@@ -3,13 +3,17 @@ package org.example.concepts.kem;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.util.Base64;
 
-public class RSAKeyTransportDemo {
+public class RSAKeyTransportWithEncryptionDemo {
+
+    // ==================== KEY ESTABLISHMENT ====================
 
     // Step 1: Generate RSA Key Pair
     public static KeyPair generateKeyPair() throws Exception {
@@ -35,8 +39,6 @@ public class RSAKeyTransportDemo {
         SecretKey symmetricKey = keyGenerator.generateKey();
 
         System.out.println("Symmetric Key Algorithm: " + symmetricKey.getAlgorithm());
-        System.out.println("Symmetric Key (Base64): " +
-                Base64.getEncoder().encodeToString(symmetricKey.getEncoded()));
         System.out.println("Symmetric key generated successfully.\n");
 
         return symmetricKey;
@@ -47,48 +49,11 @@ public class RSAKeyTransportDemo {
             throws Exception {
         System.out.println("=== Step 3: Encrypt Symmetric Key with Public Key ===");
 
-        /*
-         * Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding")
-         *
-         * Format: Algorithm/Mode/Padding
-         *
-         * RSA                           - The asymmetric encryption algorithm
-         * ECB                           - Electronic Codebook (required by Java for RSA,
-         *                                 but irrelevant since RSA encrypts one block)
-         * OAEPWithSHA-256AndMGF1Padding - The padding scheme
-         *
-         * Why padding is required:
-         * RSA requires input to be a specific size (matching the key size).
-         * A 256-bit AES key is smaller than a 2048-bit RSA key.
-         * Padding fills the gap and adds randomization for security.
-         */
         Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
-
-        /*
-         * cipher.init(Cipher.WRAP_MODE, publicKey)
-         *
-         * This only CONFIGURES the cipher. No encryption happens here.
-         *
-         * - Stores WRAP_MODE inside the cipher object
-         * - Stores the public key inside the cipher object
-         * - Marks the cipher as "ready to use"
-         *
-         * WRAP_MODE - Specifically designed for encrypting keys
-         */
         cipher.init(Cipher.WRAP_MODE, publicKey);
-
-        /*
-         * cipher.wrap(symmetricKey)
-         *
-         * This ACTUALLY ENCRYPTS the symmetric key.
-         *
-         * - Accepts a Key object directly
-         * - Returns the encrypted key as bytes
-         */
         byte[] encryptedKey = cipher.wrap(symmetricKey);
 
         System.out.println("Cipher Algorithm: " + cipher.getAlgorithm());
-        System.out.println("Padding Scheme: OAEPWithSHA-256AndMGF1Padding");
         System.out.println("Encrypted Key (Base64): " +
                 Base64.getEncoder().encodeToString(encryptedKey));
         System.out.println("Symmetric key encrypted successfully.\n");
@@ -101,71 +66,103 @@ public class RSAKeyTransportDemo {
             throws Exception {
         System.out.println("=== Step 4: Decrypt Symmetric Key with Private Key ===");
 
-        // Same cipher configuration as encryption
         Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
-
-        /*
-         * cipher.init(Cipher.UNWRAP_MODE, privateKey)
-         *
-         * This only CONFIGURES the cipher. No decryption happens here.
-         *
-         * - Stores UNWRAP_MODE inside the cipher object
-         * - Stores the private key inside the cipher object
-         * - Marks the cipher as "ready to use"
-         *
-         * UNWRAP_MODE - Specifically designed for decrypting keys
-         */
         cipher.init(Cipher.UNWRAP_MODE, privateKey);
-
-        /*
-         * cipher.unwrap(encryptedKey, "AES", Cipher.SECRET_KEY)
-         *
-         * This ACTUALLY DECRYPTS the symmetric key.
-         *
-         * Parameters:
-         *   encryptedKey      - The encrypted key bytes to decrypt
-         *   "AES"             - Algorithm of the wrapped key
-         *   Cipher.SECRET_KEY - Type of key (SECRET_KEY for symmetric keys)
-         *
-         * Returns a Key object directly.
-         */
         SecretKey decryptedKey = (SecretKey) cipher.unwrap(encryptedKey, "AES", Cipher.SECRET_KEY);
 
         System.out.println("Decrypted Key Algorithm: " + decryptedKey.getAlgorithm());
-        System.out.println("Decrypted Key (Base64): " +
-                Base64.getEncoder().encodeToString(decryptedKey.getEncoded()));
         System.out.println("Symmetric key decrypted successfully.\n");
 
         return decryptedKey;
     }
 
+    // ==================== DATA ENCRYPTION ====================
+
+    // Step 5: Encrypt data using the symmetric key
+    public static EncryptedData encryptData(String plaintext, SecretKey symmetricKey)
+            throws Exception {
+        System.out.println("=== Step 5: Encrypt Data with Symmetric Key ===");
+
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+
+        byte[] iv = new byte[12];
+        SecureRandom.getInstanceStrong().nextBytes(iv);
+
+        cipher.init(Cipher.ENCRYPT_MODE, symmetricKey, new GCMParameterSpec(128, iv));
+        byte[] ciphertext = cipher.doFinal(plaintext.getBytes());
+
+        System.out.println("Plaintext: " + plaintext);
+        System.out.println("IV (Base64): " + Base64.getEncoder().encodeToString(iv));
+        System.out.println("Ciphertext (Base64): " + Base64.getEncoder().encodeToString(ciphertext));
+        System.out.println("Data encrypted successfully.\n");
+
+        return new EncryptedData(ciphertext, iv);
+    }
+
+    // Step 6: Decrypt data using the symmetric key
+    public static String decryptData(EncryptedData encryptedData, SecretKey symmetricKey)
+            throws Exception {
+        System.out.println("=== Step 6: Decrypt Data with Symmetric Key ===");
+
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        cipher.init(Cipher.DECRYPT_MODE, symmetricKey,
+                new GCMParameterSpec(128, encryptedData.iv));
+        byte[] plaintext = cipher.doFinal(encryptedData.ciphertext);
+
+        String decryptedText = new String(plaintext);
+        System.out.println("Decrypted: " + decryptedText + "\n");
+
+        return decryptedText;
+    }
+
+    // Helper class to hold encrypted data
+    public static class EncryptedData {
+        public final byte[] ciphertext;
+        public final byte[] iv;
+
+        public EncryptedData(byte[] ciphertext, byte[] iv) {
+            this.ciphertext = ciphertext;
+            this.iv = iv;
+        }
+    }
+
     public static void main(String[] args) throws Exception {
-        System.out.println("RSA KEY TRANSPORT DEMONSTRATION\n");
+        System.out.println("RSA KEY TRANSPORT + AES ENCRYPTION DEMONSTRATION\n");
+
+        String message = "Payment confirmed: $1,299.00 - Order #12345";
+
+        // ==================== KEY ESTABLISHMENT ====================
 
         // Step 1: Receiver generates key pair
         KeyPair receiverKeyPair = generateKeyPair();
 
         // Step 2: Sender generates random symmetric key
-        SecretKey originalSymmetricKey = generateSymmetricKey();
+        SecretKey senderSymmetricKey = generateSymmetricKey();
 
         // Step 3: Sender encrypts symmetric key with receiver's public key
         byte[] encryptedKey = encryptSymmetricKey(
-                originalSymmetricKey,
+                senderSymmetricKey,
                 receiverKeyPair.getPublic()
         );
 
         // Step 4: Receiver decrypts symmetric key with private key
-        SecretKey recoveredSymmetricKey = decryptSymmetricKey(
+        SecretKey receiverSymmetricKey = decryptSymmetricKey(
                 encryptedKey,
                 receiverKeyPair.getPrivate()
         );
 
-        // Verify keys match
+        // ==================== DATA ENCRYPTION ====================
+
+        // Step 5: Sender encrypts data with symmetric key
+        EncryptedData encryptedData = encryptData(message, senderSymmetricKey);
+
+        // Step 6: Receiver decrypts data with symmetric key
+        String decryptedMessage = decryptData(encryptedData, receiverSymmetricKey);
+
+        // ==================== VERIFICATION ====================
         System.out.println("=== Verification ===");
-        boolean keysMatch = Base64.getEncoder()
-                .encodeToString(originalSymmetricKey.getEncoded())
-                .equals(Base64.getEncoder()
-                        .encodeToString(recoveredSymmetricKey.getEncoded()));
-        System.out.println("Keys Match: " + keysMatch);
+        System.out.println("Original:  " + message);
+        System.out.println("Decrypted: " + decryptedMessage);
+        System.out.println("Match: " + message.equals(decryptedMessage));
     }
 }
