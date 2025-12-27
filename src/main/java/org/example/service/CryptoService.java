@@ -353,21 +353,6 @@ public class CryptoService {
     /**
      * Container for encryption results (IV + Ciphertext)
      */
-    public static class EncryptionResult {
-        private final byte[] iv;
-        private final byte[] ciphertext;
 
-        public EncryptionResult(byte[] iv, byte[] ciphertext) {
-            this.iv = iv;
-            this.ciphertext = ciphertext;
-        }
-
-        public byte[] getIv() {
-            return iv;
-        }
-
-        public byte[] getCiphertext() {
-            return ciphertext;
-        }
-    }
+    public record EncryptionResult(byte[] iv, byte[] ciphertext) {}
 }
