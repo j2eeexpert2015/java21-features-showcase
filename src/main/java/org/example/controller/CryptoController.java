@@ -400,8 +400,8 @@ public class CryptoController {
                             "encrypt-message",
                             "Message encrypted successfully"
                     )
-                    .addData("ciphertext", cryptoService.bytesToBase64(result.getCiphertext()))
-                    .addData("iv", cryptoService.bytesToBase64(result.getIv()))
+                    .addData("ciphertext", cryptoService.bytesToBase64(result.ciphertext()))
+                    .addData("iv", cryptoService.bytesToBase64(result.ciphertext()))
                     .addData("algorithm", "AES-GCM");
 
             return ResponseEntity.ok(response);
