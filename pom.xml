@@ -95,7 +95,8 @@
                     <!-- Compile with preview + incubator Vector module -->
                     <compilerArgs>
                         <arg>--enable-preview</arg>
-                        <arg>-Xlint:preview</arg>
+                        <!--<arg>-Xlint:preview</arg>-->
+                        <arg>-Xlint:-preview</arg>  <!-- Minus sign suppresses warnings -->
                         <arg>--add-modules</arg>
                         <arg>jdk.incubator.vector</arg>
                     </compilerArgs>
@@ -121,7 +122,10 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
-                    <argLine>--enable-preview</argLine>
+                    <argLine>
+                        --enable-preview
+                        -XX:+EnableDynamicAgentLoading
+                    </argLine>
                 </configuration>
             </plugin>
         </plugins>
