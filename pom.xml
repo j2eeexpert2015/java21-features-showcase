@@ -96,7 +96,7 @@
                     <compilerArgs>
                         <arg>--enable-preview</arg>
                         <!--<arg>-Xlint:preview</arg>-->
-                        <arg>-Xlint:-preview</arg>  <!-- Minus sign suppresses warnings -->
+                        <!--<arg>-Xlint:-preview</arg> --> <!-- Minus sign suppresses warnings -->
                         <arg>--add-modules</arg>
                         <arg>jdk.incubator.vector</arg>
                     </compilerArgs>
