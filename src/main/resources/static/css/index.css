@@ -12,16 +12,16 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 1rem 2rem;
+    padding: 0.75rem 1.5rem;
 }
 
 .header {
     text-align: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     color: white;
-    padding-top: 1rem;
+    padding-top: 0.5rem;
     position: relative;
     overflow: hidden;
 }
@@ -50,9 +50,9 @@ body {
 }
 
 .header h1 {
-    font-size: 2.5rem;
-    font-weight: 900;
-    margin-bottom: 0.3rem;
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.2rem;
     line-height: 1.1;
     position: relative;
     z-index: 1;
@@ -60,7 +60,7 @@ body {
 }
 
 .header p {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 500;
     position: relative;
     z-index: 1;
@@ -69,37 +69,37 @@ body {
 
 .demos-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 1.5rem;
-    margin-top: 2rem;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+    margin-top: 1rem;
 }
 
 .demo-card {
     background: white;
-    border-radius: 20px;
-    padding: 1.8rem;
+    border-radius: 14px;
+    padding: 1.25rem;
     text-decoration: none;
     color: inherit;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
     transition: transform 0.3s ease;
 }
 
 .demo-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-4px);
     text-decoration: none;
     color: inherit;
 }
 
 .demo-icon {
-    width: 55px;
-    height: 55px;
-    border-radius: 12px;
+    width: 46px;
+    height: 46px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 1.2rem;
+    margin-bottom: 0.75rem;
     color: white;
-    font-size: 1.4rem;
+    font-size: 1.25rem;
 }
 
 .shopping-cart .demo-icon {
@@ -114,17 +114,22 @@ body {
     background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
 }
 
+.kem-demo .demo-icon {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
 .demo-title {
-    font-size: 1.4rem;
-    font-weight: 800;
-    margin-bottom: 0.8rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
     color: #1a1a1a;
 }
 
 .demo-description {
     color: #2c3e50;
-    margin-bottom: 1.2rem;
-    line-height: 1.6;
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+    font-size: 0.875rem;
 }
 
 .features-list {
@@ -133,17 +138,23 @@ body {
 }
 
 .features-list li {
-    padding: 0.4rem 0;
+    padding: 0.2rem 0;
     color: #1a1a1a;
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
 }
 
 .features-list li::before {
     content: '•';
     color: #667eea;
-    margin-right: 0.75rem;
-    font-size: 1.2rem;
+    margin-right: 0.6rem;
+    font-size: 1rem;
+}
+
+@media (max-width: 1200px) {
+    .demos-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 768px) {
@@ -153,27 +164,19 @@ body {
 
     .header {
         padding-top: 0.5rem;
-        margin-bottom: 1rem;
+        margin-bottom: 0.75rem;
     }
 
     .header h1 {
-        font-size: 2rem;
-        position: relative;
-        z-index: 1;
-    }
-
-    .header p {
-        position: relative;
-        z-index: 1;
+        font-size: 1.5rem;
     }
 
     .demos-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
-        margin-top: 1.5rem;
     }
 
     .demo-card {
-        padding: 1.5rem;
+        padding: 1rem;
     }
 }
