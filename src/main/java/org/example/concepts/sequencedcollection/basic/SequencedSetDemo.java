@@ -15,7 +15,7 @@ import java.util.*;
  * - LinkedHashSet: maintains insertion order
  * - TreeSet: maintains sorted order (via SortedSet/NavigableSet)
  */
-public class BasicSequencedSetDemo {
+public class SequencedSetDemo {
 
     public static void main(String[] args) {
         System.out.println("=== BasicSequencedSetDemo ===");
