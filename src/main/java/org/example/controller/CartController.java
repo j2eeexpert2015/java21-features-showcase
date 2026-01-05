@@ -33,8 +33,7 @@ public class CartController {
 
         return new ApiResponse("ShoppingCartController.addItem",
                 "Item added to end of cart using Sequenced Collection")
-                .withServiceCall("CartService.addItemToCart", List.of(Java21Methods.ADD_LAST))
-                .withServiceCall("CartService.updateCartMetadata", Java21Methods.BASIC_OPERATIONS);
+                .withServiceCall("CartService.addItem", List.of(Java21Methods.ADD_LAST));
     }
 
     // Add priority item to cart front
@@ -48,8 +47,7 @@ public class CartController {
 
         return new ApiResponse("ShoppingCartController.addPriorityItem",
                 "Priority item added to front of cart using Sequenced Collection")
-                .withServiceCall("CartService.addPriorityItemToCart", List.of(Java21Methods.ADD_FIRST))
-                .withServiceCall("CartService.updateCartMetadata", Java21Methods.BASIC_OPERATIONS);
+                .withServiceCall("CartService.addPriorityItem", List.of(Java21Methods.ADD_FIRST));
     }
 
     // Remove specific item
@@ -61,8 +59,7 @@ public class CartController {
 
         return new ApiResponse("ShoppingCartController.removeItem",
                 "Item removed from cart")
-                .withServiceCall("CartService.removeSpecificItem", List.of(Java21Methods.REMOVE))
-                .withServiceCall("CartService.updateCartMetadata", Java21Methods.BASIC_OPERATIONS);
+                .withServiceCall("CartService.removeItem", List.of(Java21Methods.REMOVE));
     }
 
     // Undo last addition
@@ -74,8 +71,7 @@ public class CartController {
 
         return new ApiResponse("ShoppingCartController.undoLastAction",
                 "Last action undone using Sequenced Collection removeLast")
-                .withServiceCall("CartService.removeLastAddedItem", List.of(Java21Methods.REMOVE_LAST))
-                .withServiceCall("CartService.updateCartMetadata", Java21Methods.BASIC_OPERATIONS);
+                .withServiceCall("CartService.undoLastAction", List.of(Java21Methods.GET_LAST, Java21Methods.REMOVE_LAST));
     }
 
     // Clear entire cart
@@ -87,7 +83,7 @@ public class CartController {
 
         return new ApiResponse("ShoppingCartController.clearCart",
                 "All items removed from cart")
-                .withServiceCall("CartService.clearAllItems", List.of(Java21Methods.CLEAR));
+                .withServiceCall("CartService.clearCart", List.of(Java21Methods.CLEAR));
     }
 
     // Get current cart state (for UI updates)

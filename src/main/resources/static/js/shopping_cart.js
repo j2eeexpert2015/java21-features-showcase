@@ -92,21 +92,32 @@ function updateFlowLog(logId, responseData) {
     // Handle service calls
     if (responseData.serviceCalls && typeof responseData.serviceCalls === 'object') {
         console.log('📦 serviceCalls found:', responseData.serviceCalls);
-        html += `<div class="api-flow-child">🟣 Service Layer: Multiple methods called</div>`;
 
-        Object.entries(responseData.serviceCalls).forEach(([serviceMethod, java21Methods]) => {
-            console.log(`  📌 Processing service: ${serviceMethod}`, java21Methods);
-            if (java21Methods && java21Methods.length > 0) {
-                html += `<div class="api-flow-child">  └── <strong>${serviceMethod}</strong> → <span class="java21-method-tag">${java21Methods.join(', ')}</span></div>`;
-                // Collect methods to highlight
-                java21Methods.forEach(method => {
-                    console.log('    ➕ Adding method to highlight:', method);
-                    methodsToHighlight.push(method);
-                });
-            } else {
-                html += `<div class="api-flow-child">  └── <strong>${serviceMethod}</strong> → Standard Collection API</div>`;
-            }
-        });
+        const serviceEntries = Object.entries(responseData.serviceCalls);
+        const totalMethods = serviceEntries.reduce((sum, [, methods]) => sum + (methods?.length || 0), 0);
+
+        // Check if single service with single method
+        if (serviceEntries.length === 1 && totalMethods === 1) {
+            const [serviceMethod, java21Methods] = serviceEntries[0];
+            html += `<div class="api-flow-child">🟣 Service Layer: <strong>${serviceMethod}</strong></div>`;
+            console.log('    ➕ Adding method to highlight:', java21Methods[0]);
+            methodsToHighlight.push(java21Methods[0]);
+        } else {
+            // Multiple services - just show service names
+            html += `<div class="api-flow-child">🟣 Service Layer: Multiple methods called</div>`;
+
+            serviceEntries.forEach(([serviceMethod, java21Methods]) => {
+                console.log(`  📌 Processing service: ${serviceMethod}`, java21Methods);
+                html += `<div class="api-flow-child">  └── <strong>${serviceMethod}</strong></div>`;
+                // Still collect methods to highlight in API Reference table
+                if (java21Methods && java21Methods.length > 0) {
+                    java21Methods.forEach(method => {
+                        console.log('    ➕ Adding method to highlight:', method);
+                        methodsToHighlight.push(method);
+                    });
+                }
+            });
+        }
     } else {
         console.log('⚠️ No serviceCalls in responseData');
     }
