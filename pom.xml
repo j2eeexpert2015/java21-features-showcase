@@ -107,7 +107,8 @@
                     <!-- Compile with preview + incubator Vector module -->
                     <compilerArgs>
                         <arg>--enable-preview</arg>
-                        <arg>-Xlint:preview</arg>
+                        <!--<arg>-Xlint:preview</arg>-->
+                        <!--<arg>-Xlint:-preview</arg> --> <!-- Minus sign suppresses warnings -->
                         <arg>--add-modules</arg>
                         <arg>jdk.incubator.vector</arg>
                     </compilerArgs>
@@ -136,6 +137,7 @@
                     <argLine>
                         --enable-preview
                         -Djdk.instrument.traceUsage
+                        -XX:+EnableDynamicAgentLoading
                     </argLine>
                 </configuration>
             </plugin>

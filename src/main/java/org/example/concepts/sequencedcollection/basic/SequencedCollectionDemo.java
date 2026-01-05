@@ -2,7 +2,7 @@ package org.example.concepts.sequencedcollection.basic;
 
 import java.util.*;
 
-public class BasicSequencedCollectionDemo {
+public class SequencedCollectionDemo {
 
     public static void main(String[] args) {
         System.out.println("=== BasicSequencedCollectionDemo ===");

@@ -15,7 +15,7 @@ import java.util.*;
  * - LinkedHashMap: maintains insertion order
  * - TreeMap: maintains key-sorted order (via SortedMap/NavigableMap)
  */
-public class BasicSequencedMapDemo {
+public class SequencedMapDemo {
 
     public static void main(String[] args) {
         System.out.println("=== BasicSequencedMapDemo ===");
