@@ -153,7 +153,8 @@ public class RetailMemoryStress {
      *
      * Note: Manual pause can reduce allocation rate due to JIT optimization!
      */
-    private static final boolean WAIT_FOR_PROFILER = false;
+    // private static final boolean WAIT_FOR_PROFILER = false;
+    private static final boolean WAIT_FOR_PROFILER = true;
 
     /**
      * AUTO START DELAY: Seconds to wait before starting (if not waiting for user)
