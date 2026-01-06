@@ -94,14 +94,15 @@ function updateFlowLog(logId, responseData) {
         console.log('📦 serviceCalls found:', responseData.serviceCalls);
 
         const serviceEntries = Object.entries(responseData.serviceCalls);
-        const totalMethods = serviceEntries.reduce((sum, [, methods]) => sum + (methods?.length || 0), 0);
 
-        // Check if single service with single method
-        if (serviceEntries.length === 1 && totalMethods === 1) {
+        // Check if single service call (regardless of how many Java 21 methods)
+        if (serviceEntries.length === 1) {
             const [serviceMethod, java21Methods] = serviceEntries[0];
-            html += `<div class="api-flow-child">🟣 Service Layer: <strong>${serviceMethod}</strong></div>`;
-            console.log('    ➕ Adding method to highlight:', java21Methods[0]);
-            methodsToHighlight.push(java21Methods[0]);
+            html += `<div class="api-flow-child">🟣 Service Layer: <strong>${serviceMethod}</strong> → <span class="java21-method-tag">${java21Methods.join(', ')}</span></div>`;
+            java21Methods.forEach(method => {
+                console.log('    ➕ Adding method to highlight:', method);
+                methodsToHighlight.push(method);
+            });
         } else {
             // Multiple services - just show service names
             html += `<div class="api-flow-child">🟣 Service Layer: Multiple methods called</div>`;
