@@ -561,9 +561,9 @@ public class PatternMatchingShowcase {
 
         // 💡 TIP: Comment out any demo methods you don't want to run during your video
 
-        demo.demoSwitchExpressions();        // 1️⃣ Feature 1: Java 14
-        demo.demoTypePatterns();             // 2️⃣ Feature 2: Java 16
-        demo.demoRecordPatterns();           // 3️⃣ Feature 3: Java 21
+        //demo.demoSwitchExpressions();        // 1️⃣ Feature 1: Java 14
+        //demo.demoTypePatterns();             // 2️⃣ Feature 2: Java 16
+        //demo.demoRecordPatterns();           // 3️⃣ Feature 3: Java 21
         demo.demoPatternMatchingForSwitch(); // 4️⃣ All Combined: Java 21
         demo.demoSummary();                  // 📊 Summary
     }

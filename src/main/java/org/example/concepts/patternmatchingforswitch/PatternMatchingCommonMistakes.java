@@ -46,6 +46,9 @@ public class PatternMatchingCommonMistakes {
         // This is what students WANT to write but it won't compile
         // Demonstrating with a less obvious mistake that DOES compile but has wrong logic
         return switch (payment) {
+            case CreditCard(var n, var t, var c, var e, var amount, var id)
+                    when amount.compareTo(new BigDecimal("1000")) > 0 ->
+                    "High-value card";  // ⚠️ UNREACHABLE - dominated by case above!
             // Without proper ordering, you might write logic that compiles
             // but doesn't work as intended
             case CreditCard cc -> {
@@ -56,6 +59,7 @@ public class PatternMatchingCommonMistakes {
                     yield "Standard card";
                 }
             }
+
 
             case PayPal pp -> "PayPal";
             case BankTransfer bt -> "Bank";
