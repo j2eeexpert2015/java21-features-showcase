@@ -220,4 +220,79 @@ body {
   display: inline-block; width: 12px; height: 12px; border: 2px solid #6c757d; border-radius: 50%;
   border-top-color: #fff; animation: spin 1s ease-in-out infinite; margin-right: 6px;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin { to { transform: rotate(360deg); } }/* === NEW CSS RULES TO ADD === */
+/* These replace inline styles from HTML */
+
+/* Panel header spacing */
+.panel-header-spacing {
+  margin-top: 30px;
+}
+
+/* Payment method info */
+.payment-method-info {
+  font-size: 12px;
+  text-align: center;
+}
+
+.payment-method-name {
+  font-weight: 600;
+}
+
+.payment-method-desc {
+  color: #6c757d;
+}
+
+/* Customer type label */
+.customer-type-label {
+  margin-bottom: 10px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Checkbox hint */
+.checkbox-hint {
+  font-size: 12px;
+  color: #6c757d;
+  margin-left: 20px;
+}
+
+/* Section headers (h4) */
+.section-header {
+  font-size: 12px;
+  color: #6c757d;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.section-header-spaced {
+  margin-bottom: 15px;
+}
+
+/* Status content */
+.status-title {
+  font-size: 12px;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.status-text {
+  font-size: 10px;
+  color: #555;
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.1;
+}
+
+/* Clear log button - remove inline styles */
+.clear-log-btn {
+  margin-left: auto;
+  border: 1px solid #ddd;
+  background: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+}

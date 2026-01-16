@@ -49,7 +49,7 @@
             </div>
         </div>
 
-        <div class="panel-header" style="margin-top: 30px;">
+        <div class="panel-header panel-header-spacing">
             <span class="panel-icon">💳</span>
             Payment Method
         </div>
@@ -57,29 +57,29 @@
         <div class="payment-methods">
             <div class="payment-method selected" onclick="selectPaymentMethod('credit')" data-method="credit">
                 <div class="payment-icon">💳</div>
-                <div style="font-size: 12px; text-align: center;">
-                    <div style="font-weight: 600;">Credit Card</div>
-                    <div style="color: #6c757d;">Visa, MC, Amex</div>
+                <div class="payment-method-info">
+                    <div class="payment-method-name">Credit Card</div>
+                    <div class="payment-method-desc">Visa, MC, Amex</div>
                 </div>
             </div>
             <div class="payment-method" onclick="selectPaymentMethod('paypal')" data-method="paypal">
                 <div class="payment-icon">📱</div>
-                <div style="font-size: 12px; text-align: center;">
-                    <div style="font-weight: 600;">PayPal</div>
-                    <div style="color: #6c757d;">Account</div>
+                <div class="payment-method-info">
+                    <div class="payment-method-name">PayPal</div>
+                    <div class="payment-method-desc">Account</div>
                 </div>
             </div>
             <div class="payment-method" onclick="selectPaymentMethod('bank')" data-method="bank">
                 <div class="payment-icon">🏛️</div>
-                <div style="font-size: 12px; text-align: center;">
-                    <div style="font-weight: 600;">Bank Transfer</div>
-                    <div style="color: #6c757d;">Direct</div>
+                <div class="payment-method-info">
+                    <div class="payment-method-name">Bank Transfer</div>
+                    <div class="payment-method-desc">Direct</div>
                 </div>
             </div>
         </div>
 
         <div class="customer-type">
-            <div style="margin-bottom: 10px; font-weight: 600; font-size: 14px;">👤 Customer Type</div>
+            <div class="customer-type-label">👤 Customer Type</div>
             <div class="customer-tabs">
                 <button class="customer-tab" onclick="selectCustomerType('basic')" data-type="basic">Basic</button>
                 <button class="customer-tab" onclick="selectCustomerType('premium')" data-type="premium">Premium</button>
@@ -91,7 +91,7 @@
             <input type="checkbox" id="international" onchange="toggleInternational()">
             <label for="international">International Transaction</label>
         </div>
-        <div style="font-size: 12px; color: #6c757d; margin-left: 20px;">
+        <div class="checkbox-hint">
             High amounts + international = verification
         </div>
 
@@ -104,7 +104,7 @@
             Java 21 Pattern Matching
         </div>
 
-        <h4 style="font-size: 12px; color: #6c757d; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Pattern Matching Reference</h4>
+        <h4 class="section-header">Pattern Matching Reference</h4>
 
         <div class="pattern-reference" id="pattern-reference">
             <div class="pattern-line" data-pattern="switch">
@@ -128,38 +128,38 @@
             💡 Rows highlight to show the *actual* executed path.
         </div>
 
-        <h4 style="font-size: 12px; color: #6c757d; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px;">Current Pattern Status</h4>
+        <h4 class="section-header section-header-spaced">Current Pattern Status</h4>
 
         <div class="status-section" id="status-section">
             <div class="status-item">
                 <div class="status-icon success">✓</div>
                 <div class="status-content">
-                    <h5 style="font-size: 12px !important; font-weight: bold !important; color: #333 !important;">Payment Method Detection</h5>
-                    <p id="payment-detection" style="font-size: 10px !important; color: #555 !important; font-weight: 500 !important;">Pattern: CreditCard identified</p>
+                    <h5 class="status-title">Payment Method Detection</h5>
+                    <p id="payment-detection" class="status-text">Pattern: CreditCard identified</p>
                 </div>
             </div>
 
             <div class="status-item">
                 <div class="status-icon success">✓</div>
                 <div class="status-content">
-                    <h5 style="font-size: 12px !important; font-weight: bold !important; color: #333 !important;">Guard Condition Check</h5>
-                    <p id="guard-condition" style="font-size: 10px !important; color: #555 !important; font-weight: 500 !important;">Amount ≤ $1,000 — Standard processing</p>
+                    <h5 class="status-title">Guard Condition Check</h5>
+                    <p id="guard-condition" class="status-text">Amount ≤ $1,000 — Standard processing</p>
                 </div>
             </div>
 
             <div class="status-item">
                 <div class="status-icon success">✓</div>
                 <div class="status-content">
-                    <h5 style="font-size: 12px !important; font-weight: bold !important; color: #333 !important;">Validation</h5>
-                    <p id="validation-status" style="font-size: 10px !important; color: #555 !important; font-weight: 500 !important;">Ready for processing</p>
+                    <h5 class="status-title">Validation</h5>
+                    <p id="validation-status" class="status-text">Ready for processing</p>
                 </div>
             </div>
 
             <div class="status-item">
                 <div class="status-icon play">▶</div>
                 <div class="status-content">
-                    <h5 style="font-size: 12px !important; font-weight: bold !important; color: #333 !important;">Payment Processing</h5>
-                    <p id="processing-status" style="font-size: 10px !important; color: #555 !important; font-weight: 500 !important;">Click Process Payment to execute</p>
+                    <h5 class="status-title">Payment Processing</h5>
+                    <p id="processing-status" class="status-text">Click Process Payment to execute</p>
                 </div>
             </div>
         </div>
@@ -169,7 +169,7 @@
         <div class="panel-header">
             <span class="panel-icon">📊</span>
             Visual Flow Inspector
-            <button class="btn btn-sm btn-outline-secondary clear-log-btn" onclick="clearInspectorLog()" style="margin-left: auto; border: 1px solid #ddd; background: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;">🗑️ Clear</button>
+            <button class="clear-log-btn" onclick="clearInspectorLog()">🗑️ Clear</button>
         </div>
 
         <div id="api-log" class="api-log-container" aria-live="polite">
