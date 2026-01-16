@@ -1,29 +1,13 @@
 /*
-* Corrected payment_processing.js
-*
-* FIX 1: (Instant Update)
-* - Removed updatePatternHighlighting() and updateStatusIndicators() from input handlers.
-* - Added resetStatusPanels() to clear panels on init, clear, and process.
-* - processPayment() now calls updateStatusIndicators() *after* API call.
-*
-* FIX 2: (Highlighting Bug)
-* - REMOVED highlight clearing from highlightJavaMethod().
-* - ADDED highlight clearing to the TOP of renderPatternMatchingSteps().
-* - REMOVED 3-second timeout from highlightJavaMethod() to make highlights persist.
-*
-* FIX 3: (Status Line Logic)
-* - Status line ("Offline Mode" vs "API Call") is now updated AFTER the API call completes.
-* - If API succeeds, status is retroactively corrected to show "API Call".
-* - Fixes the illogical display of "Offline Mode" with successful transaction data.
+* Simplified payment_processing.js
+* - Removed connection state tracking
+* - Removed offline/online mode detection
+* - Just shows API call results: success or error
 */
 
 const API_BASE_URL = 'http://localhost:8080';
 const ENDPOINTS = {
   PROCESS: '/api/payment/process',
-  METHOD: '/api/payment/method',
-  CUSTOMER_TYPE: '/api/payment/customer/type',
-  INTERNATIONAL: '/api/payment/international',
-  AMOUNT: '/api/payment/amount',
   DEMO_STATE: '/api/payment/demo-state'
 };
 
@@ -32,8 +16,7 @@ let appState = {
   paymentMethod: 'credit',
   customerType: 'vip',
   isInternational: false,
-  processing: false,
-  connected: false
+  processing: false
 };
 
 const orderScenarios = {
@@ -91,84 +74,9 @@ const customerTypes = {
   vip: { tier: 'VIP', priority: 'Express' }
 };
 
-// Generate mock pattern matching steps for offline mode
-function generateMockPatternSteps() {
-  const steps = [];
-  const method = paymentMethods[appState.paymentMethod];
-
-  steps.push({
-    stepType: 'TYPE_CHECK',
-    description: `Payment is ${method.name}`,
-    matchedType: method.name,
-    timestamp: new Date().toISOString()
-  });
-
-  const destructuredValues = appState.paymentMethod === 'credit'
-    ? `type=Visa, cvv=***`
-    : appState.paymentMethod === 'paypal'
-      ? `email=user@example.com, accountId=PP-${Date.now().toString().slice(-6)}`
-      : `routing=021000021, account=****1234`;
-
-  steps.push({
-    stepType: 'DESTRUCTURING',
-    description: `Record pattern destructured ${method.name} components`,
-    matchedType: method.name,
-    extractedValues: destructuredValues,
-    timestamp: new Date().toISOString()
-  });
-
-  if (appState.amount > 1000 && appState.isInternational) {
-    steps.push({
-      stepType: 'GUARD_EVALUATION',
-      description: `Guard condition for high-value international transactions`,
-      guardExpression: 'amount > 1000 && international',
-      passed: true,
-      caseNumber: 1,
-      evaluationDetails: [
-        { condition: 'amount > 1000', result: true, actualValue: `$${appState.amount.toLocaleString()} > $1,000` },
-        { condition: 'international', result: true, actualValue: 'TRUE' }
-      ],
-      timestamp: new Date().toISOString()
-    });
-  } else if (appState.amount > 1000 && !appState.isInternational) {
-    steps.push({
-      stepType: 'GUARD_EVALUATION',
-      description: `Checking guard for high-value international case`,
-      guardExpression: 'amount > 1000 && international',
-      passed: false,
-      caseNumber: 1,
-      evaluationDetails: [
-        { condition: 'amount > 1000', result: true, actualValue: `$${appState.amount.toLocaleString()} > $1,000` },
-        { condition: 'international', result: false, actualValue: 'FALSE' }
-      ],
-      timestamp: new Date().toISOString()
-    });
-    steps.push({
-      stepType: 'GUARD_EVALUATION',
-      description: `Guard condition for high-value domestic transactions`,
-      guardExpression: 'amount > 1000',
-      passed: true,
-      caseNumber: 2,
-      evaluationDetails: [
-        { condition: 'amount > 1000', result: true, actualValue: `$${appState.amount.toLocaleString()} > $1,000` }
-      ],
-      timestamp: new Date().toISOString()
-    });
-  }
-
-  return steps;
-}
-
 async function apiCall(method, endpoint, data = null) {
-  // Store the method and endpoint for later use in updateFlowLog
   const requestMethod = method.toUpperCase();
-  const requestEndpoint = endpoint;
-
-  const logId = createFlowLog(
-    `${requestMethod} Request`,
-    requestMethod,
-    requestEndpoint
-  );
+  const logId = createFlowLog(`${requestMethod} Request`, requestMethod, endpoint);
 
   try {
     const config = {
@@ -185,51 +93,21 @@ async function apiCall(method, endpoint, data = null) {
 
     const responseData = await response.json();
 
-    // **FIX 3:** Pass request info to updateFlowLog so it can correct the status
     updateFlowLog(logId, {
       controller_method: responseData.controller_method || 'PaymentController',
-      service_calls: responseData.service_calls || {},
       operation_description: responseData.operation_description || 'Operation completed',
-      response_data: responseData,
-      _requestMethod: requestMethod,
-      _requestEndpoint: requestEndpoint,
-      _wasSuccessful: true
+      response_data: responseData
     });
 
+    updateConnectionStatus(true);
     return responseData;
+
   } catch (error) {
     console.error('API Call failed:', error);
-    updateFlowLog(logId, {
-      error: error.message,
-      controller_method: 'Connection Failed',
-      _requestMethod: requestMethod,
-      _requestEndpoint: requestEndpoint,
-      _wasSuccessful: false
-    });
+    updateFlowLog(logId, { error: error.message });
+    updateConnectionStatus(false);
     throw error;
   }
-}
-
-async function checkConnection() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/payment/demo-state`, {
-      method: 'GET', headers: { 'Content-Type': 'application/json' }, credentials: 'include'
-    });
-
-    if (response.ok) {
-      appState.connected = true;
-      updateConnectionStatus(true);
-      const demoState = await response.json();
-      syncWithBackendState(demoState);
-      return true;
-    }
-  } catch (error) {
-    console.log('Backend not available:', error.message);
-  }
-
-  appState.connected = false;
-  updateConnectionStatus(false);
-  return false;
 }
 
 function updateConnectionStatus(connected) {
@@ -239,31 +117,9 @@ function updateConnectionStatus(connected) {
   if (connected) {
     dot.classList.add('connected');
     text.textContent = 'Backend Connected';
-    document.querySelectorAll('button').forEach(btn => btn.disabled = false);
   } else {
     dot.classList.remove('connected');
     text.textContent = 'Backend Offline';
-  }
-}
-
-function syncWithBackendState(backendState) {
-  if (!backendState) return;
-
-  if (backendState.amount) {
-    appState.amount = parseFloat(backendState.amount);
-    updateAmountDisplays(appState.amount);
-  }
-  if (backendState.paymentMethod) {
-    appState.paymentMethod = backendState.paymentMethod;
-    updatePaymentMethodUI(backendState.paymentMethod);
-  }
-  if (backendState.customerType) {
-    appState.customerType = backendState.customerType.toLowerCase();
-    updateCustomerTypeUI(appState.customerType);
-  }
-  if (typeof backendState.international === 'boolean') {
-    appState.isInternational = backendState.international;
-    document.getElementById('international').checked = backendState.international;
   }
 }
 
@@ -271,9 +127,10 @@ function createFlowLog(userAction, method, endpoint) {
   const logContainer = document.getElementById('api-log');
   if (!logContainer) return null;
 
+  // Clear initial placeholder messages
   const initialMessages = logContainer.querySelectorAll('.text-muted, .text-center');
   initialMessages.forEach(msg => {
-    if (msg.textContent && (msg.textContent.includes('Starting') || msg.textContent.includes('Click'))) {
+    if (msg.textContent && (msg.textContent.includes('Click') || msg.textContent.includes('cleared'))) {
       logContainer.innerHTML = '';
     }
   });
@@ -283,10 +140,9 @@ function createFlowLog(userAction, method, endpoint) {
   flowBlock.id = logId;
   flowBlock.className = 'api-flow-block';
 
-  // **FIX 3:** Initially show "Attempting..." status instead of pre-judging connection state
   flowBlock.innerHTML = `
     <div>👤 <strong>${userAction}</strong> (Frontend)</div>
-    <div class="api-flow-child" data-role="status">⏳ Attempting: ${method} ${endpoint}</div>
+    <div class="api-flow-child" data-role="status">🌐 ${method} ${endpoint}</div>
     <div class="api-flow-child" data-role="controller"><div class="spinner"></div> Processing...</div>
   `;
 
@@ -303,7 +159,7 @@ function createFlowLog(userAction, method, endpoint) {
 function renderPatternMatchingSteps(steps) {
   if (!steps || steps.length === 0) return '';
 
-  // **FIX 2 (Highlighting):** Clear highlights ONCE before the loop begins.
+  // Clear highlights before rendering new ones
   document.querySelectorAll('.pattern-line.highlighted').forEach(line => line.classList.remove('highlighted'));
 
   let html = '<div class="pm-execution-header">🟣 Pattern Matching Execution:</div>';
@@ -362,44 +218,23 @@ function updateFlowLog(logId, responseData) {
   if (!flowBlock) return;
 
   const controllerElement = flowBlock.querySelector('[data-role="controller"]');
-  const statusElement = flowBlock.querySelector('[data-role="status"]');
   if (!controllerElement) return;
 
-  const actualData = responseData.response_data || responseData;
-  const controllerMethod = actualData.controllerMethod || responseData.controller_method || 'PaymentController';
-  const operationDesc = actualData.operationDescription || responseData.operation_description || 'Operation completed';
-
-  // **FIX 3:** Update status line based on ACTUAL result
-  if (statusElement) {
-    const method = responseData._requestMethod || 'GET';
-    const endpoint = responseData._requestEndpoint || '';
-
-    if (responseData._wasSuccessful === false) {
-      // API call failed or offline mode - show offline status
-      statusElement.innerHTML = `⚠️ Offline Mode: ${method} ${endpoint}`;
-    } else {
-      // API call succeeded - show connected status
-      statusElement.innerHTML = `🌐 API Call: ${method} ${endpoint}`;
-
-      // **FIX 4:** If we were offline but now connected, add a connection restored notice
-      if (!appState.connected) {
-        appState.connected = true;
-        updateConnectionStatus(true);
-        addConnectionRestoredNotice();
-      }
-    }
-  }
-
-  // Only show error state if there's an actual error message (not graceful offline)
-  if (responseData.error && !responseData._isGracefulOffline) {
+  // Handle errors
+  if (responseData.error) {
     flowBlock.classList.add('error');
     controllerElement.innerHTML = `🔴 <span class="error-text">Error: ${responseData.error}</span>`;
     return;
   }
 
+  const actualData = responseData.response_data || responseData;
+  const controllerMethod = actualData.controllerMethod || responseData.controller_method || 'PaymentController';
+  const operationDesc = actualData.operationDescription || responseData.operation_description || 'Operation completed';
+
   flowBlock.classList.add('success');
   let html = `🔴 Controller: <strong>${controllerMethod}</strong>`;
 
+  // Find pattern matching steps
   let pmSteps = null;
   if (actualData?.metadata?.paymentResponse?.patternMatchingSteps) {
     pmSteps = actualData.metadata.paymentResponse.patternMatchingSteps;
@@ -417,6 +252,7 @@ function updateFlowLog(logId, responseData) {
     html += `<div class="api-flow-child">💡 <span class="success-text">${operationDesc}</span></div>`;
   }
 
+  // Transaction details
   let txnData = actualData?.metadata?.paymentResponse || actualData?.paymentResponse || actualData;
   if (txnData.transactionId) {
     html += `<div class="api-flow-child">💳 Transaction: <strong>${txnData.transactionId}</strong> (${txnData.status})</div>`;
@@ -431,39 +267,13 @@ function updateFlowLog(logId, responseData) {
 function clearInspectorLog() {
   const logContainer = document.getElementById('api-log');
   if (!logContainer) return;
-  logContainer.innerHTML = '<div class="text-muted text-center py-2">Log cleared. Perform actions to see API calls...</div>';
-
+  logContainer.innerHTML = '<div class="text-muted text-center py-2">Log cleared. Click Process Payment to see API calls...</div>';
   resetStatusPanels();
 }
 
-// **FIX 4:** Adds a notice when connection is restored mid-session
-function addConnectionRestoredNotice() {
-  const logContainer = document.getElementById('api-log');
-  if (!logContainer) return;
-
-  // Find and update the old "Offline Mode" initialization entry
-  const flowBlocks = logContainer.querySelectorAll('.api-flow-block');
-  flowBlocks.forEach(block => {
-    const statusLine = block.querySelector('[data-role="status"]');
-    const controllerLine = block.querySelector('[data-role="controller"]');
-
-    // Check if this is the initialization entry that showed offline
-    if (statusLine && statusLine.textContent.includes('Offline Mode') &&
-        controllerLine && controllerLine.textContent.includes('Frontend Only Mode')) {
-      // Update the old entry to show it's now stale
-      statusLine.innerHTML = `✅ Connection Restored (was offline at startup)`;
-      block.classList.remove('error');
-      block.classList.add('success');
-    }
-  });
-}
-
-// Resets the middle panel to its default state
 function resetStatusPanels() {
-  // 1. Reset Pattern Matching Reference highlights
   document.querySelectorAll('.pattern-line.highlighted').forEach(line => line.classList.remove('highlighted'));
 
-  // 2. Reset Current Pattern Status text
   document.getElementById('payment-detection').textContent = 'Pattern: Awaiting processing...';
 
   const guardIcon = document.querySelector('#status-section .status-item:nth-child(2) .status-icon');
@@ -481,7 +291,6 @@ function resetStatusPanels() {
   processingIcon.textContent = '▶';
   document.getElementById('processing-status').textContent = 'Click Process Payment to execute';
 }
-
 
 function highlightJavaMethod(methodName) {
   if (!methodName) return;
@@ -503,9 +312,7 @@ function highlightJavaMethod(methodName) {
 
   if (targetSelector) {
     const line = document.querySelector(targetSelector);
-    if (line) {
-      line.classList.add('highlighted');
-    }
+    if (line) line.classList.add('highlighted');
   }
 }
 
@@ -548,14 +355,12 @@ function selectPaymentMethod(method) {
     const card = event.target.closest('.payment-method');
     if (card) card.classList.add('selected');
   }
-
   appState.paymentMethod = method;
 }
 
 function selectCustomerType(type) {
   document.querySelectorAll('.customer-tab').forEach(tab => tab.classList.remove('active'));
   if (typeof event !== 'undefined' && event.target) event.target.classList.add('active');
-
   appState.customerType = type;
 }
 
@@ -590,10 +395,9 @@ async function processPayment() {
 
     console.log('Payment response received:', response);
 
-    // Update status indicators
     updateStatusIndicators();
 
-    // Extract payment response from various possible locations
+    // Extract payment response
     let paymentResponseData = null;
     if (response?.response_data?.metadata?.paymentResponse) {
       paymentResponseData = response.response_data.metadata.paymentResponse;
@@ -608,13 +412,10 @@ async function processPayment() {
     if (paymentResponseData) {
       console.log('Payment response data:', paymentResponseData);
       updateProcessingResults(paymentResponseData);
-    } else {
-      console.warn('No payment response data found in response');
     }
 
   } catch (error) {
     console.error('Payment processing failed:', error);
-    alert('Payment processing failed: ' + error.message);
   } finally {
     setTimeout(() => {
       appState.processing = false;
@@ -631,34 +432,15 @@ function updateProcessingResults(paymentResponse) {
 
   if (paymentResponse.validationMessage) {
     const validationIcon = document.querySelector('#status-section .status-item:nth-child(3) .status-icon');
-    if(paymentResponse.status === 'SUCCESS' || paymentResponse.status === 'PENDING' || paymentResponse.status === 'SIMULATED_SUCCESS') {
-        validationIcon.className = 'status-icon success';
-        validationIcon.textContent = '✓';
+    if (paymentResponse.status === 'SUCCESS' || paymentResponse.status === 'PENDING' || paymentResponse.status === 'SIMULATED_SUCCESS') {
+      validationIcon.className = 'status-icon success';
+      validationIcon.textContent = '✓';
     } else {
-        validationIcon.className = 'status-icon warning';
-        validationIcon.textContent = '⚠';
+      validationIcon.className = 'status-icon warning';
+      validationIcon.textContent = '⚠';
     }
     document.getElementById('validation-status').textContent = paymentResponse.validationMessage;
   }
-}
-
-function updatePatternHighlighting() {
-  document.querySelectorAll('.pattern-line').forEach(line => line.classList.remove('highlighted'));
-
-  const linesToHighlight = [];
-  const switchLine = document.querySelector('[data-pattern="switch"]'); linesToHighlight.push(switchLine);
-
-  const methodLine = document.querySelector(`[data-pattern="${appState.paymentMethod}"]`);
-  if (methodLine) linesToHighlight.push(methodLine);
-
-  if (appState.amount > 1000 || appState.isInternational) {
-    const guardLine = document.querySelector('[data-pattern="guard"]');
-    linesToHighlight.push(guardLine);
-  }
-
-  const sealedLine = document.querySelector('[data-pattern="sealed"]'); linesToHighlight.push(sealedLine);
-
-  linesToHighlight.forEach(line => { if (line) line.classList.add('highlighted'); });
 }
 
 function updateStatusIndicators() {
@@ -667,15 +449,16 @@ function updateStatusIndicators() {
 
   document.getElementById('payment-detection').textContent = `Pattern: ${method.name} identified`;
 
-  let guardText; let guardIcon;
+  let guardText;
+  let guardIcon = document.querySelector('#status-section .status-item:nth-child(2) .status-icon');
   if (appState.amount > 1000) {
     guardText = `Amount > $1,000 — High-value guard evaluated`;
-    guardIcon = document.querySelector('#status-section .status-item:nth-child(2) .status-icon');
-    guardIcon.className = 'status-icon warning'; guardIcon.textContent = '⚠';
+    guardIcon.className = 'status-icon warning';
+    guardIcon.textContent = '⚠';
   } else {
     guardText = `Amount ≤ $1,000 — Standard processing`;
-    guardIcon = document.querySelector('#status-section .status-item:nth-child(2) .status-icon');
-    guardIcon.className = 'status-icon success'; guardIcon.textContent = '✓';
+    guardIcon.className = 'status-icon success';
+    guardIcon.textContent = '✓';
   }
   document.getElementById('guard-condition').textContent = guardText;
 
@@ -686,36 +469,15 @@ function updateStatusIndicators() {
   document.getElementById('processing-status').textContent = `Processing...`;
 }
 
-async function initApp() {
+function initApp() {
   resetStatusPanels();
-
   updateAmountDisplays(appState.amount);
   updateOrderDisplay(orderScenarios[500]);
-
   document.querySelector('[data-amount="500"]').classList.add('active');
 
-  const logId = createFlowLog('App Initialization', 'GET', '/api/payment/demo-state');
-  const connected = await checkConnection();
-
-  if (connected) {
-    updateFlowLog(logId, {
-      controller_method: 'PaymentController.getDemoState',
-      operation_description: 'Backend connected - Demo synchronized with server state',
-      _requestMethod: 'GET',
-      _requestEndpoint: '/api/payment/demo-state',
-      _wasSuccessful: true
-    });
-  } else {
-    updateFlowLog(logId, {
-      controller_method: 'Frontend Only Mode',
-      operation_description: 'Backend offline - Running in simulation mode',
-      _requestMethod: 'GET',
-      _requestEndpoint: '/api/payment/demo-state',
-      _wasSuccessful: false,
-      _isGracefulOffline: true
-    });
-  }
+  // Show ready state
+  const logContainer = document.getElementById('api-log');
+  logContainer.innerHTML = '<div class="text-muted text-center py-2">Click Process Payment to see API calls...</div>';
 }
 
 document.addEventListener('DOMContentLoaded', initApp);
-setInterval(checkConnection, 60000);
