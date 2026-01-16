@@ -486,7 +486,7 @@ function updateOrderDisplay(scenario) {
     .join('');
 }
 
-async function setAmount(amount) {
+function setAmount(amount) {
   document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
   if (typeof event !== 'undefined' && event.target) event.target.classList.add('active');
 
@@ -498,13 +498,9 @@ async function setAmount(amount) {
   // updatePatternHighlighting();
   // updateStatusIndicators();
 
-  if (appState.connected) {
-    try { await apiCall('PUT', `${ENDPOINTS.AMOUNT}/${amount}`); }
-    catch (error) { console.error('Failed to update amount on backend:', error); }
-  }
 }
 
-async function selectPaymentMethod(method) {
+function selectPaymentMethod(method) {
   document.querySelectorAll('.payment-method').forEach(pm => pm.classList.remove('selected'));
   if (typeof event !== 'undefined' && event.target) {
     const card = event.target.closest('.payment-method');
@@ -517,13 +513,9 @@ async function selectPaymentMethod(method) {
   // updatePatternHighlighting();
   // updateStatusIndicators();
 
-  if (appState.connected) {
-    try { await apiCall('PUT', `${ENDPOINTS.METHOD}/${method}`); }
-    catch (error) { console.error('Failed to update payment method on backend:', error); }
-  }
 }
 
-async function selectCustomerType(type) {
+function selectCustomerType(type) {
   document.querySelectorAll('.customer-tab').forEach(tab => tab.classList.remove('active'));
   if (typeof event !== 'undefined' && event.target) event.target.classList.add('active');
 
@@ -532,22 +524,14 @@ async function selectCustomerType(type) {
   // **FIX 1:** Removed call to updateStatusIndicators()
   // updateStatusIndicators();
 
-  if (appState.connected) {
-    try { await apiCall('PUT', `${ENDPOINTS.CUSTOMER_TYPE}/${type.toUpperCase()}`); }
-    catch (error) { console.error('Failed to update customer type on backend:', error); }
-  }
 }
 
-async function toggleInternational() {
+function toggleInternational() {
   appState.isInternational = document.getElementById('international').checked;
 
   // **FIX 1:** Removed call to updateStatusIndicators()
   // updateStatusIndicators();
 
-  if (appState.connected) {
-    try { await apiCall('PUT', `${ENDPOINTS.INTERNATIONAL}/${appState.isInternational}`); }
-    catch (error) { console.error('Failed to update international status on backend:', error); }
-  }
 }
 
 async function processPayment() {
@@ -560,79 +544,58 @@ async function processPayment() {
   processBtn.classList.add('processing');
   processBtn.innerHTML = '<div class="spinner"></div> Processing...';
 
-  // **FIX 1:** Reset panels at the START of processing
   resetStatusPanels();
 
   try {
-    if (appState.connected) {
-      const paymentRequest = {
-        customerId: 1,
-        paymentMethod: appState.paymentMethod,
-        amount: appState.amount,
-        customerType: appState.customerType.toUpperCase(),
-        international: appState.isInternational
-      };
+    // Build complete payment request with all selections
+    const paymentRequest = {
+      customerId: 1,
+      paymentMethod: appState.paymentMethod,
+      amount: appState.amount,
+      customerType: appState.customerType.toUpperCase(),
+      international: appState.isInternational
+    };
 
-      const response = await apiCall('POST', ENDPOINTS.PROCESS, paymentRequest);
+    console.log('Sending payment request:', paymentRequest);
 
-      // **FIX 1:** Update status panel AFTER API call
-      updateStatusIndicators(); // This updates the status text
+    // Send everything in ONE POST request
+    const response = await apiCall('POST', ENDPOINTS.PROCESS, paymentRequest);
 
-      // This logic handles the nested response structure
-      let paymentResponseData = null;
-      if (response && response.response_data && response.response_data.metadata && response.response_data.metadata.paymentResponse) {
-          paymentResponseData = response.response_data.metadata.paymentResponse;
-      } else if (response && response.response_data && response.response_data.paymentResponse) {
-          paymentResponseData = response.response_data.paymentResponse;
-      } else if (response && response.metadata && response.metadata.paymentResponse) {
-          paymentResponseData = response.metadata.paymentResponse;
-      } else if (response && response.paymentResponse) {
-          paymentResponseData = response.paymentResponse;
-      }
+    console.log('Payment response received:', response);
 
-      if (paymentResponseData) {
-          updateProcessingResults(paymentResponseData); // This adds final transaction ID
-      }
+    // Update status indicators
+    updateStatusIndicators();
 
-    } else {
-      const logId = createFlowLog('Process Payment (Offline)', 'POST', '/api/payment/process');
-      const mockSteps = generateMockPatternSteps();
-
-      setTimeout(() => {
-        updateFlowLog(logId, {
-          controller_method: 'PaymentController.processPayment (Simulated)',
-          operation_description: `Payment processed successfully (offline simulation)`,
-          response_data: {
-            paymentResponse: {
-              transactionId: 'TXN-OFFLINE-' + Date.now().toString().slice(-6),
-              status: 'SIMULATED_SUCCESS',
-              amount: appState.amount,
-              paymentMethod: paymentMethods[appState.paymentMethod].name,
-              validationMessage: 'Offline simulation - payment would be processed',
-              patternMatchingSteps: mockSteps
-            }
-          }
-        });
-
-        // **FIX 1:** Update status panel AFTER offline simulation
-        updateStatusIndicators();
-        updateProcessingResults({
-            status: 'SIMULATED_SUCCESS',
-            transactionId: 'TXN-OFFLINE-' + Date.now().toString().slice(-6),
-            validationMessage: 'Offline simulation - payment would be processed'
-        });
-
-      }, 1000);
+    // Extract payment response from various possible locations
+    let paymentResponseData = null;
+    if (response?.response_data?.metadata?.paymentResponse) {
+      paymentResponseData = response.response_data.metadata.paymentResponse;
+    } else if (response?.response_data?.paymentResponse) {
+      paymentResponseData = response.response_data.paymentResponse;
+    } else if (response?.metadata?.paymentResponse) {
+      paymentResponseData = response.metadata.paymentResponse;
+    } else if (response?.paymentResponse) {
+      paymentResponseData = response.paymentResponse;
     }
+
+    // Update processing results if payment response found
+    if (paymentResponseData) {
+      console.log('Payment response data:', paymentResponseData);
+      updateProcessingResults(paymentResponseData);
+    } else {
+      console.warn('No payment response data found in response');
+    }
+
   } catch (error) {
     console.error('Payment processing failed:', error);
+    alert('Payment processing failed: ' + error.message);
   } finally {
     setTimeout(() => {
       appState.processing = false;
       processBtn.disabled = false;
       processBtn.classList.remove('processing');
       processBtn.innerHTML = originalText;
-    }, 1000); // Shortened delay
+    }, 1000);
   }
 }
 
