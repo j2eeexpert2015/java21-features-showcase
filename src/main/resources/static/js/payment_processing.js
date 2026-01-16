@@ -486,7 +486,7 @@ function updateOrderDisplay(scenario) {
     .join('');
 }
 
-async function setQuickTest(amount) {
+async function setAmount(amount) {
   document.querySelectorAll('.test-btn').forEach(btn => btn.classList.remove('active'));
   if (typeof event !== 'undefined' && event.target) event.target.classList.add('active');
 
