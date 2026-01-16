@@ -112,14 +112,6 @@ function createFlowLog(userAction, method, endpoint) {
   const logContainer = document.getElementById('api-log');
   if (!logContainer) return null;
 
-  // Clear initial placeholder messages
-  const initialMessages = logContainer.querySelectorAll('.text-muted, .text-center');
-  initialMessages.forEach(msg => {
-    if (msg.textContent && (msg.textContent.includes('Click') || msg.textContent.includes('cleared'))) {
-      logContainer.innerHTML = '';
-    }
-  });
-
   const flowBlock = document.createElement('div');
   const logId = `flow-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   flowBlock.id = logId;
@@ -252,7 +244,7 @@ function updateFlowLog(logId, responseData) {
 function clearInspectorLog() {
   const logContainer = document.getElementById('api-log');
   if (!logContainer) return;
-  logContainer.innerHTML = '<div class="text-muted text-center py-2">Log cleared. Click Process Payment to see API calls...</div>';
+  logContainer.innerHTML = '';
   resetStatusPanels();
 }
 
@@ -459,10 +451,6 @@ function initApp() {
   updateAmountDisplays(appState.amount);
   updateOrderDisplay(orderScenarios[500]);
   document.querySelector('[data-amount="500"]').classList.add('active');
-
-  // Show ready state
-  const logContainer = document.getElementById('api-log');
-  logContainer.innerHTML = '<div class="text-muted text-center py-2">Click Process Payment to see API calls...</div>';
 }
 
 document.addEventListener('DOMContentLoaded', initApp);
