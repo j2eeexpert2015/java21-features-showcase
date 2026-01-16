@@ -10,6 +10,11 @@
 * - REMOVED highlight clearing from highlightJavaMethod().
 * - ADDED highlight clearing to the TOP of renderPatternMatchingSteps().
 * - REMOVED 3-second timeout from highlightJavaMethod() to make highlights persist.
+*
+* FIX 3: (Status Line Logic)
+* - Status line ("Offline Mode" vs "API Call") is now updated AFTER the API call completes.
+* - If API succeeds, status is retroactively corrected to show "API Call".
+* - Fixes the illogical display of "Offline Mode" with successful transaction data.
 */
 
 const API_BASE_URL = 'http://localhost:8080';
@@ -155,19 +160,23 @@ function generateMockPatternSteps() {
 }
 
 async function apiCall(method, endpoint, data = null) {
+  // Store the method and endpoint for later use in updateFlowLog
+  const requestMethod = method.toUpperCase();
+  const requestEndpoint = endpoint;
+
   const logId = createFlowLog(
-    `${method.toUpperCase()} Request`,
-    method.toUpperCase(),
-    endpoint
+    `${requestMethod} Request`,
+    requestMethod,
+    requestEndpoint
   );
 
   try {
     const config = {
-      method: method.toUpperCase(),
+      method: requestMethod,
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include'
     };
-    if (data && (method.toUpperCase() === 'POST' || method.toUpperCase() === 'PUT')) {
+    if (data && (requestMethod === 'POST' || requestMethod === 'PUT')) {
       config.body = JSON.stringify(data);
     }
 
@@ -176,17 +185,27 @@ async function apiCall(method, endpoint, data = null) {
 
     const responseData = await response.json();
 
+    // **FIX 3:** Pass request info to updateFlowLog so it can correct the status
     updateFlowLog(logId, {
       controller_method: responseData.controller_method || 'PaymentController',
       service_calls: responseData.service_calls || {},
       operation_description: responseData.operation_description || 'Operation completed',
-      response_data: responseData
+      response_data: responseData,
+      _requestMethod: requestMethod,
+      _requestEndpoint: requestEndpoint,
+      _wasSuccessful: true
     });
 
     return responseData;
   } catch (error) {
     console.error('API Call failed:', error);
-    updateFlowLog(logId, { error: error.message, controller_method: 'Connection Failed' });
+    updateFlowLog(logId, {
+      error: error.message,
+      controller_method: 'Connection Failed',
+      _requestMethod: requestMethod,
+      _requestEndpoint: requestEndpoint,
+      _wasSuccessful: false
+    });
     throw error;
   }
 }
@@ -246,10 +265,6 @@ function syncWithBackendState(backendState) {
     appState.isInternational = backendState.international;
     document.getElementById('international').checked = backendState.international;
   }
-
-  // **FIX 1:** Do NOT call update functions here
-  // updateStatusIndicators();
-  // updatePatternHighlighting();
 }
 
 function createFlowLog(userAction, method, endpoint) {
@@ -268,12 +283,10 @@ function createFlowLog(userAction, method, endpoint) {
   flowBlock.id = logId;
   flowBlock.className = 'api-flow-block';
 
-  const statusIcon = appState.connected ? '🌐' : '⚠️';
-  const statusText = appState.connected ? 'API Call' : 'Offline Mode';
-
+  // **FIX 3:** Initially show "Attempting..." status instead of pre-judging connection state
   flowBlock.innerHTML = `
     <div>👤 <strong>${userAction}</strong> (Frontend)</div>
-    <div class="api-flow-child">${statusIcon} ${statusText}: ${method} ${endpoint}</div>
+    <div class="api-flow-child" data-role="status">⏳ Attempting: ${method} ${endpoint}</div>
     <div class="api-flow-child" data-role="controller"><div class="spinner"></div> Processing...</div>
   `;
 
@@ -349,15 +362,38 @@ function updateFlowLog(logId, responseData) {
   if (!flowBlock) return;
 
   const controllerElement = flowBlock.querySelector('[data-role="controller"]');
+  const statusElement = flowBlock.querySelector('[data-role="status"]');
   if (!controllerElement) return;
 
   const actualData = responseData.response_data || responseData;
   const controllerMethod = actualData.controllerMethod || responseData.controller_method || 'PaymentController';
   const operationDesc = actualData.operationDescription || responseData.operation_description || 'Operation completed';
 
-  if (responseData.error || actualData.error) {
+  // **FIX 3:** Update status line based on ACTUAL result
+  if (statusElement) {
+    const method = responseData._requestMethod || 'GET';
+    const endpoint = responseData._requestEndpoint || '';
+
+    if (responseData._wasSuccessful === false) {
+      // API call failed or offline mode - show offline status
+      statusElement.innerHTML = `⚠️ Offline Mode: ${method} ${endpoint}`;
+    } else {
+      // API call succeeded - show connected status
+      statusElement.innerHTML = `🌐 API Call: ${method} ${endpoint}`;
+
+      // **FIX 4:** If we were offline but now connected, add a connection restored notice
+      if (!appState.connected) {
+        appState.connected = true;
+        updateConnectionStatus(true);
+        addConnectionRestoredNotice();
+      }
+    }
+  }
+
+  // Only show error state if there's an actual error message (not graceful offline)
+  if (responseData.error && !responseData._isGracefulOffline) {
     flowBlock.classList.add('error');
-    controllerElement.innerHTML = `🔴 <span class="error-text">Error: ${responseData.error || actualData.error}</span>`;
+    controllerElement.innerHTML = `🔴 <span class="error-text">Error: ${responseData.error}</span>`;
     return;
   }
 
@@ -365,7 +401,6 @@ function updateFlowLog(logId, responseData) {
   let html = `🔴 Controller: <strong>${controllerMethod}</strong>`;
 
   let pmSteps = null;
-  // **FIX:** Added better logic to find the nested paymentResponse
   if (actualData?.metadata?.paymentResponse?.patternMatchingSteps) {
     pmSteps = actualData.metadata.paymentResponse.patternMatchingSteps;
   } else if (actualData?.paymentResponse?.patternMatchingSteps) {
@@ -375,7 +410,6 @@ function updateFlowLog(logId, responseData) {
   }
 
   if (pmSteps && pmSteps.length > 0) {
-    // This function WILL call highlightJavaMethod
     html += renderPatternMatchingSteps(pmSteps);
   }
 
@@ -383,7 +417,6 @@ function updateFlowLog(logId, responseData) {
     html += `<div class="api-flow-child">💡 <span class="success-text">${operationDesc}</span></div>`;
   }
 
-  // **FIX:** Added better logic to find the nested paymentResponse
   let txnData = actualData?.metadata?.paymentResponse || actualData?.paymentResponse || actualData;
   if (txnData.transactionId) {
     html += `<div class="api-flow-child">💳 Transaction: <strong>${txnData.transactionId}</strong> (${txnData.status})</div>`;
@@ -400,43 +433,59 @@ function clearInspectorLog() {
   if (!logContainer) return;
   logContainer.innerHTML = '<div class="text-muted text-center py-2">Log cleared. Perform actions to see API calls...</div>';
 
-  // **FIX 1:** Also reset the middle panel
   resetStatusPanels();
 }
 
-// **FIX 1:** ***NEW FUNCTION***
+// **FIX 4:** Adds a notice when connection is restored mid-session
+function addConnectionRestoredNotice() {
+  const logContainer = document.getElementById('api-log');
+  if (!logContainer) return;
+
+  // Find and update the old "Offline Mode" initialization entry
+  const flowBlocks = logContainer.querySelectorAll('.api-flow-block');
+  flowBlocks.forEach(block => {
+    const statusLine = block.querySelector('[data-role="status"]');
+    const controllerLine = block.querySelector('[data-role="controller"]');
+
+    // Check if this is the initialization entry that showed offline
+    if (statusLine && statusLine.textContent.includes('Offline Mode') &&
+        controllerLine && controllerLine.textContent.includes('Frontend Only Mode')) {
+      // Update the old entry to show it's now stale
+      statusLine.innerHTML = `✅ Connection Restored (was offline at startup)`;
+      block.classList.remove('error');
+      block.classList.add('success');
+    }
+  });
+}
+
 // Resets the middle panel to its default state
 function resetStatusPanels() {
-    // 1. Reset Pattern Matching Reference highlights
-    document.querySelectorAll('.pattern-line.highlighted').forEach(line => line.classList.remove('highlighted'));
+  // 1. Reset Pattern Matching Reference highlights
+  document.querySelectorAll('.pattern-line.highlighted').forEach(line => line.classList.remove('highlighted'));
 
-    // 2. Reset Current Pattern Status text
-    document.getElementById('payment-detection').textContent = 'Pattern: Awaiting processing...';
+  // 2. Reset Current Pattern Status text
+  document.getElementById('payment-detection').textContent = 'Pattern: Awaiting processing...';
 
-    const guardIcon = document.querySelector('#status-section .status-item:nth-child(2) .status-icon');
-    // **FIX 3 (Guard Icon):** Set default to 'success' (✓) to match the HTML
-    guardIcon.className = 'status-icon success';
-    guardIcon.textContent = '✓';
-    document.getElementById('guard-condition').textContent = 'Guard: Awaiting processing...';
+  const guardIcon = document.querySelector('#status-section .status-item:nth-child(2) .status-icon');
+  guardIcon.className = 'status-icon success';
+  guardIcon.textContent = '✓';
+  document.getElementById('guard-condition').textContent = 'Guard: Awaiting processing...';
 
-    const validationIcon = document.querySelector('#status-section .status-item:nth-child(3) .status-icon');
-    validationIcon.className = 'status-icon success';
-    validationIcon.textContent = '✓';
-    document.getElementById('validation-status').textContent = 'Ready for processing';
+  const validationIcon = document.querySelector('#status-section .status-item:nth-child(3) .status-icon');
+  validationIcon.className = 'status-icon success';
+  validationIcon.textContent = '✓';
+  document.getElementById('validation-status').textContent = 'Ready for processing';
 
-    const processingIcon = document.querySelector('#status-section .status-item:nth-child(4) .status-icon');
-    processingIcon.className = 'status-icon play';
-    processingIcon.textContent = '▶';
-    document.getElementById('processing-status').textContent = 'Click Process Payment to execute';
+  const processingIcon = document.querySelector('#status-section .status-item:nth-child(4) .status-icon');
+  processingIcon.className = 'status-icon play';
+  processingIcon.textContent = '▶';
+  document.getElementById('processing-status').textContent = 'Click Process Payment to execute';
 }
 
 
 function highlightJavaMethod(methodName) {
   if (!methodName) return;
   const safe = String(methodName).replace(/\(\)$/, '');
-
-  // **FIX 2 (Highlighting):** The line clearing highlights has been REMOVED from here.
-  // document.querySelectorAll('.pattern-line.highlighted').forEach(line => line.classList.remove('highlighted'));
 
   let targetSelector = null;
   switch (safe.toLowerCase()) {
@@ -456,8 +505,6 @@ function highlightJavaMethod(methodName) {
     const line = document.querySelector(targetSelector);
     if (line) {
       line.classList.add('highlighted');
-      // **FIX:** Removed the timeout so the highlight persists
-      // setTimeout(() => { if (line.isConnected) line.classList.remove('highlighted'); }, 3000);
     }
   }
 }
@@ -493,11 +540,6 @@ function setAmount(amount) {
   appState.amount = amount;
   updateOrderDisplay(orderScenarios[amount]);
   updateAmountDisplays(amount);
-
-  // **FIX 1:** Removed calls to updatePatternHighlighting() and updateStatusIndicators()
-  // updatePatternHighlighting();
-  // updateStatusIndicators();
-
 }
 
 function selectPaymentMethod(method) {
@@ -508,11 +550,6 @@ function selectPaymentMethod(method) {
   }
 
   appState.paymentMethod = method;
-
-  // **FIX 1:** Removed calls to updatePatternHighlighting() and updateStatusIndicators()
-  // updatePatternHighlighting();
-  // updateStatusIndicators();
-
 }
 
 function selectCustomerType(type) {
@@ -520,18 +557,10 @@ function selectCustomerType(type) {
   if (typeof event !== 'undefined' && event.target) event.target.classList.add('active');
 
   appState.customerType = type;
-
-  // **FIX 1:** Removed call to updateStatusIndicators()
-  // updateStatusIndicators();
-
 }
 
 function toggleInternational() {
   appState.isInternational = document.getElementById('international').checked;
-
-  // **FIX 1:** Removed call to updateStatusIndicators()
-  // updateStatusIndicators();
-
 }
 
 async function processPayment() {
@@ -547,7 +576,6 @@ async function processPayment() {
   resetStatusPanels();
 
   try {
-    // Build complete payment request with all selections
     const paymentRequest = {
       customerId: 1,
       paymentMethod: appState.paymentMethod,
@@ -558,7 +586,6 @@ async function processPayment() {
 
     console.log('Sending payment request:', paymentRequest);
 
-    // Send everything in ONE POST request
     const response = await apiCall('POST', ENDPOINTS.PROCESS, paymentRequest);
 
     console.log('Payment response received:', response);
@@ -578,7 +605,6 @@ async function processPayment() {
       paymentResponseData = response.paymentResponse;
     }
 
-    // Update processing results if payment response found
     if (paymentResponseData) {
       console.log('Payment response data:', paymentResponseData);
       updateProcessingResults(paymentResponseData);
@@ -600,7 +626,6 @@ async function processPayment() {
 }
 
 function updateProcessingResults(paymentResponse) {
-  // This function now just adds the final transaction details
   document.getElementById('processing-status').textContent =
     `${paymentResponse.status} - Transaction: ${paymentResponse.transactionId}`;
 
@@ -617,8 +642,6 @@ function updateProcessingResults(paymentResponse) {
   }
 }
 
-// **NOTE:** This function is no longer called by inputs,
-// but is left here in case you want to re-enable "live preview" later.
 function updatePatternHighlighting() {
   document.querySelectorAll('.pattern-line').forEach(line => line.classList.remove('highlighted'));
 
@@ -639,8 +662,6 @@ function updatePatternHighlighting() {
 }
 
 function updateStatusIndicators() {
-  // This function now correctly acts as the "result" display,
-  // called ONLY after processing.
   const method = paymentMethods[appState.paymentMethod];
   const customer = customerTypes[appState.customerType];
 
@@ -662,14 +683,10 @@ function updateStatusIndicators() {
   if (appState.isInternational) validationText += ' + International compliance';
   document.getElementById('validation-status').textContent = validationText;
 
-  // This line will be overwritten by updateProcessingResults, which is correct.
   document.getElementById('processing-status').textContent = `Processing...`;
 }
 
 async function initApp() {
-  // **FIX 1:** Removed calls to updatePatternHighlighting() and updateStatusIndicators()
-
-  // Reset panels to default on load
   resetStatusPanels();
 
   updateAmountDisplays(appState.amount);
@@ -683,12 +700,19 @@ async function initApp() {
   if (connected) {
     updateFlowLog(logId, {
       controller_method: 'PaymentController.getDemoState',
-      operation_description: 'Backend connected - Demo synchronized with server state'
+      operation_description: 'Backend connected - Demo synchronized with server state',
+      _requestMethod: 'GET',
+      _requestEndpoint: '/api/payment/demo-state',
+      _wasSuccessful: true
     });
   } else {
     updateFlowLog(logId, {
       controller_method: 'Frontend Only Mode',
-      operation_description: 'Backend offline - Running in simulation mode'
+      operation_description: 'Backend offline - Running in simulation mode',
+      _requestMethod: 'GET',
+      _requestEndpoint: '/api/payment/demo-state',
+      _wasSuccessful: false,
+      _isGracefulOffline: true
     });
   }
 }
