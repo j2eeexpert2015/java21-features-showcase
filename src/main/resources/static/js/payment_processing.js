@@ -99,27 +99,12 @@ async function apiCall(method, endpoint, data = null) {
       response_data: responseData
     });
 
-    updateConnectionStatus(true);
     return responseData;
 
   } catch (error) {
     console.error('API Call failed:', error);
     updateFlowLog(logId, { error: error.message });
-    updateConnectionStatus(false);
     throw error;
-  }
-}
-
-function updateConnectionStatus(connected) {
-  const dot = document.getElementById('connectionDot');
-  const text = document.getElementById('connectionText');
-
-  if (connected) {
-    dot.classList.add('connected');
-    text.textContent = 'Backend Connected';
-  } else {
-    dot.classList.remove('connected');
-    text.textContent = 'Backend Offline';
   }
 }
 
