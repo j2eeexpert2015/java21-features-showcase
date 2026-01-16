@@ -65,18 +65,18 @@ body {
 .panel-header { display: flex; align-items: center; margin-bottom: 8px; font-weight: 600; font-size: 12px; }
 .panel-icon { margin-right: 6px; font-size: 14px; }
 
-.quick-tests { display: flex; gap: 4px; margin-bottom: 8px; }
+.amount-selector { display: flex; gap: 4px; margin-bottom: 8px; }
 
-.test-btn {
+.amount-btn {
   padding: 3px 8px; border: 1px solid #ddd; border-radius: 12px;
   background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
   font-size: 10px; cursor: pointer; transition: all 0.2s;
 }
-.test-btn.active {
+.amount-btn.active {
   border-color: #007bff; background: linear-gradient(145deg, #007bff 0%, #0056b3 100%);
   color: white; box-shadow: 0 2px 8px rgba(0,123,255,0.3);
 }
-.test-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+.amount-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 
 .order-item { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px; }
 

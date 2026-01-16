@@ -31,7 +31,7 @@ let appState = {
   connected: false
 };
 
-const scenarios = {
+const orderScenarios = {
   500: {
     items: [
       { name: 'AirPods Pro', price: 249 },
@@ -487,11 +487,11 @@ function updateOrderDisplay(scenario) {
 }
 
 async function setAmount(amount) {
-  document.querySelectorAll('.test-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
   if (typeof event !== 'undefined' && event.target) event.target.classList.add('active');
 
   appState.amount = amount;
-  updateOrderDisplay(scenarios[amount]);
+  updateOrderDisplay(orderScenarios[amount]);
   updateAmountDisplays(amount);
 
   // **FIX 1:** Removed calls to updatePatternHighlighting() and updateStatusIndicators()
@@ -710,7 +710,7 @@ async function initApp() {
   resetStatusPanels();
 
   updateAmountDisplays(appState.amount);
-  updateOrderDisplay(scenarios[500]);
+  updateOrderDisplay(orderScenarios[500]);
 
   document.querySelector('[data-amount="500"]').classList.add('active');
 
