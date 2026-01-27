@@ -152,15 +152,15 @@ function renderPatternMatchingSteps(steps) {
 
     if (stepType === 'TYPE_CHECK') {
       html += `<div class="pm-step-detail success">✓ ${stepMessage}</div>`;
-      highlightJavaMethod('switch');
-      if (stepMessage.includes('CreditCard')) highlightJavaMethod('credit');
-      else if (stepMessage.includes('PayPal')) highlightJavaMethod('paypal');
-      else if (stepMessage.includes('BankTransfer')) highlightJavaMethod('bank');
+      highlightMatchedPattern('switch');
+      if (stepMessage.includes('CreditCard')) highlightMatchedPattern('credit');
+      else if (stepMessage.includes('PayPal')) highlightMatchedPattern('paypal');
+      else if (stepMessage.includes('BankTransfer')) highlightMatchedPattern('bank');
     } else if (stepType === 'DESTRUCTURING') {
       html += `<div class="pm-step-detail success">✓ ${stepMessage}</div>`;
-      if (stepMessage.includes('CreditCard')) highlightJavaMethod('credit');
-      else if (stepMessage.includes('PayPal')) highlightJavaMethod('paypal');
-      else if (stepMessage.includes('BankTransfer')) highlightJavaMethod('bank');
+      if (stepMessage.includes('CreditCard')) highlightMatchedPattern('credit');
+      else if (stepMessage.includes('PayPal')) highlightMatchedPattern('paypal');
+      else if (stepMessage.includes('BankTransfer')) highlightMatchedPattern('bank');
     } else if (stepType === 'GUARD_EVALUATION') {
       const guardExpr = step.guardExpression || '';
       html += `<div class="pm-step-detail">🔍 Checking: ${guardExpr}</div>`;
@@ -180,7 +180,7 @@ function renderPatternMatchingSteps(steps) {
       const resultClass = isPassed ? 'passed' : 'failed';
       const resultIcon = isPassed ? '✅' : '⚠️';
       html += `<div class="pm-result ${resultClass}">${resultIcon} ${stepMessage}</div>`;
-      if (isPassed) highlightJavaMethod('guard');
+      if (isPassed) highlightMatchedPattern('guard');
     }
 
     html += `</div>`;
@@ -269,7 +269,7 @@ function resetStatusPanels() {
   document.getElementById('processing-status').textContent = 'Click Process Payment to execute';
 }
 
-function highlightJavaMethod(methodName) {
+function highlightMatchedPattern(methodName) {
   if (!methodName) return;
   const safe = String(methodName).replace(/\(\)$/, '');
 
