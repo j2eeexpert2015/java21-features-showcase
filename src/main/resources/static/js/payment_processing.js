@@ -14,7 +14,7 @@ const ENDPOINTS = {
 let appState = {
   amount: 500,
   paymentMethod: 'credit',
-  customerType: 'vip',
+  customerType: 'basic',
   isInternational: false,
   processing: false
 };
