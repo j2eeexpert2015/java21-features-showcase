@@ -12,9 +12,7 @@ let appState = {
   orderId: '',
   amount: 0,
   itemsCount: 0,
-  searchQuery: '',
-  connected: false,
-  processing: false
+  searchQuery: ''
 };
 
 async function apiCall(method, endpoint, data = null) {
@@ -46,77 +44,6 @@ async function apiCall(method, endpoint, data = null) {
   }
 }
 
-async function checkConnection() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/templates/demo-state`, {
-      method: 'GET', headers: { 'Content-Type': 'application/json' }
-    });
-
-    if (response.ok) {
-      appState.connected = true;
-      updateConnectionStatus(true);
-      const apiResponse = await response.json();
-      if (apiResponse.metadata && apiResponse.metadata.demoState) {
-        syncWithBackendState(apiResponse.metadata.demoState);
-      }
-      return true;
-    }
-  } catch (error) {
-    console.log('Backend not available:', error.message);
-
-    if (!appState.customerName) {
-      document.getElementById('customerName').value = 'Sarah Johnson';
-      document.getElementById('orderId').value = 'ORD-1001';
-      document.getElementById('amount').value = '1299.99';
-      document.getElementById('itemsCount').value = '3';
-      document.getElementById('searchQuery').value = 'sarah.johnson@example.com';
-    }
-  }
-
-  appState.connected = false;
-  updateConnectionStatus(false);
-  return false;
-}
-
-function updateConnectionStatus(connected) {
-  const dot = document.getElementById('connectionDot');
-  const text = document.getElementById('connectionText');
-
-  if (connected) {
-    dot.classList.add('connected');
-    text.textContent = 'Backend Connected';
-    document.querySelectorAll('button').forEach(btn => btn.disabled = false);
-  } else {
-    dot.classList.remove('connected');
-    text.textContent = 'Backend Offline';
-  }
-}
-
-function syncWithBackendState(backendState) {
-  if (!backendState) return;
-
-  if (backendState.customerName) {
-    appState.customerName = backendState.customerName;
-    document.getElementById('customerName').value = backendState.customerName;
-  }
-  if (backendState.orderId) {
-    appState.orderId = backendState.orderId;
-    document.getElementById('orderId').value = backendState.orderId;
-  }
-  if (backendState.amount) {
-    appState.amount = parseFloat(backendState.amount);
-    document.getElementById('amount').value = backendState.amount;
-  }
-  if (backendState.itemsCount) {
-    appState.itemsCount = parseInt(backendState.itemsCount);
-    document.getElementById('itemsCount').value = backendState.itemsCount;
-  }
-  if (backendState.searchQuery) {
-    appState.searchQuery = backendState.searchQuery;
-    document.getElementById('searchQuery').value = backendState.searchQuery;
-  }
-}
-
 function createFlowLog(userAction, method, endpoint) {
   const logContainer = document.getElementById('api-log');
   if (!logContainer) return null;
@@ -133,12 +60,9 @@ function createFlowLog(userAction, method, endpoint) {
   flowBlock.id = logId;
   flowBlock.className = 'api-flow-block';
 
-  const statusIcon = appState.connected ? '🌐' : '⚠️';
-  const statusText = appState.connected ? 'API Call' : 'Offline Mode';
-
   flowBlock.innerHTML = `
     <div>👤 <strong>${userAction}</strong> (Frontend)</div>
-    <div class="api-flow-child">${statusIcon} ${statusText}: ${method} ${endpoint}</div>
+    <div class="api-flow-child">🌐 API Call: ${method} ${endpoint}</div>
     <div class="api-flow-child" data-role="controller"><div class="spinner"></div> Processing...</div>
   `;
 
@@ -273,13 +197,10 @@ function highlightJavaMethod(methodName) {
 }
 
 async function generateEmail() {
-  if (appState.processing) return;
-
   const emailBtn = document.getElementById('emailBtn');
   const outputSection = document.getElementById('template-output');
   const originalText = emailBtn.innerHTML;
 
-  appState.processing = true;
   emailBtn.disabled = true;
   emailBtn.classList.add('processing');
   emailBtn.innerHTML = '<div class="spinner"></div> Processing...';
@@ -294,35 +215,22 @@ async function generateEmail() {
       searchQuery: document.getElementById('searchQuery').value
     };
 
-    if (appState.connected) {
-      const response = await apiCall('POST', ENDPOINTS.EMAIL, templateRequest);
-      if (response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse) {
-        const templateData = response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse;
-        displayTemplate({
-          type: 'email',
-          title: 'Order Confirmation Email',
-          template: templateData.templateSource || 'STR template processed',
-          output: templateData.generatedContent,
-          processorUsed: templateData.processorUsed || 'STR Processor'
-        }, 'email');
-      }
-    } else {
-      const logId = createFlowLog('Generate Email (Offline)', 'POST', '/api/templates/email');
-      setTimeout(() => {
-        updateFlowLog(logId, {
-          controller_method: 'StringTemplateController.generateEmail (Simulated)',
-          service_calls: { 'StringTemplateService.generateEmail': ['STR', 'Expression embedding'] },
-          operation_description: 'Email template generated using STR processor (offline simulation)'
-        });
-
-        const emailContent = simulateEmailGeneration(templateRequest);
-        displayTemplate(emailContent, 'email');
-      }, 1000);
+    const response = await apiCall('POST', ENDPOINTS.EMAIL, templateRequest);
+    
+    if (response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse) {
+      const templateData = response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse;
+      displayTemplate({
+        type: 'email',
+        title: 'Order Confirmation Email',
+        template: templateData.templateSource || 'STR template processed',
+        output: templateData.generatedContent,
+        processorUsed: templateData.processorUsed || 'STR Processor'
+      }, 'email');
     }
   } catch (error) {
     console.error('Email generation failed:', error);
+    showError('Failed to generate email. Please ensure the backend is running.');
   } finally {
-    appState.processing = false;
     emailBtn.disabled = false;
     emailBtn.classList.remove('processing');
     emailBtn.innerHTML = originalText;
@@ -331,13 +239,10 @@ async function generateEmail() {
 }
 
 async function generateSMS() {
-  if (appState.processing) return;
-
   const smsBtn = document.getElementById('smsBtn');
   const outputSection = document.getElementById('template-output');
   const originalText = smsBtn.innerHTML;
 
-  appState.processing = true;
   smsBtn.disabled = true;
   smsBtn.classList.add('processing');
   smsBtn.innerHTML = '<div class="spinner"></div> Processing...';
@@ -351,35 +256,22 @@ async function generateSMS() {
       itemsCount: parseInt(document.getElementById('itemsCount').value)
     };
 
-    if (appState.connected) {
-      const response = await apiCall('POST', ENDPOINTS.SMS, templateRequest);
-      if (response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse) {
-        const templateData = response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse;
-        displayTemplate({
-          type: 'sms',
-          title: 'SMS Notification',
-          template: templateData.templateSource || 'FMT template processed',
-          output: templateData.generatedContent,
-          processorUsed: templateData.processorUsed || 'FMT Processor'
-        }, 'sms');
-      }
-    } else {
-      const logId = createFlowLog('Generate SMS (Offline)', 'POST', '/api/templates/sms');
-      setTimeout(() => {
-        updateFlowLog(logId, {
-          controller_method: 'StringTemplateController.generateSMS (Simulated)',
-          service_calls: { 'StringTemplateService.generateSMS': ['FMT', 'Expression embedding', 'Formatted output'] },
-          operation_description: 'SMS template generated using FMT processor (offline simulation)'
-        });
-
-        const smsContent = simulateSMSGeneration(templateRequest);
-        displayTemplate(smsContent, 'sms');
-      }, 1000);
+    const response = await apiCall('POST', ENDPOINTS.SMS, templateRequest);
+    
+    if (response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse) {
+      const templateData = response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse;
+      displayTemplate({
+        type: 'sms',
+        title: 'SMS Notification',
+        template: templateData.templateSource || 'FMT template processed',
+        output: templateData.generatedContent,
+        processorUsed: templateData.processorUsed || 'FMT Processor'
+      }, 'sms');
     }
   } catch (error) {
     console.error('SMS generation failed:', error);
+    showError('Failed to generate SMS. Please ensure the backend is running.');
   } finally {
-    appState.processing = false;
     smsBtn.disabled = false;
     smsBtn.classList.remove('processing');
     smsBtn.innerHTML = originalText;
@@ -388,13 +280,10 @@ async function generateSMS() {
 }
 
 async function generateSQL() {
-  if (appState.processing) return;
-
   const sqlBtn = document.getElementById('sqlBtn');
   const outputSection = document.getElementById('template-output');
   const originalText = sqlBtn.innerHTML;
 
-  appState.processing = true;
   sqlBtn.disabled = true;
   sqlBtn.classList.add('processing');
   sqlBtn.innerHTML = '<div class="spinner"></div> Processing...';
@@ -409,35 +298,22 @@ async function generateSQL() {
       searchQuery: document.getElementById('searchQuery').value
     };
 
-    if (appState.connected) {
-      const response = await apiCall('POST', ENDPOINTS.SQL, templateRequest);
-      if (response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse) {
-        const templateData = response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse;
-        displayTemplate({
-          type: 'sql',
-          title: 'Database Query',
-          template: templateData.templateSource || 'SQL template processed',
-          output: templateData.generatedContent,
-          processorUsed: templateData.processorUsed || 'Custom Processor'
-        }, 'sql');
-      }
-    } else {
-      const logId = createFlowLog('Generate SQL (Offline)', 'POST', '/api/templates/sql');
-      setTimeout(() => {
-        updateFlowLog(logId, {
-          controller_method: 'StringTemplateController.generateSQL (Simulated)',
-          service_calls: { 'StringTemplateService.generateSQL': ['Custom', 'Expression embedding'] },
-          operation_description: 'SQL template generated using custom processor (offline simulation)'
-        });
-
-        const sqlContent = simulateSQLGeneration(templateRequest);
-        displayTemplate(sqlContent, 'sql');
-      }, 1000);
+    const response = await apiCall('POST', ENDPOINTS.SQL, templateRequest);
+    
+    if (response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse) {
+      const templateData = response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse;
+      displayTemplate({
+        type: 'sql',
+        title: 'Database Query',
+        template: templateData.templateSource || 'SQL template processed',
+        output: templateData.generatedContent,
+        processorUsed: templateData.processorUsed || 'Custom Processor'
+      }, 'sql');
     }
   } catch (error) {
     console.error('SQL generation failed:', error);
+    showError('Failed to generate SQL. Please ensure the backend is running.');
   } finally {
-    appState.processing = false;
     sqlBtn.disabled = false;
     sqlBtn.classList.remove('processing');
     sqlBtn.innerHTML = originalText;
@@ -445,66 +321,13 @@ async function generateSQL() {
   }
 }
 
-function simulateEmailGeneration(data) {
-  return {
-    type: 'email',
-    title: 'Order Confirmation Email',
-    template: 'STR."Dear \\{customerName}, Your order #\\{orderId} has been confirmed!"',
-    output: `Dear ${data.customerName},
-
-Your order #${data.orderId} has been confirmed!
-
-Order Details:
-- Total Amount: ${data.amount.toFixed(2)}
-- Items: ${data.itemsCount} product(s)
-- Order Date: ${new Date().toLocaleDateString()}
-
-Thank you for shopping with TechMart!
-
-Best regards,
-The TechMart Team`,
-    processorUsed: 'STR Processor'
-  };
-}
-
-function simulateSMSGeneration(data) {
-  return {
-    type: 'sms',
-    title: 'SMS Notification',
-    template: 'FMT."Order \\{orderId} confirmed! Total: \\{amount:$.2f} for \\{itemsCount} items"',
-    output: `TechMart Alert
-Order ${data.orderId} confirmed!
-Total: ${data.amount.toFixed(2)} for ${data.itemsCount} items.
-Track: techmart.com/track/${data.orderId}`,
-    processorUsed: 'FMT Processor'
-  };
-}
-
-function simulateSQLGeneration(data) {
-  const sanitizedCustomerName = data.customerName ? data.customerName.replace(/[';"\-\-]/g, '').trim() : '';
-  const sanitizedOrderId = data.orderId ? data.orderId.replace(/[';"\-\-]/g, '').trim() : '';
-
-  return {
-    type: 'sql',
-    title: 'Database Query',
-    template: 'SAFE."SELECT * FROM orders WHERE customer_name = \\{customerName} AND order_id = \\{orderId} AND total_amount >= \\{amount} AND item_count <= \\{itemsCount}"',
-    output: `-- Generated Safe SQL Query (Demo)
--- All inputs sanitized: dangerous characters removed
-
-SELECT o.order_id, o.customer_name, o.total_amount, o.item_count, o.status, o.order_date
-FROM orders o
-WHERE o.customer_name = '${sanitizedCustomerName}'
-  AND o.order_id = '${sanitizedOrderId}'
-  AND o.total_amount >= ${data.amount}
-  AND o.item_count <= ${data.itemsCount}
-  AND o.status = 'active'
-  AND o.order_date >= CURRENT_DATE - INTERVAL 365 DAY
-ORDER BY o.order_date DESC;
-
--- Security Note: In production, use PreparedStatement with ? placeholders
--- This demo shows input sanitization as a String Template security example`,
-    processorUsed: 'Custom Safe Processor'
-  };
+function showError(message) {
+  const outputContainer = document.getElementById('template-output');
+  outputContainer.innerHTML = `
+    <div class="alert alert-danger" role="alert">
+      <i class="fas fa-exclamation-circle"></i> <strong>Error:</strong> ${message}
+    </div>
+  `;
 }
 
 function displayTemplate(content, type) {
@@ -543,24 +366,15 @@ function displayTemplate(content, type) {
   `;
 }
 
-async function initApp() {
-  const logId = createFlowLog('App Initialization', 'GET', '/api/templates/demo-state');
-  const connected = await checkConnection();
-
-  if (connected) {
-    updateFlowLog(logId, {
-      controller_method: 'StringTemplateController.getDemoState',
-      service_calls: {},
-      operation_description: 'Backend connected - Demo ready'
-    });
-  } else {
-    updateFlowLog(logId, {
-      controller_method: 'Frontend Only Mode',
-      service_calls: {},
-      operation_description: 'Backend offline - Running in simulation mode'
-    });
-  }
+function initApp() {
+  // Set default values
+  document.getElementById('customerName').value = 'Sarah Johnson';
+  document.getElementById('orderId').value = 'ORD-1001';
+  document.getElementById('amount').value = '1299.99';
+  document.getElementById('itemsCount').value = '3';
+  document.getElementById('searchQuery').value = 'sarah.johnson@example.com';
+  
+  console.log('TechMart String Templates Demo initialized');
 }
 
 document.addEventListener('DOMContentLoaded', initApp);
-setInterval(checkConnection, 30000);

@@ -36,14 +36,6 @@ body{
 }
 @keyframes badgePulse{0%,100%{transform:scale(1);box-shadow:0 1px 4px rgba(16,185,129,.3)}50%{transform:scale(1.05);box-shadow:0 2px 8px rgba(16,185,129,.5)}}
 
-.connection-status{
-  position:absolute; top:50%; left:20px; transform:translateY(-50%);
-  display:flex; align-items:center; gap:5px; font-size:10px;
-}
-.status-dot{ width:8px; height:8px; border-radius:50%; background:#dc3545; animation:pulse 2s infinite; }
-.status-dot.connected{ background:#28a745; animation:none; }
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-
 .demo-page-container{ padding:.25rem; }
 
 .demo-card{
