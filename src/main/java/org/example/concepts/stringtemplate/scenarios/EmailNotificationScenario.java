@@ -70,8 +70,8 @@ public class EmailNotificationScenario {
 
         // Generate different email types
         demonstrateOrderConfirmation(order);
-        demonstrateShippingNotification(order);
-        demonstrateInvoice(order);
+        //demonstrateShippingNotification(order);
+        //demonstrateInvoice(order);
     }
 
     /**
