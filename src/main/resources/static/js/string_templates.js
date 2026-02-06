@@ -97,6 +97,9 @@ function updateFlowLog(logId, responseData) {
   if (responseData.service_calls && Object.keys(responseData.service_calls).length > 0) {
     html += `<div class="api-flow-child">🟣 Service Layer: Template processing executed</div>`;
 
+    // Clear previous highlights before applying new ones
+    clearAllHighlights();
+
     Object.entries(responseData.service_calls).forEach(([serviceMethod, templateFeatures]) => {
       if (Array.isArray(templateFeatures) && templateFeatures.length > 0) {
         html += `<div class="api-flow-child">  └── <strong>${serviceMethod}</strong> → <span class="java21-method-tag">${templateFeatures.join(', ')}</span></div>`;
@@ -125,11 +128,7 @@ function clearInspectorLog() {
   logContainer.innerHTML = '<div class="text-muted text-center py-2">Log cleared. Generate templates to see API calls...</div>';
 }
 
-function highlightJavaMethod(methodName) {
-  if (!methodName) return;
-
-  const safe = String(methodName).replace(/\(\)$/, '');
-
+function clearAllHighlights() {
   document.querySelectorAll('.api-reference-table tr[data-highlight="1"]').forEach(row => {
     const cells = Array.from(row.cells);
     cells.forEach(cell => {
@@ -142,6 +141,12 @@ function highlightJavaMethod(methodName) {
     });
     row.removeAttribute('data-highlight');
   });
+}
+
+function highlightJavaMethod(methodName) {
+  if (!methodName) return;
+
+  const safe = String(methodName).replace(/\(\)$/, '');
 
   let targetSelector = null;
   switch (safe.toLowerCase()) {
@@ -178,20 +183,6 @@ function highlightJavaMethod(methodName) {
       });
 
       row.setAttribute('data-highlight', '1');
-
-      setTimeout(() => {
-        if (row.isConnected) {
-          cells.forEach(cell => {
-            cell.style.removeProperty('box-shadow');
-            cell.style.removeProperty('background-color');
-            cell.style.removeProperty('border-top');
-            cell.style.removeProperty('border-bottom');
-            cell.style.removeProperty('border-left');
-            cell.style.removeProperty('border-right');
-          });
-          row.removeAttribute('data-highlight');
-        }
-      }, 3000);
     }
   }
 }
@@ -216,7 +207,7 @@ async function generateEmail() {
     };
 
     const response = await apiCall('POST', ENDPOINTS.EMAIL, templateRequest);
-    
+
     if (response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse) {
       const templateData = response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse;
       displayTemplate({
@@ -257,7 +248,7 @@ async function generateSMS() {
     };
 
     const response = await apiCall('POST', ENDPOINTS.SMS, templateRequest);
-    
+
     if (response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse) {
       const templateData = response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse;
       displayTemplate({
@@ -299,7 +290,7 @@ async function generateSQL() {
     };
 
     const response = await apiCall('POST', ENDPOINTS.SQL, templateRequest);
-    
+
     if (response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse) {
       const templateData = response.templateResponse || response.response_data?.templateResponse || response.metadata?.templateResponse;
       displayTemplate({
@@ -373,7 +364,7 @@ function initApp() {
   document.getElementById('amount').value = '1299.99';
   document.getElementById('itemsCount').value = '3';
   document.getElementById('searchQuery').value = 'sarah.johnson@example.com';
-  
+
   console.log('TechMart String Templates Demo initialized');
 }
 
