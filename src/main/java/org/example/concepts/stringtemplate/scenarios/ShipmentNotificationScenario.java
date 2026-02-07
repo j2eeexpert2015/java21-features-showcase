@@ -15,7 +15,7 @@ import java.util.List;
  * Note: Order Confirmation demo moved to OrderConfirmationScenario.java
  * (used for Slides 19-20 demonstration)
  */
-public class EmailNotificationScenario {
+public class ShipmentNotificationScenario {
 
     record Customer(String name, String email, String tier) {}
 
