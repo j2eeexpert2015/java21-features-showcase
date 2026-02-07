@@ -9,12 +9,11 @@ import java.util.List;
  * Real-World Scenario: E-Commerce Email Notification System
  *
  * Demonstrates String Templates for:
- * - Order confirmations
  * - Shipping notifications
  * - Invoice generation
- * - Customer communication
  *
- * Shows how String Templates solve real business problems.
+ * Note: Order Confirmation demo moved to OrderConfirmationScenario.java
+ * (used for Slides 19-20 demonstration)
  */
 public class EmailNotificationScenario {
 
@@ -69,90 +68,17 @@ public class EmailNotificationScenario {
         );
 
         // Generate different email types
-        demonstrateOrderConfirmation(order);
-        //demonstrateShippingNotification(order);
-        //demonstrateInvoice(order);
+        demonstrateShippingNotification(order);
+        demonstrateInvoice(order);
     }
 
     /**
-     * 1️⃣ Order Confirmation Email
+     * Shipping Notification (Used in Slides 13-15)
      *
-     * ❌ OLD WAY: String concatenation or StringBuilder
-     * ✅ NEW WAY: String Template for clarity and safety
-     */
-    private static void demonstrateOrderConfirmation(Order order) {
-        System.out.println("1. ORDER CONFIRMATION EMAIL");
-        System.out.println("━".repeat(60));
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy 'at' hh:mm a");
-        String formattedDate = order.orderDate().format(formatter);
-
-        // ❌ OLD WAY - StringBuilder approach
-        StringBuilder oldEmail = new StringBuilder();
-        oldEmail.append("Subject: Order Confirmation - ").append(order.orderId()).append("\n\n");
-        oldEmail.append("Dear ").append(order.customer().name()).append(",\n\n");
-        oldEmail.append("Thank you for your order!\n\n");
-        oldEmail.append("Order Details:\n");
-        oldEmail.append("Order Number: ").append(order.orderId()).append("\n");
-        oldEmail.append("Order Date: ").append(formattedDate).append("\n");
-        oldEmail.append("Customer Tier: ").append(order.customer().tier()).append("\n\n");
-
-        oldEmail.append("Items Ordered:\n");
-        for (OrderItem item : order.items()) {
-            oldEmail.append("- ").append(item.productName())
-                    .append(" (Qty: ").append(item.quantity()).append(")")
-                    .append(" - $").append(item.price()).append("\n");
-        }
-
-        oldEmail.append("\nSubtotal: $").append(order.subtotal()).append("\n");
-        oldEmail.append("Tax: $").append(order.tax()).append("\n");
-        oldEmail.append("Total: $").append(order.total()).append("\n");
-
-        System.out.println("OLD WAY (StringBuilder - 30+ lines):");
-        System.out.println(oldEmail);
-        System.out.println();
-
-        // ✅ NEW WAY - String Template
-        String itemsList = order.items().stream()
-                .map(item -> STR."- \{item.productName()} (Qty: \{item.quantity()}) - $\{item.price()}")
-                .reduce("", (a, b) -> a + b + "\n");
-
-        String newEmail = STR."""
-            Subject: Order Confirmation - \{order.orderId()}
-
-            Dear \{order.customer().name()},
-
-            Thank you for your order!
-
-            Order Details:
-            Order Number: \{order.orderId()}
-            Order Date: \{formattedDate}
-            Customer Tier: \{order.customer().tier()}
-
-            Items Ordered:
-            \{itemsList}
-            Subtotal: $\{order.subtotal()}
-            Tax: $\{order.tax()}
-            Total: $\{order.total()}
-
-            Your order will be processed within 24 hours.
-
-            Best regards,
-            TechMart Team
-            """;
-
-        System.out.println("NEW WAY (String Template - cleaner, safer):");
-        System.out.println(newEmail);
-        System.out.println();
-    }
-
-    /**
-     * 2️⃣ Shipping Notification
-     *
-     * Shows dynamic content based on customer tier
+     * Shows dynamic content based on customer tier using switch expressions
      */
     private static void demonstrateShippingNotification(Order order) {
-        System.out.println("2. SHIPPING NOTIFICATION");
+        System.out.println("SHIPPING NOTIFICATION");
         System.out.println("━".repeat(60));
 
         String trackingNumber = "1Z999AA10123456784";
@@ -194,12 +120,12 @@ public class EmailNotificationScenario {
     }
 
     /**
-     * 3️⃣ Invoice Generation
+     * Invoice Generation
      *
-     * Professional invoice with calculations
+     * Professional invoice with calculations and formatted layout
      */
     private static void demonstrateInvoice(Order order) {
-        System.out.println("3. INVOICE GENERATION");
+        System.out.println("INVOICE GENERATION");
         System.out.println("━".repeat(60));
 
         String invoiceNumber = STR."INV-\{order.orderId().substring(4)}";
