@@ -69,7 +69,7 @@ public class ShipmentNotificationScenario {
 
         // Generate different email types
         demonstrateShippingNotification(order);
-        demonstrateInvoice(order);
+        //demonstrateInvoice(order);
     }
 
     /**
