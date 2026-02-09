@@ -161,3 +161,26 @@ body{
 .sms-preview pre {
     font-family: 'Consolas', 'Monaco', 'Courier New', monospace !important;
 }
+/* Template source code display - preserves formatting with reddish color */
+.template-source-code {
+    background: #f8f9fa;
+    padding: .75rem;
+    border-radius: .375rem;
+    font-size: .8rem;
+    margin: .5rem 0 0 0;
+    white-space: pre-wrap;
+    overflow-x: auto;
+    font-family: 'Courier New', 'Consolas', monospace;
+    line-height: 1.5;
+    border: 1px solid #dee2e6;
+    color: #c2185b;  /* Reddish/magenta color */
+    font-weight: 600;
+}
+
+/* Template output display - preserves formatting with normal styling */
+.template-output-text {
+    margin: 0;
+    white-space: pre-wrap;
+    font-family: inherit;
+    font-size: .9rem;
+}

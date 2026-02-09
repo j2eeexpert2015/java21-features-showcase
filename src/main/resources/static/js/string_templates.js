@@ -339,14 +339,16 @@ function displayTemplate(content, type) {
       </div>
 
       <div class="mb-2">
-        <small class="text-muted">Template:</small><br>
-        <code style="background:#f8f9fa; padding:.25rem; border-radius:.25rem; font-size:.8rem;">${content.template}</code>
+        <small class="text-muted"><strong>Template:</strong></small>
+        <!-- Using CSS class for proper formatting and styling -->
+        <pre class="template-source-code">${escapeHtml(content.template)}</pre>
       </div>
 
       <div class="mb-2">
-        <small class="text-muted">Generated Output:</small>
+        <small class="text-muted"><strong>Generated Output:</strong></small>
         <div style="background:white; padding:.75rem; border:1px solid #e9ecef; border-radius:.25rem; margin-top:.25rem;">
-          <pre style="margin:0; white-space:pre-wrap; font-family:inherit; font-size:.9rem;">${content.output}</pre>
+          <!-- Using CSS class for output formatting -->
+          <pre class="template-output-text">${escapeHtml(content.output)}</pre>
         </div>
       </div>
 
@@ -355,6 +357,13 @@ function displayTemplate(content, type) {
       </div>
     </div>
   `;
+}
+
+// Helper function to escape HTML entities and prevent XSS
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }
 
 function initApp() {

@@ -1,4 +1,3 @@
-// src/main/java/org/example/service/StringTemplateService.java
 package org.example.service;
 
 import org.example.dto.template.TemplateRequest;
@@ -11,7 +10,7 @@ import static org.example.service.SafeSQLProcessor.SAFE;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-// No additional imports needed for String Templates
+
 
 @Service
 public class StringTemplateService {
@@ -25,7 +24,24 @@ public class StringTemplateService {
         logger.info("Customer: {}, Order: {}, Amount: ${}",
                 request.getCustomerName(), request.getOrderId(), request.getAmount());
 
-        String templateSource = "STR.\"Dear \\{customerName}, Your order #\\{orderId} has been confirmed!\"";
+        // Template source (non-evaluated) - stored separately for demo visualization only
+        String templateSource = """
+            STR.\"\"\"
+            Dear \\{request.getCustomerName()},
+            
+            Your order #\\{request.getOrderId()} has been confirmed!
+            
+            Order Details:
+            - Total Amount: $\\{request.getAmount()}
+            - Items: \\{request.getItemsCount()} product(s)
+            - Order Date: \\{LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))}
+            
+            Thank you for shopping with TechMart!
+            
+            Best regards,
+            The TechMart Team
+            \"\"\"
+            """;
 
         // Java 21 STR Template - safe string interpolation
         String emailContent = STR."""
@@ -64,19 +80,19 @@ public class StringTemplateService {
         logger.info("Customer: {}, Order: {}, Amount: {}",
                 request.getCustomerName(), request.getOrderId(), request.getAmount());
 
-        // What we show in Panel 3 as the "template source"
+        // Template source (non-evaluated) - stored separately for demo visualization only
         String templateSource = """
-            FMT.\"\"\"\
-                TechMart Alert
-                Customer: %-20s\\{request.getCustomerName()}
-                Order ID: %-15s\\{request.getOrderId()}
-                Amount:   $%,10.2f\\{request.getAmount()}
-                Items:    %5d\\{request.getItemsCount()}
-                Status:   APPROVED
-                \"\"\"\
+            FMT.\"\"\"
+            TechMart Alert
+            Customer: %-20s\\{request.getCustomerName()}
+            Order ID: %-15s\\{request.getOrderId()}
+            Amount:   $%,10.2f\\{request.getAmount()}
+            Items:    %5d\\{request.getItemsCount()}
+            Status:   APPROVED
+            \"\"\"
             """;
 
-        // 🔥 Actual Java 21 FMT template execution
+        // Actual Java 21 FMT template execution
         String smsContent = FMT."""
             TechMart Alert
             Customer: %-20s\{request.getCustomerName()}
@@ -106,10 +122,19 @@ public class StringTemplateService {
                 request.getCustomerName(), request.getOrderId(),
                 request.getAmount(), request.getItemsCount());
 
-        String templateSource = "SAFE.\"SELECT * FROM orders WHERE customer_name = \\{customerName} AND order_id = \\{orderId} AND total_amount >= \\{amount} AND item_count <= \\{itemsCount}\"";
-        // Custom safe SQL generation - input sanitization
-        //String safeQuery = generateParameterizedSQL(request);
-        // NOW this is an actual custom processor!
+        // Template source (non-evaluated) - stored separately for demo visualization only
+        String templateSource = """
+            SAFE.\"\"\"
+            SELECT o.order_id, o.customer_name, o.total_amount
+            FROM orders o
+            WHERE o.customer_name = '\\{request.getCustomerName()}'
+              AND o.order_id = '\\{request.getOrderId()}'
+              AND o.total_amount >= \\{request.getAmount()}
+            ORDER BY o.order_date DESC
+            \"\"\"
+            """;
+
+        // Actual custom SAFE processor execution
         String safeQuery = SAFE."""
         SELECT o.order_id, o.customer_name, o.total_amount
         FROM orders o
@@ -120,7 +145,6 @@ public class StringTemplateService {
         """;
 
         logger.info("✓ Custom SAFE processor completed");
-
         logger.info("✓ Custom processor completed - safe query generated");
         logger.info("✓ Security: Input sanitized to prevent SQL injection");
         logger.info("================================");
