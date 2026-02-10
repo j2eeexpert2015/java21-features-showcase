@@ -5,17 +5,16 @@ public class TemplateResponse {
     private String templateSource;
     private String generatedContent;
     private String processorUsed;
-    private String securityStatus;
+
 
     public TemplateResponse() {}
 
     public TemplateResponse(String templateType, String templateSource, String generatedContent,
-                            String processorUsed, String securityStatus) {
+                            String processorUsed) {
         this.templateType = templateType;
         this.templateSource = templateSource;
         this.generatedContent = generatedContent;
         this.processorUsed = processorUsed;
-        this.securityStatus = securityStatus;
     }
 
     // Getters and setters
@@ -49,13 +48,5 @@ public class TemplateResponse {
 
     public void setProcessorUsed(String processorUsed) {
         this.processorUsed = processorUsed;
-    }
-
-    public String getSecurityStatus() {
-        return securityStatus;
-    }
-
-    public void setSecurityStatus(String securityStatus) {
-        this.securityStatus = securityStatus;
     }
 }

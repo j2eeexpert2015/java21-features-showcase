@@ -68,8 +68,7 @@ public class StringTemplateService {
                 "email",
                 templateSource,
                 emailContent,
-                "STR Processor",
-                "safe"
+                "STR Processor"
         );
     }
 
@@ -110,8 +109,7 @@ public class StringTemplateService {
                 "sms",              // templateType
                 templateSource,     // templateSource (for Panel 3)
                 smsContent,         // generatedContent
-                "FMT Processor",    // processorUsed
-                "safe"              // securityStatus
+                "FMT Processor"   // processorUsed
         );
     }
 
@@ -153,8 +151,7 @@ public class StringTemplateService {
                 "sql",
                 templateSource,
                 safeQuery,
-                "Custom Safe Processor",
-                "safe"
+                "Custom Safe Processor"
         );
     }
 
