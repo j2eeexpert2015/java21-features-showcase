@@ -103,7 +103,7 @@ function updateFlowLog(logId, responseData) {
     Object.entries(responseData.service_calls).forEach(([serviceMethod, templateFeatures]) => {
       if (Array.isArray(templateFeatures) && templateFeatures.length > 0) {
         html += `<div class="api-flow-child">  └── <strong>${serviceMethod}</strong> → <span class="java21-method-tag">${templateFeatures.join(', ')}</span></div>`;
-        templateFeatures.forEach(method => highlightJavaMethod(method));
+        templateFeatures.forEach(method => highlightFeature(method));
       } else {
         html += `<div class="api-flow-child">  └── <strong>${serviceMethod}</strong> → Standard processing</div>`;
       }
@@ -143,7 +143,7 @@ function clearAllHighlights() {
   });
 }
 
-function highlightJavaMethod(methodName) {
+function highlightFeature(methodName) {
   if (!methodName) return;
 
   const safe = String(methodName).replace(/\(\)$/, '');
