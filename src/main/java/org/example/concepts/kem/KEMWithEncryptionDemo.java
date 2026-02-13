@@ -10,8 +10,9 @@ import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.Base64;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class KEMWithEncryptionDemo {
 
@@ -79,13 +80,13 @@ public class KEMWithEncryptionDemo {
     // ==================== DATA ENCRYPTION ====================
 
     // Helper: Convert shared secret to AES key
+    // DHKEM output is always 32 bytes — use directly
     private static SecretKey toAesKey(SecretKey sharedSecret) {
-        byte[] aesKeyBytes = Arrays.copyOf(sharedSecret.getEncoded(), 32);
-        return new SecretKeySpec(aesKeyBytes, "AES");
+        return new SecretKeySpec(sharedSecret.getEncoded(), "AES");
     }
 
     // Step 5: Encrypt data using the shared secret
-    public static EncryptedData encryptData(String plaintext, SecretKey sharedSecret)
+    public static EncryptedData encrypt(String plaintext, SecretKey sharedSecret)
             throws Exception {
         System.out.println("=== Step 5: Encrypt Data with Shared Secret ===");
 
@@ -97,7 +98,7 @@ public class KEMWithEncryptionDemo {
         SecureRandom.getInstanceStrong().nextBytes(iv);
 
         cipher.init(Cipher.ENCRYPT_MODE, aesKey, new GCMParameterSpec(128, iv));
-        byte[] ciphertext = cipher.doFinal(plaintext.getBytes());
+        byte[] ciphertext = cipher.doFinal(plaintext.getBytes(UTF_8));
 
         System.out.println("Plaintext: " + plaintext);
         System.out.println("IV (Base64): " + Base64.getEncoder().encodeToString(iv));
@@ -108,7 +109,7 @@ public class KEMWithEncryptionDemo {
     }
 
     // Step 6: Decrypt data using the shared secret
-    public static String decryptData(EncryptedData encryptedData, SecretKey sharedSecret)
+    public static String decrypt(EncryptedData encryptedData, SecretKey sharedSecret)
             throws Exception {
         System.out.println("=== Step 6: Decrypt Data with Shared Secret ===");
 
@@ -119,7 +120,7 @@ public class KEMWithEncryptionDemo {
                 new GCMParameterSpec(128, encryptedData.iv));
         byte[] plaintext = cipher.doFinal(encryptedData.ciphertext);
 
-        String decryptedText = new String(plaintext);
+        String decryptedText = new String(plaintext, UTF_8);
         System.out.println("Decrypted: " + decryptedText + "\n");
 
         return decryptedText;
@@ -162,10 +163,10 @@ public class KEMWithEncryptionDemo {
         // ==================== DATA ENCRYPTION ====================
 
         // Step 5: Sender encrypts data with shared secret
-        EncryptedData encryptedData = encryptData(message, senderSharedSecret);
+        EncryptedData encryptedData = encrypt(message, senderSharedSecret);
 
         // Step 6: Receiver decrypts data with shared secret
-        String decryptedMessage = decryptData(encryptedData, receiverSharedSecret);
+        String decryptedMessage = decrypt(encryptedData, receiverSharedSecret);
 
         // ==================== VERIFICATION ====================
         System.out.println("=== Verification ===");
