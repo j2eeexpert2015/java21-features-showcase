@@ -1,10 +1,10 @@
 package org.example.controller;
 
-
-
 import org.example.dto.rsavskem.CryptoRequest;
 import org.example.dto.rsavskem.CryptoResponse;
 import org.example.service.CryptoService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +17,12 @@ import java.security.KeyPair;
  * REST Controller for RSA vs KEM Comparison Demo
  * Provides endpoints for both RSA Key Transport and KEM operations
  *
- * @author Learning from Experience
  */
 @RestController
 @RequestMapping("/api/crypto")
 public class CryptoController {
+
+    private static final Logger log = LoggerFactory.getLogger(CryptoController.class);
 
     private final CryptoService cryptoService;
 
@@ -33,26 +34,9 @@ public class CryptoController {
     // RSA KEY TRANSPORT ENDPOINTS
     // ============================================================================
 
-    /**
-     * Step 1: Generate RSA Key Pair (2048 bits)
-     *
-     * GET /api/crypto/rsa/generate-keypair
-     *
-     * Response:
-     * {
-     *   "success": true,
-     *   "operation": "rsa-generate-keypair",
-     *   "message": "RSA key pair generated successfully",
-     *   "data": {
-     *     "publicKey": "MIIBIjANBgkqhki...",
-     *     "privateKey": "MIIEvQIBADANBgk...",
-     *     "keySize": 2048,
-     *     "algorithm": "RSA"
-     *   }
-     * }
-     */
     @GetMapping("/rsa/generate-keypair")
     public ResponseEntity<CryptoResponse> generateRsaKeyPair() {
+        log.info("==> RSA: Generate Key Pair request");
         try {
             KeyPair keyPair = cryptoService.generateRsaKeyPair();
 
@@ -65,34 +49,20 @@ public class CryptoController {
                     .addData("keySize", 2048)
                     .addData("algorithm", "RSA");
 
+            log.info("<== RSA: Key pair generated (2048 bits)");
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
+            log.error("<== RSA: Key pair generation failed - {}", e.getMessage());
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(CryptoResponse.error("rsa-generate-keypair", e.getMessage()));
         }
     }
 
-    /**
-     * Step 2: Generate Random AES Key (256 bits)
-     *
-     * GET /api/crypto/rsa/generate-aes-key
-     *
-     * Response:
-     * {
-     *   "success": true,
-     *   "operation": "rsa-generate-aes-key",
-     *   "message": "AES key generated successfully",
-     *   "data": {
-     *     "aesKey": "7a3f2e8d9c1b4a5e...",
-     *     "keySize": 256,
-     *     "algorithm": "AES"
-     *   }
-     * }
-     */
     @GetMapping("/rsa/generate-aes-key")
     public ResponseEntity<CryptoResponse> generateAesKey() {
+        log.info("==> RSA: Generate AES Key request");
         try {
             SecretKey aesKey = cryptoService.generateAesKey();
 
@@ -104,45 +74,24 @@ public class CryptoController {
                     .addData("keySize", 256)
                     .addData("algorithm", "AES");
 
+            log.info("<== RSA: AES key generated (256 bits / 32 bytes)");
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
+            log.error("<== RSA: AES key generation failed - {}", e.getMessage());
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(CryptoResponse.error("rsa-generate-aes-key", e.getMessage()));
         }
     }
 
-    /**
-     * Step 3: Encrypt AES Key with RSA Public Key
-     *
-     * POST /api/crypto/rsa/encrypt-aes-key
-     *
-     * Request Body:
-     * {
-     *   "data": "{\"publicKey\":\"...\",\"aesKey\":\"...\"}"
-     * }
-     *
-     * Response:
-     * {
-     *   "success": true,
-     *   "operation": "rsa-encrypt-aes-key",
-     *   "message": "AES key encrypted successfully",
-     *   "data": {
-     *     "encryptedKey": "8e4d7c2a9f3b1e5d...",
-     *     "sizeInBytes": 256,
-     *     "paddingScheme": "OAEP (SHA-256 + MGF1)"
-     *   }
-     * }
-     */
     @PostMapping("/rsa/encrypt-aes-key")
     public ResponseEntity<CryptoResponse> encryptAesKey(@RequestBody CryptoRequest request) {
+        log.info("==> RSA: Encrypt AES Key request");
         try {
-            // Parse JSON data from request
             String publicKey = extractJsonField(request.getData(), "publicKey");
             String aesKey = extractJsonField(request.getData(), "aesKey");
 
-            // Encrypt AES key with RSA
             byte[] encryptedKey = cryptoService.encryptAesKeyWithRsa(publicKey, aesKey);
 
             CryptoResponse response = CryptoResponse.success(
@@ -153,49 +102,28 @@ public class CryptoController {
                     .addData("sizeInBytes", encryptedKey.length)
                     .addData("paddingScheme", "OAEP (SHA-256 + MGF1)");
 
+            log.info("<== RSA: AES key encrypted ({} bytes transmitted - contains key material)", encryptedKey.length);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
+            log.error("<== RSA: Encryption failed - {}", e.getMessage());
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(CryptoResponse.error("rsa-encrypt-aes-key", e.getMessage()));
         }
     }
 
-    /**
-     * Step 4: Decrypt AES Key with RSA Private Key
-     *
-     * POST /api/crypto/rsa/decrypt-aes-key
-     *
-     * Request Body:
-     * {
-     *   "data": "{\"privateKey\":\"...\",\"encryptedKey\":\"...\",\"originalKey\":\"...\"}"
-     * }
-     *
-     * Response:
-     * {
-     *   "success": true,
-     *   "operation": "rsa-decrypt-aes-key",
-     *   "message": "AES key decrypted successfully",
-     *   "data": {
-     *     "decryptedKey": "7a3f2e8d9c1b4a5e...",
-     *     "keysMatch": true
-     *   }
-     * }
-     */
     @PostMapping("/rsa/decrypt-aes-key")
     public ResponseEntity<CryptoResponse> decryptAesKey(@RequestBody CryptoRequest request) {
+        log.info("==> RSA: Decrypt AES Key request");
         try {
-            // Parse JSON data from request
             String privateKey = extractJsonField(request.getData(), "privateKey");
             String encryptedKey = extractJsonField(request.getData(), "encryptedKey");
             String originalKey = extractJsonField(request.getData(), "originalKey");
 
-            // Decrypt AES key with RSA
             byte[] decryptedKey = cryptoService.decryptAesKeyWithRsa(privateKey, encryptedKey);
             String decryptedKeyBase64 = cryptoService.bytesToBase64(decryptedKey);
 
-            // Verify keys match
             boolean keysMatch = cryptoService.verifyAesKeysMatch(originalKey, decryptedKeyBase64);
 
             CryptoResponse response = CryptoResponse.success(
@@ -205,9 +133,11 @@ public class CryptoController {
                     .addData("decryptedKey", decryptedKeyBase64)
                     .addData("keysMatch", keysMatch);
 
+            log.info("<== RSA: AES key decrypted (keysMatch: {})", keysMatch);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
+            log.error("<== RSA: Decryption failed - {}", e.getMessage());
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(CryptoResponse.error("rsa-decrypt-aes-key", e.getMessage()));
@@ -218,26 +148,9 @@ public class CryptoController {
     // KEM ENDPOINTS
     // ============================================================================
 
-    /**
-     * Step 1: Generate X25519 Key Pair for KEM
-     *
-     * GET /api/crypto/kem/generate-keypair
-     *
-     * Response:
-     * {
-     *   "success": true,
-     *   "operation": "kem-generate-keypair",
-     *   "message": "X25519 key pair generated successfully",
-     *   "data": {
-     *     "publicKey": "MCowBQYDK2VuAyEA...",
-     *     "privateKey": "MC4CAQAwBQYDK2Vu...",
-     *     "keySize": 256,
-     *     "algorithm": "X25519"
-     *   }
-     * }
-     */
     @GetMapping("/kem/generate-keypair")
     public ResponseEntity<CryptoResponse> generateKemKeyPair() {
+        log.info("==> KEM: Generate X25519 Key Pair request");
         try {
             KeyPair keyPair = cryptoService.generateKemKeyPair();
 
@@ -250,44 +163,23 @@ public class CryptoController {
                     .addData("keySize", 256)
                     .addData("algorithm", "X25519");
 
+            log.info("<== KEM: X25519 key pair generated");
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
+            log.error("<== KEM: Key pair generation failed - {}", e.getMessage());
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(CryptoResponse.error("kem-generate-keypair", e.getMessage()));
         }
     }
 
-    /**
-     * Step 2: KEM Encapsulation
-     *
-     * POST /api/crypto/kem/encapsulate
-     *
-     * Request Body:
-     * {
-     *   "data": "{\"publicKey\":\"...\"}"
-     * }
-     *
-     * Response:
-     * {
-     *   "success": true,
-     *   "operation": "kem-encapsulate",
-     *   "message": "KEM encapsulation completed successfully",
-     *   "data": {
-     *     "sharedSecret": "3d7f9e2c8a1b4d6f...",
-     *     "encapsulation": "9a7e3f2d8c1b5e4a...",
-     *     "encapsulationSize": 32
-     *   }
-     * }
-     */
     @PostMapping("/kem/encapsulate")
     public ResponseEntity<CryptoResponse> kemEncapsulate(@RequestBody CryptoRequest request) {
+        log.info("==> KEM: Encapsulation request");
         try {
-            // Parse JSON data from request
             String publicKey = extractJsonField(request.getData(), "publicKey");
 
-            // Perform KEM encapsulation
             KEM.Encapsulated encapsulated = cryptoService.performKemEncapsulation(publicKey);
 
             CryptoResponse response = CryptoResponse.success(
@@ -298,49 +190,29 @@ public class CryptoController {
                     .addData("encapsulation", cryptoService.bytesToBase64(encapsulated.encapsulation()))
                     .addData("encapsulationSize", encapsulated.encapsulation().length);
 
+            log.info("<== KEM: Encapsulation complete ({} bytes transmitted - NO key material)",
+                    encapsulated.encapsulation().length);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
+            log.error("<== KEM: Encapsulation failed - {}", e.getMessage());
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(CryptoResponse.error("kem-encapsulate", e.getMessage()));
         }
     }
 
-    /**
-     * Step 3: KEM Decapsulation
-     *
-     * POST /api/crypto/kem/decapsulate
-     *
-     * Request Body:
-     * {
-     *   "data": "{\"privateKey\":\"...\",\"encapsulation\":\"...\",\"originalSecret\":\"...\"}"
-     * }
-     *
-     * Response:
-     * {
-     *   "success": true,
-     *   "operation": "kem-decapsulate",
-     *   "message": "KEM decapsulation completed successfully",
-     *   "data": {
-     *     "derivedSecret": "3d7f9e2c8a1b4d6f...",
-     *     "secretsMatch": true
-     *   }
-     * }
-     */
     @PostMapping("/kem/decapsulate")
     public ResponseEntity<CryptoResponse> kemDecapsulate(@RequestBody CryptoRequest request) {
+        log.info("==> KEM: Decapsulation request");
         try {
-            // Parse JSON data from request
             String privateKey = extractJsonField(request.getData(), "privateKey");
             String encapsulation = extractJsonField(request.getData(), "encapsulation");
             String originalSecret = extractJsonField(request.getData(), "originalSecret");
 
-            // Perform KEM decapsulation
             SecretKey derivedSecret = cryptoService.performKemDecapsulation(privateKey, encapsulation);
             String derivedSecretBase64 = cryptoService.keyToBase64(derivedSecret);
 
-            // Verify secrets match
             boolean secretsMatch = cryptoService.verifySecretsMatch(originalSecret, derivedSecretBase64);
 
             CryptoResponse response = CryptoResponse.success(
@@ -350,9 +222,11 @@ public class CryptoController {
                     .addData("derivedSecret", derivedSecretBase64)
                     .addData("secretsMatch", secretsMatch);
 
+            log.info("<== KEM: Decapsulation complete (secretsMatch: {}, derived locally - never transmitted)", secretsMatch);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
+            log.error("<== KEM: Decapsulation failed - {}", e.getMessage());
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(CryptoResponse.error("kem-decapsulate", e.getMessage()));
@@ -363,37 +237,13 @@ public class CryptoController {
     // MESSAGE ENCRYPTION ENDPOINTS (SHARED)
     // ============================================================================
 
-    /**
-     * Encrypt a message using AES-GCM
-     *
-     * POST /api/crypto/encrypt-message
-     *
-     * Request Body:
-     * {
-     *   "message": "Hello Bob! Payment confirmed: $1,299.00",
-     *   "data": "{\"aesKey\":\"...\"}"
-     * }
-     *
-     * Response:
-     * {
-     *   "success": true,
-     *   "operation": "encrypt-message",
-     *   "message": "Message encrypted successfully",
-     *   "data": {
-     *     "ciphertext": "5f8e3a2d9c7b1e4a...",
-     *     "iv": "a7f3e9c1b2d4f6e8...",
-     *     "algorithm": "AES-GCM"
-     *   }
-     * }
-     */
     @PostMapping("/encrypt-message")
     public ResponseEntity<CryptoResponse> encryptMessage(@RequestBody CryptoRequest request) {
+        log.info("==> Encrypt message request");
         try {
-            // Parse request
             String message = request.getMessage();
             String aesKey = extractJsonField(request.getData(), "aesKey");
 
-            // Encrypt message
             CryptoService.EncryptionResult result = cryptoService.encryptMessage(aesKey, message);
 
             CryptoResponse response = CryptoResponse.success(
@@ -401,47 +251,28 @@ public class CryptoController {
                             "Message encrypted successfully"
                     )
                     .addData("ciphertext", cryptoService.bytesToBase64(result.ciphertext()))
-                    .addData("iv", cryptoService.bytesToBase64(result.ciphertext()))
+                    .addData("iv", cryptoService.bytesToBase64(result.iv()))
                     .addData("algorithm", "AES-GCM");
 
+            log.info("<== Message encrypted (AES-GCM)");
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
+            log.error("<== Message encryption failed - {}", e.getMessage());
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(CryptoResponse.error("encrypt-message", e.getMessage()));
         }
     }
 
-    /**
-     * Decrypt a message using AES-GCM
-     *
-     * POST /api/crypto/decrypt-message
-     *
-     * Request Body:
-     * {
-     *   "data": "{\"aesKey\":\"...\",\"iv\":\"...\",\"ciphertext\":\"...\"}"
-     * }
-     *
-     * Response:
-     * {
-     *   "success": true,
-     *   "operation": "decrypt-message",
-     *   "message": "Message decrypted successfully",
-     *   "data": {
-     *     "plaintext": "Hello Bob! Payment confirmed: $1,299.00"
-     *   }
-     * }
-     */
     @PostMapping("/decrypt-message")
     public ResponseEntity<CryptoResponse> decryptMessage(@RequestBody CryptoRequest request) {
+        log.info("==> Decrypt message request");
         try {
-            // Parse request
             String aesKey = extractJsonField(request.getData(), "aesKey");
             String iv = extractJsonField(request.getData(), "iv");
             String ciphertext = extractJsonField(request.getData(), "ciphertext");
 
-            // Decrypt message
             String plaintext = cryptoService.decryptMessage(aesKey, iv, ciphertext);
 
             CryptoResponse response = CryptoResponse.success(
@@ -450,9 +281,11 @@ public class CryptoController {
                     )
                     .addData("plaintext", plaintext);
 
+            log.info("<== Message decrypted (AES-GCM)");
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
+            log.error("<== Message decryption failed - {}", e.getMessage());
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(CryptoResponse.error("decrypt-message", e.getMessage()));
@@ -463,10 +296,6 @@ public class CryptoController {
     // UTILITY METHODS
     // ============================================================================
 
-    /**
-     * Simple JSON field extractor (for demo purposes)
-     * In production, use Jackson ObjectMapper
-     */
     private String extractJsonField(String json, String fieldName) {
         if (json == null) {
             throw new IllegalArgumentException("JSON data is null");
