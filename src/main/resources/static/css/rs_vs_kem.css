@@ -36,6 +36,178 @@ body {
     font-size: 13px;
 }
 
+/* ============================================
+   LEGEND - Sender/Receiver & Sym/Asym
+   ============================================ */
+.legend-bar {
+    background: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+.legend-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.legend-group-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #7f8c8d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.legend-badge.sender {
+    background: #E3F2FD;
+    color: #1565C0;
+    border: 1px solid #1565C0;
+}
+
+.legend-badge.receiver {
+    background: #E8F5E9;
+    color: #2E7D32;
+    border: 1px solid #2E7D32;
+}
+
+.legend-badge.network {
+    background: #FFF3E0;
+    color: #E65100;
+    border: 1px solid #E65100;
+}
+
+.legend-badge.asym {
+    background: #EDE7F6;
+    color: #5E35B1;
+    border: 1px solid #5E35B1;
+}
+
+.legend-badge.sym {
+    background: #FFF8E1;
+    color: #F57F17;
+    border: 1px solid #F57F17;
+}
+
+.legend-desc {
+    font-size: 10px;
+    color: #666;
+}
+
+/* ============================================
+   STEP LABELS - Party & Crypto Type
+   ============================================ */
+.step-labels {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+    margin-right: 10px;
+}
+
+.step-badge {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.step-badge.sender {
+    background: #E3F2FD;
+    color: #1565C0;
+}
+
+.step-badge.receiver {
+    background: #E8F5E9;
+    color: #2E7D32;
+}
+
+.step-badge.network {
+    background: #FFF3E0;
+    color: #E65100;
+}
+
+.step-badge.asym {
+    background: #EDE7F6;
+    color: #5E35B1;
+}
+
+.step-badge.sym {
+    background: #FFF8E1;
+    color: #F57F17;
+}
+
+.step-badge.derives {
+    background: linear-gradient(90deg, #EDE7F6 50%, #FFF8E1 50%);
+    color: #333;
+}
+
+/* ============================================
+   DEBUG PANEL LABELS
+   ============================================ */
+.debug-party-label {
+    font-size: 9px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 8px;
+    margin-left: 6px;
+}
+
+.debug-party-label.receiver {
+    background: #E8F5E9;
+    color: #2E7D32;
+}
+
+.debug-party-label.sender {
+    background: #E3F2FD;
+    color: #1565C0;
+}
+
+.debug-party-label.network {
+    background: #FFF3E0;
+    color: #E65100;
+}
+
+.debug-crypto-label {
+    font-size: 9px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 8px;
+    margin-left: 4px;
+}
+
+.debug-crypto-label.asym {
+    background: #EDE7F6;
+    color: #5E35B1;
+}
+
+.debug-crypto-label.sym {
+    background: #FFF8E1;
+    color: #F57F17;
+}
+
+/* ============================================
+   MAIN LAYOUT
+   ============================================ */
 .main-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -299,6 +471,10 @@ body {
     color: #7f8c8d;
     font-size: 10px;
     margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
 }
 
 .message-section {
@@ -314,6 +490,14 @@ body {
     margin-bottom: 12px;
     text-align: center;
     font-size: 15px;
+}
+
+.message-section .section-subtitle {
+    text-align: center;
+    font-size: 11px;
+    color: #7f8c8d;
+    margin-top: -8px;
+    margin-bottom: 12px;
 }
 
 .message-input {
@@ -418,6 +602,10 @@ body {
         border-right: none;
         padding-right: 0;
     }
+
+    .legend-bar {
+        gap: 20px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -433,6 +621,12 @@ body {
     .step-header {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .step-labels {
+        margin-left: 0;
+        margin-top: 6px;
+        margin-bottom: 6px;
     }
 
     .btn {
@@ -456,5 +650,15 @@ body {
         border-bottom: none;
         padding-bottom: 0;
         margin-bottom: 0;
+    }
+
+    .legend-bar {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .legend-group {
+        flex-wrap: wrap;
+        justify-content: center;
     }
 }

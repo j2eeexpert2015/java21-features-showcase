@@ -14,6 +14,36 @@
         <p>RSA Key Transport vs Key Encapsulation Mechanism (KEM) - Java 21</p>
     </div>
 
+    <!-- Legend Bar -->
+    <div class="legend-bar">
+        <div class="legend-group">
+            <span class="legend-group-title">Parties:</span>
+            <div class="legend-item">
+                <span class="legend-badge sender">👤 SENDER</span>
+                <span class="legend-desc">Wants to share key</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-badge receiver">👥 RECEIVER</span>
+                <span class="legend-desc">Owns key pair</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-badge network">🌐 NETWORK</span>
+                <span class="legend-desc">What travels</span>
+            </div>
+        </div>
+        <div class="legend-group">
+            <span class="legend-group-title">Crypto Type:</span>
+            <div class="legend-item">
+                <span class="legend-badge asym">🔐 ASYMMETRIC</span>
+                <span class="legend-desc">Public/Private keys</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-badge sym">🔑 SYMMETRIC</span>
+                <span class="legend-desc">Shared secret (AES)</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Main 2-Column Grid: Methods (left) | Debug (right) -->
     <div class="main-grid">
         <!-- Left Column: RSA + KEM stacked vertically -->
@@ -22,7 +52,7 @@
             <div class="method-panel">
                 <div class="panel-header rsa">
                     <h2>🔴 RSA KEY TRANSPORT</h2>
-                    <p>Traditional Method</p>
+                    <p>Traditional Method — Encrypt & Transmit the Key</p>
                 </div>
                 <div class="panel-body">
                     <!-- RSA Step 1 -->
@@ -32,12 +62,16 @@
                                 <div class="step-status" id="rsa-step1-status">⏸️</div>
                                 <div class="step-title">STEP 1: Generate RSA Key Pair</div>
                             </div>
+                            <div class="step-labels">
+                                <span class="step-badge receiver">Receiver</span>
+                                <span class="step-badge asym">Asymmetric</span>
+                            </div>
                             <button class="btn btn-rsa" id="rsa-btn-step1">Generate (2048 bits)</button>
                         </div>
                         <div class="step-content" id="rsa-step1-content" style="display: none;">
                             <div class="info-box success">
-                                ✅ RSA Public Key (2048 bits)<br>
-                                ✅ RSA Private Key (2048 bits)
+                                ✅ RSA Public Key (2048 bits) → shared with Sender<br>
+                                ✅ RSA Private Key (2048 bits) → kept secret
                             </div>
                         </div>
                     </div>
@@ -49,6 +83,10 @@
                                 <div class="step-status" id="rsa-step2-status">⏸️</div>
                                 <div class="step-title">STEP 2: Generate Random AES Key</div>
                             </div>
+                            <div class="step-labels">
+                                <span class="step-badge sender">Sender</span>
+                                <span class="step-badge sym">Symmetric</span>
+                            </div>
                             <button class="btn btn-rsa" id="rsa-btn-step2" disabled>Generate (256 bits)</button>
                         </div>
                         <div class="step-content" id="rsa-step2-content" style="display: none;">
@@ -56,7 +94,7 @@
                                 ✅ AES Key Generated (256 bits = 32 bytes)
                             </div>
                             <div class="info-box danger">
-                                🔴 This key will be encrypted and transmitted
+                                🔴 This symmetric key will be encrypted and transmitted
                             </div>
                             <div class="key-display" id="rsa-aes-key"></div>
                         </div>
@@ -69,14 +107,19 @@
                                 <div class="step-status" id="rsa-step3-status">⏸️</div>
                                 <div class="step-title">STEP 3: Encrypt AES Key with RSA</div>
                             </div>
+                            <div class="step-labels">
+                                <span class="step-badge sender">Sender</span>
+                                <span class="step-badge network">Network</span>
+                                <span class="step-badge asym">Asymmetric</span>
+                            </div>
                             <button class="btn btn-rsa" id="rsa-btn-step3" disabled>Encrypt (OAEP)</button>
                         </div>
                         <div class="step-content" id="rsa-step3-content" style="display: none;">
                             <div class="info-box warning">
-                                ⚠️ Padding: OAEP (SHA-256 + MGF1)
+                                ⚠️ Padding: OAEP (SHA-256 + MGF1) — must match on both sides
                             </div>
                             <div class="info-box danger">
-                                🔴 Encrypted: 256 bytes - Contains actual key
+                                🔴 Encrypted: 256 bytes transmitted — Contains actual key (encrypted)
                             </div>
                             <div class="key-display" id="rsa-encrypted-key"></div>
                         </div>
@@ -89,12 +132,16 @@
                                 <div class="step-status" id="rsa-step4-status">⏸️</div>
                                 <div class="step-title">STEP 4: Decrypt AES Key</div>
                             </div>
+                            <div class="step-labels">
+                                <span class="step-badge receiver">Receiver</span>
+                                <span class="step-badge sym">→ Symmetric</span>
+                            </div>
                             <button class="btn btn-rsa" id="rsa-btn-step4" disabled>Decrypt with RSA</button>
                         </div>
                         <div class="step-content" id="rsa-step4-content" style="display: none;">
                             <div class="info-box success">
-                                ✅ AES Key Recovered<br>
-                                ✅ Keys Match: <span id="rsa-match">true</span>
+                                ✅ AES Key Recovered — Receiver extracted the symmetric key<br>
+                                ✅ Keys Match: <span id="rsa-match">true</span> — Both parties now share the same key
                             </div>
                             <div class="key-display" id="rsa-decrypted-key"></div>
                         </div>
@@ -114,7 +161,7 @@
             <div class="method-panel">
                 <div class="panel-header kem">
                     <h2>🟢 KEY ENCAPSULATION MECHANISM</h2>
-                    <p>Modern Method - Java 21</p>
+                    <p>Modern Method - Java 21 — Derive, Don't Transmit</p>
                 </div>
                 <div class="panel-body">
                     <!-- KEM Step 1 -->
@@ -124,12 +171,16 @@
                                 <div class="step-status" id="kem-step1-status">⏸️</div>
                                 <div class="step-title">STEP 1: Generate X25519 Key Pair</div>
                             </div>
+                            <div class="step-labels">
+                                <span class="step-badge receiver">Receiver</span>
+                                <span class="step-badge asym">Asymmetric</span>
+                            </div>
                             <button class="btn btn-kem" id="kem-btn-step1">Generate (256 bits)</button>
                         </div>
                         <div class="step-content" id="kem-step1-content" style="display: none;">
                             <div class="info-box success">
-                                ✅ X25519 Public Key (256 bits)<br>
-                                ✅ X25519 Private Key (256 bits)
+                                ✅ X25519 Public Key (256 bits) → shared with Sender<br>
+                                ✅ X25519 Private Key (256 bits) → kept secret
                             </div>
                         </div>
                     </div>
@@ -141,18 +192,23 @@
                                 <div class="step-status" id="kem-step2-status">⏸️</div>
                                 <div class="step-title">STEP 2: KEM Encapsulation</div>
                             </div>
+                            <div class="step-labels">
+                                <span class="step-badge sender">Sender</span>
+                                <span class="step-badge asym">Asymmetric</span>
+                                <span class="step-badge sym">→ Symmetric</span>
+                            </div>
                             <button class="btn btn-kem" id="kem-btn-step2" disabled>Encapsulate</button>
                         </div>
                         <div class="step-content" id="kem-step2-content" style="display: none;">
                             <div class="info-box info">
-                                📦 KEM produces TWO outputs:
+                                📦 KEM produces TWO outputs from asymmetric operation:
                             </div>
                             <div class="info-box success">
-                                ✅ Shared Secret (kept local) - NEVER TRANSMITTED
+                                ✅ Shared Secret (kept local) — NEVER TRANSMITTED — Symmetric key derived
                             </div>
                             <div class="key-display" id="kem-shared-secret"></div>
                             <div class="info-box success" style="margin-top: 8px;">
-                                ✅ Encapsulation (safe to send) - NO key material
+                                ✅ Encapsulation (safe to send) — NO key material inside
                             </div>
                             <div class="key-display" id="kem-encapsulation"></div>
                         </div>
@@ -165,11 +221,14 @@
                                 <div class="step-status" id="kem-step3-status">⏸️</div>
                                 <div class="step-title">STEP 3: Transmit Encapsulation</div>
                             </div>
+                            <div class="step-labels">
+                                <span class="step-badge network">Network</span>
+                            </div>
                             <button class="btn btn-kem" id="kem-btn-step3" disabled>Transmit</button>
                         </div>
                         <div class="step-content" id="kem-step3-content" style="display: none;">
                             <div class="info-box success">
-                                📡 Network: 32 bytes | Public data | NO key material | No padding
+                                📡 Network: 32 bytes | Public data | NO key material | No padding needed
                             </div>
                         </div>
                     </div>
@@ -181,12 +240,16 @@
                                 <div class="step-status" id="kem-step4-status">⏸️</div>
                                 <div class="step-title">STEP 4: KEM Decapsulation</div>
                             </div>
+                            <div class="step-labels">
+                                <span class="step-badge receiver">Receiver</span>
+                                <span class="step-badge sym">→ Symmetric</span>
+                            </div>
                             <button class="btn btn-kem" id="kem-btn-step4" disabled>Decapsulate</button>
                         </div>
                         <div class="step-content" id="kem-step4-content" style="display: none;">
                             <div class="info-box success">
-                                ✅ Shared Secret Derived (locally)<br>
-                                ✅ Secrets Match: <span id="kem-match">true</span> - Was never transmitted
+                                ✅ Shared Secret Derived (locally) — computed independently<br>
+                                ✅ Secrets Match: <span id="kem-match">true</span> — Was never transmitted!
                             </div>
                             <div class="key-display" id="kem-derived-secret"></div>
                         </div>
@@ -207,33 +270,58 @@
         <div class="debug-panel-wrapper">
             <div class="panel-header debug">
                 <h2>🔧 SESSION DEBUG INFO</h2>
-                <p>Real-time Key Data</p>
+                <p>Real-time Key Data — Both Perspectives</p>
             </div>
             <div class="debug-section-content">
                 <!-- RSA Debug -->
                 <div class="debug-method-block">
                     <div class="debug-method-title rsa">🔴 RSA METHOD</div>
                     <div class="debug-item">
-                        <div class="debug-label">RSA Public Key:</div>
+                        <div class="debug-label">
+                            RSA Public Key
+                            <span class="debug-party-label receiver">Receiver</span>
+                            <span class="debug-crypto-label asym">Asymmetric</span>
+                            → shared
+                        </div>
                         <div class="debug-value" id="debug-rsa-public">Not generated yet</div>
                     </div>
                     <div class="debug-item">
-                        <div class="debug-label">RSA Private Key:</div>
+                        <div class="debug-label">
+                            RSA Private Key
+                            <span class="debug-party-label receiver">Receiver</span>
+                            <span class="debug-crypto-label asym">Asymmetric</span>
+                            → secret
+                        </div>
                         <div class="debug-value" id="debug-rsa-private">Not generated yet</div>
                     </div>
                     <div class="debug-item">
-                        <div class="debug-label">🔴 Encrypted AES Key (256 bytes):</div>
+                        <div class="debug-label">
+                            AES Key (original)
+                            <span class="debug-party-label sender">Sender</span>
+                            <span class="debug-crypto-label sym">Symmetric</span>
+                        </div>
+                        <div class="debug-value" id="debug-rsa-aes">Not generated yet</div>
+                    </div>
+                    <div class="debug-item">
+                        <div class="debug-label">
+                            🔴 Encrypted AES Key (256 bytes)
+                            <span class="debug-party-label network">Network</span>
+                        </div>
                         <div class="debug-value" id="debug-rsa-encrypted">Not generated yet</div>
                         <div class="info-box danger" style="margin-top: 3px; font-size: 9px; padding: 4px 8px;">
                             ⚠️ Contains actual key (encrypted)
                         </div>
                     </div>
                     <div class="debug-item">
-                        <div class="debug-label">AES Key (recovered):</div>
-                        <div class="debug-value" id="debug-rsa-aes">Not generated yet</div>
+                        <div class="debug-label">
+                            AES Key (recovered)
+                            <span class="debug-party-label receiver">Receiver</span>
+                            <span class="debug-crypto-label sym">Symmetric</span>
+                        </div>
+                        <div class="debug-value" id="debug-rsa-recovered">Not recovered yet</div>
                     </div>
                     <div class="debug-item">
-                        <div class="debug-label">IV:</div>
+                        <div class="debug-label">IV (for message encryption)</div>
                         <div class="debug-value" id="debug-rsa-iv">Not generated yet</div>
                     </div>
                 </div>
@@ -242,26 +330,53 @@
                 <div class="debug-method-block">
                     <div class="debug-method-title kem">🟢 KEM METHOD</div>
                     <div class="debug-item">
-                        <div class="debug-label">X25519 Public Key:</div>
+                        <div class="debug-label">
+                            X25519 Public Key
+                            <span class="debug-party-label receiver">Receiver</span>
+                            <span class="debug-crypto-label asym">Asymmetric</span>
+                            → shared
+                        </div>
                         <div class="debug-value" id="debug-kem-public">Not generated yet</div>
                     </div>
                     <div class="debug-item">
-                        <div class="debug-label">X25519 Private Key:</div>
+                        <div class="debug-label">
+                            X25519 Private Key
+                            <span class="debug-party-label receiver">Receiver</span>
+                            <span class="debug-crypto-label asym">Asymmetric</span>
+                            → secret
+                        </div>
                         <div class="debug-value" id="debug-kem-private">Not generated yet</div>
                     </div>
                     <div class="debug-item">
-                        <div class="debug-label">🟢 Encapsulation (32 bytes):</div>
-                        <div class="debug-value" id="debug-kem-encapsulation">Not generated yet</div>
-                        <div class="info-box success" style="margin-top: 3px; font-size: 9px; padding: 4px 8px;">
-                            ✅ No key material
+                        <div class="debug-label">
+                            Shared Secret (Sender)
+                            <span class="debug-party-label sender">Sender</span>
+                            <span class="debug-crypto-label sym">Symmetric</span>
+                            → LOCAL
                         </div>
-                    </div>
-                    <div class="debug-item">
-                        <div class="debug-label">Shared Secret (derived):</div>
                         <div class="debug-value" id="debug-kem-secret">Not generated yet</div>
                     </div>
                     <div class="debug-item">
-                        <div class="debug-label">IV:</div>
+                        <div class="debug-label">
+                            🟢 Encapsulation (32 bytes)
+                            <span class="debug-party-label network">Network</span>
+                        </div>
+                        <div class="debug-value" id="debug-kem-encapsulation">Not generated yet</div>
+                        <div class="info-box success" style="margin-top: 3px; font-size: 9px; padding: 4px 8px;">
+                            ✅ No key material — just mathematical parameters
+                        </div>
+                    </div>
+                    <div class="debug-item">
+                        <div class="debug-label">
+                            Shared Secret (derived)
+                            <span class="debug-party-label receiver">Receiver</span>
+                            <span class="debug-crypto-label sym">Symmetric</span>
+                            → LOCAL
+                        </div>
+                        <div class="debug-value" id="debug-kem-derived">Not derived yet</div>
+                    </div>
+                    <div class="debug-item">
+                        <div class="debug-label">IV (for message encryption)</div>
                         <div class="debug-value" id="debug-kem-iv">Not generated yet</div>
                     </div>
                 </div>
@@ -272,6 +387,7 @@
     <!-- Message Encryption Section -->
     <div class="message-section">
         <h3>STEP 5: Message Encryption (Both Methods Use AES-GCM)</h3>
+        <p class="section-subtitle">🔑 Symmetric encryption — same key encrypts & decrypts | Once key is established, both methods work identically</p>
         <input type="text"
                class="message-input"
                id="message-input"
@@ -282,18 +398,18 @@
         </button>
         <div id="encryption-results" style="display: none; margin-top: 12px;">
             <div class="info-box success">
-                ✅ Both methods successfully encrypted and decrypted the message
+                ✅ Both methods successfully encrypted and decrypted the message using their symmetric keys
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
                 <div>
-                    <h4 style="color: #e74c3c; margin-bottom: 6px; font-size: 12px;">🔴 RSA Method</h4>
+                    <h4 style="color: #e74c3c; margin-bottom: 6px; font-size: 12px;">🔴 RSA Method (uses recovered AES key)</h4>
                     <div class="debug-label">Encrypted:</div>
                     <div class="debug-value" id="rsa-ciphertext"></div>
                     <div class="debug-label" style="margin-top: 6px;">Decrypted:</div>
                     <div class="debug-value" id="rsa-plaintext"></div>
                 </div>
                 <div>
-                    <h4 style="color: #27ae60; margin-bottom: 6px; font-size: 12px;">🟢 KEM Method</h4>
+                    <h4 style="color: #27ae60; margin-bottom: 6px; font-size: 12px;">🟢 KEM Method (uses derived shared secret)</h4>
                     <div class="debug-label">Encrypted:</div>
                     <div class="debug-value" id="kem-ciphertext"></div>
                     <div class="debug-label" style="margin-top: 6px;">Decrypted:</div>
