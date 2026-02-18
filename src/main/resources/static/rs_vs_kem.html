@@ -19,16 +19,16 @@
         <div class="legend-group">
             <span class="legend-group-title">Parties:</span>
             <div class="legend-item">
-                <span class="legend-badge sender">👤 SENDER</span>
+                <span class="legend-badge sender">📤 SENDER</span>
                 <span class="legend-desc">Wants to share key</span>
             </div>
             <div class="legend-item">
-                <span class="legend-badge receiver">👥 RECEIVER</span>
+                <span class="legend-badge receiver">📥 RECEIVER</span>
                 <span class="legend-desc">Owns key pair</span>
             </div>
             <div class="legend-item">
                 <span class="legend-badge network">🌐 NETWORK</span>
-                <span class="legend-desc">What travels</span>
+                <span class="legend-desc">What gets transmitted</span>
             </div>
         </div>
         <div class="legend-group">
@@ -39,7 +39,7 @@
             </div>
             <div class="legend-item">
                 <span class="legend-badge sym">🔑 SYMMETRIC</span>
-                <span class="legend-desc">Shared secret (AES)</span>
+                <span class="legend-desc">Shared secret</span>
             </div>
         </div>
     </div>
@@ -134,7 +134,7 @@
                             </div>
                             <div class="step-labels">
                                 <span class="step-badge receiver">Receiver</span>
-                                <span class="step-badge sym">→ Symmetric</span>
+                                <span class="step-badge sym">Symmetric</span>
                             </div>
                             <button class="btn btn-rsa" id="rsa-btn-step4" disabled>Decrypt with RSA</button>
                         </div>
@@ -195,13 +195,13 @@
                             <div class="step-labels">
                                 <span class="step-badge sender">Sender</span>
                                 <span class="step-badge asym">Asymmetric</span>
-                                <span class="step-badge sym">→ Symmetric</span>
+                                <span class="step-badge sym">Symmetric</span>
                             </div>
                             <button class="btn btn-kem" id="kem-btn-step2" disabled>Encapsulate</button>
                         </div>
                         <div class="step-content" id="kem-step2-content" style="display: none;">
                             <div class="info-box info">
-                                📦 KEM produces TWO outputs from asymmetric operation:
+                                📦 Asymmetric operation, symmetric result. KEM produces TWO outputs:
                             </div>
                             <div class="info-box success">
                                 ✅ Shared Secret (kept local) — NEVER TRANSMITTED — Symmetric key derived
@@ -222,6 +222,7 @@
                                 <div class="step-title">STEP 3: Transmit Encapsulation</div>
                             </div>
                             <div class="step-labels">
+                                <span class="step-badge sender">Sender</span>
                                 <span class="step-badge network">Network</span>
                             </div>
                             <button class="btn btn-kem" id="kem-btn-step3" disabled>Transmit</button>
@@ -242,7 +243,7 @@
                             </div>
                             <div class="step-labels">
                                 <span class="step-badge receiver">Receiver</span>
-                                <span class="step-badge sym">→ Symmetric</span>
+                                <span class="step-badge sym">Symmetric</span>
                             </div>
                             <button class="btn btn-kem" id="kem-btn-step4" disabled>Decapsulate</button>
                         </div>
@@ -305,6 +306,7 @@
                     <div class="debug-item">
                         <div class="debug-label">
                             🔴 Encrypted AES Key (256 bytes)
+                            <span class="debug-party-label sender">Sender</span>
                             <span class="debug-party-label network">Network</span>
                         </div>
                         <div class="debug-value" id="debug-rsa-encrypted">Not generated yet</div>
@@ -321,7 +323,10 @@
                         <div class="debug-value" id="debug-rsa-recovered">Not recovered yet</div>
                     </div>
                     <div class="debug-item">
-                        <div class="debug-label">IV (for message encryption)</div>
+                        <div class="debug-label">
+                            IV (for message encryption)
+                            <span class="debug-party-label sender">Sender</span>
+                        </div>
                         <div class="debug-value" id="debug-rsa-iv">Not generated yet</div>
                     </div>
                 </div>
@@ -359,6 +364,7 @@
                     <div class="debug-item">
                         <div class="debug-label">
                             🟢 Encapsulation (32 bytes)
+                            <span class="debug-party-label sender">Sender</span>
                             <span class="debug-party-label network">Network</span>
                         </div>
                         <div class="debug-value" id="debug-kem-encapsulation">Not generated yet</div>
@@ -376,7 +382,10 @@
                         <div class="debug-value" id="debug-kem-derived">Not derived yet</div>
                     </div>
                     <div class="debug-item">
-                        <div class="debug-label">IV (for message encryption)</div>
+                        <div class="debug-label">
+                            IV (for message encryption)
+                            <span class="debug-party-label sender">Sender</span>
+                        </div>
                         <div class="debug-value" id="debug-kem-iv">Not generated yet</div>
                     </div>
                 </div>
@@ -387,32 +396,32 @@
     <!-- Message Encryption Section -->
     <div class="message-section">
         <h3>STEP 5: Message Encryption (Both Methods Use AES-GCM)</h3>
-        <p class="section-subtitle">🔑 Symmetric encryption — same key encrypts & decrypts | Once key is established, both methods work identically</p>
+        <p class="section-subtitle">🔑 Symmetric encryption — same key encrypts & decrypts | Sender encrypts, Receiver decrypts</p>
         <input type="text"
                class="message-input"
                id="message-input"
                placeholder="Enter message to encrypt"
                value="Hello Bob! Payment confirmed: $1,299.00 - Order #12345">
         <button class="btn btn-primary" id="btn-encrypt-both" disabled>
-            Encrypt Message with Both Methods
+            Sender: Encrypt Message with Both Methods
         </button>
         <div id="encryption-results" style="display: none; margin-top: 12px;">
             <div class="info-box success">
-                ✅ Both methods successfully encrypted and decrypted the message using their symmetric keys
+                ✅ Sender encrypted, Receiver decrypted — both methods work identically once key is established
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
                 <div>
                     <h4 style="color: #e74c3c; margin-bottom: 6px; font-size: 12px;">🔴 RSA Method (uses recovered AES key)</h4>
-                    <div class="debug-label">Encrypted:</div>
+                    <div class="debug-label">Encrypted (by Sender):</div>
                     <div class="debug-value" id="rsa-ciphertext"></div>
-                    <div class="debug-label" style="margin-top: 6px;">Decrypted:</div>
+                    <div class="debug-label" style="margin-top: 6px;">Decrypted (by Receiver):</div>
                     <div class="debug-value" id="rsa-plaintext"></div>
                 </div>
                 <div>
                     <h4 style="color: #27ae60; margin-bottom: 6px; font-size: 12px;">🟢 KEM Method (uses derived shared secret)</h4>
-                    <div class="debug-label">Encrypted:</div>
+                    <div class="debug-label">Encrypted (by Sender):</div>
                     <div class="debug-value" id="kem-ciphertext"></div>
-                    <div class="debug-label" style="margin-top: 6px;">Decrypted:</div>
+                    <div class="debug-label" style="margin-top: 6px;">Decrypted (by Receiver):</div>
                     <div class="debug-value" id="kem-plaintext"></div>
                 </div>
             </div>
