@@ -1,7 +1,6 @@
 package org.example.controller;
 
-import org.example.dto.rsavskem.CryptoRequest;
-import org.example.dto.rsavskem.CryptoResponse;
+import org.example.dto.rsavskem.*;
 import org.example.service.CryptoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +15,6 @@ import java.security.KeyPair;
 /**
  * REST Controller for RSA vs KEM Comparison Demo
  * Provides endpoints for both RSA Key Transport and KEM operations
- *
  */
 @RestController
 @RequestMapping("/api/crypto")
@@ -38,8 +36,10 @@ public class CryptoController {
     public ResponseEntity<CryptoResponse> generateRsaKeyPair() {
         log.info("==> RSA: Generate Key Pair request");
         try {
+            // Call service - all crypto happens here
             KeyPair keyPair = cryptoService.generateRsaKeyPair();
 
+            // Build response with metadata for debug panel
             CryptoResponse response = CryptoResponse.success(
                             "rsa-generate-keypair",
                             "RSA key pair generated successfully"
@@ -86,13 +86,14 @@ public class CryptoController {
     }
 
     @PostMapping("/rsa/encrypt-aes-key")
-    public ResponseEntity<CryptoResponse> encryptAesKey(@RequestBody CryptoRequest request) {
+    public ResponseEntity<CryptoResponse> encryptAesKey(@RequestBody RsaEncryptRequest request) {
         log.info("==> RSA: Encrypt AES Key request");
         try {
-            String publicKey = extractJsonField(request.getData(), "publicKey");
-            String aesKey = extractJsonField(request.getData(), "aesKey");
-
-            byte[] encryptedKey = cryptoService.encryptAesKeyWithRsa(publicKey, aesKey);
+            // Direct field access - type-safe, no manual parsing
+            byte[] encryptedKey = cryptoService.encryptAesKeyWithRsa(
+                    request.publicKey(),
+                    request.aesKey()
+            );
 
             CryptoResponse response = CryptoResponse.success(
                             "rsa-encrypt-aes-key",
@@ -114,17 +115,20 @@ public class CryptoController {
     }
 
     @PostMapping("/rsa/decrypt-aes-key")
-    public ResponseEntity<CryptoResponse> decryptAesKey(@RequestBody CryptoRequest request) {
+    public ResponseEntity<CryptoResponse> decryptAesKey(@RequestBody RsaDecryptRequest request) {
         log.info("==> RSA: Decrypt AES Key request");
         try {
-            String privateKey = extractJsonField(request.getData(), "privateKey");
-            String encryptedKey = extractJsonField(request.getData(), "encryptedKey");
-            String originalKey = extractJsonField(request.getData(), "originalKey");
-
-            byte[] decryptedKey = cryptoService.decryptAesKeyWithRsa(privateKey, encryptedKey);
+            // Decrypt and verify against original
+            byte[] decryptedKey = cryptoService.decryptAesKeyWithRsa(
+                    request.privateKey(),
+                    request.encryptedKey()
+            );
             String decryptedKeyBase64 = cryptoService.bytesToBase64(decryptedKey);
 
-            boolean keysMatch = cryptoService.verifyAesKeysMatch(originalKey, decryptedKeyBase64);
+            boolean keysMatch = cryptoService.verifyAesKeysMatch(
+                    request.originalKey(),
+                    decryptedKeyBase64
+            );
 
             CryptoResponse response = CryptoResponse.success(
                             "rsa-decrypt-aes-key",
@@ -175,12 +179,11 @@ public class CryptoController {
     }
 
     @PostMapping("/kem/encapsulate")
-    public ResponseEntity<CryptoResponse> kemEncapsulate(@RequestBody CryptoRequest request) {
+    public ResponseEntity<CryptoResponse> kemEncapsulate(@RequestBody KemEncapsulateRequest request) {
         log.info("==> KEM: Encapsulation request");
         try {
-            String publicKey = extractJsonField(request.getData(), "publicKey");
-
-            KEM.Encapsulated encapsulated = cryptoService.performKemEncapsulation(publicKey);
+            // Produces both shared secret (local) and encapsulation (transmitted)
+            KEM.Encapsulated encapsulated = cryptoService.performKemEncapsulation(request.publicKey());
 
             CryptoResponse response = CryptoResponse.success(
                             "kem-encapsulate",
@@ -203,17 +206,20 @@ public class CryptoController {
     }
 
     @PostMapping("/kem/decapsulate")
-    public ResponseEntity<CryptoResponse> kemDecapsulate(@RequestBody CryptoRequest request) {
+    public ResponseEntity<CryptoResponse> kemDecapsulate(@RequestBody KemDecapsulateRequest request) {
         log.info("==> KEM: Decapsulation request");
         try {
-            String privateKey = extractJsonField(request.getData(), "privateKey");
-            String encapsulation = extractJsonField(request.getData(), "encapsulation");
-            String originalSecret = extractJsonField(request.getData(), "originalSecret");
-
-            SecretKey derivedSecret = cryptoService.performKemDecapsulation(privateKey, encapsulation);
+            // Derive secret locally using private key + encapsulation
+            SecretKey derivedSecret = cryptoService.performKemDecapsulation(
+                    request.privateKey(),
+                    request.encapsulation()
+            );
             String derivedSecretBase64 = cryptoService.keyToBase64(derivedSecret);
 
-            boolean secretsMatch = cryptoService.verifySecretsMatch(originalSecret, derivedSecretBase64);
+            boolean secretsMatch = cryptoService.verifySecretsMatch(
+                    request.originalSecret(),
+                    derivedSecretBase64
+            );
 
             CryptoResponse response = CryptoResponse.success(
                             "kem-decapsulate",
@@ -238,13 +244,14 @@ public class CryptoController {
     // ============================================================================
 
     @PostMapping("/encrypt-message")
-    public ResponseEntity<CryptoResponse> encryptMessage(@RequestBody CryptoRequest request) {
+    public ResponseEntity<CryptoResponse> encryptMessage(@RequestBody EncryptMessageRequest request) {
         log.info("==> Encrypt message request");
         try {
-            String message = request.getMessage();
-            String aesKey = extractJsonField(request.getData(), "aesKey");
-
-            CryptoService.EncryptionResult result = cryptoService.encryptMessage(aesKey, message);
+            // Works with any AES key - from RSA or KEM
+            CryptoService.EncryptionResult result = cryptoService.encryptMessage(
+                    request.aesKey(),
+                    request.message()
+            );
 
             CryptoResponse response = CryptoResponse.success(
                             "encrypt-message",
@@ -266,14 +273,14 @@ public class CryptoController {
     }
 
     @PostMapping("/decrypt-message")
-    public ResponseEntity<CryptoResponse> decryptMessage(@RequestBody CryptoRequest request) {
+    public ResponseEntity<CryptoResponse> decryptMessage(@RequestBody DecryptMessageRequest request) {
         log.info("==> Decrypt message request");
         try {
-            String aesKey = extractJsonField(request.getData(), "aesKey");
-            String iv = extractJsonField(request.getData(), "iv");
-            String ciphertext = extractJsonField(request.getData(), "ciphertext");
-
-            String plaintext = cryptoService.decryptMessage(aesKey, iv, ciphertext);
+            String plaintext = cryptoService.decryptMessage(
+                    request.aesKey(),
+                    request.iv(),
+                    request.ciphertext()
+            );
 
             CryptoResponse response = CryptoResponse.success(
                             "decrypt-message",
@@ -290,31 +297,5 @@ public class CryptoController {
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(CryptoResponse.error("decrypt-message", e.getMessage()));
         }
-    }
-
-    // ============================================================================
-    // UTILITY METHODS
-    // ============================================================================
-
-    private String extractJsonField(String json, String fieldName) {
-        if (json == null) {
-            throw new IllegalArgumentException("JSON data is null");
-        }
-
-        String searchKey = "\"" + fieldName + "\":\"";
-        int startIndex = json.indexOf(searchKey);
-
-        if (startIndex == -1) {
-            throw new IllegalArgumentException("Field '" + fieldName + "' not found in JSON");
-        }
-
-        startIndex += searchKey.length();
-        int endIndex = json.indexOf("\"", startIndex);
-
-        if (endIndex == -1) {
-            throw new IllegalArgumentException("Malformed JSON for field '" + fieldName + "'");
-        }
-
-        return json.substring(startIndex, endIndex);
     }
 }

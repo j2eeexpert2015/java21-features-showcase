@@ -33,15 +33,14 @@ function showError(method, stepNum, errorMessage) {
     document.getElementById(`${method}-step${stepNum}-status`).textContent = '❌';
 }
 
-// RSA Step 1: Generate Key Pair (RECEIVER generates)
+// RSA Step 1: Generate Key Pair
 document.getElementById('rsa-btn-step1').addEventListener('click', async function() {
     activateStep('rsa', 1);
     try {
         const response = await fetch(`${API_BASE}/rsa/generate-keypair`);
         const data = await response.json();
         if (data.success) {
-            state.rsa.publicKey = data.data.publicKey;
-            state.rsa.privateKey = data.data.privateKey;
+            state.rsa.publicKey = data.data.publicKey; state.rsa.privateKey = data.data.privateKey;
             document.getElementById('rsa-step1-content').style.display = 'block';
             document.getElementById('debug-rsa-public').textContent = state.rsa.publicKey.substring(0, 64) + '...';
             document.getElementById('debug-rsa-private').textContent = state.rsa.privateKey.substring(0, 64) + '...';
@@ -51,7 +50,7 @@ document.getElementById('rsa-btn-step1').addEventListener('click', async functio
     } catch (error) { showError('rsa', 1, error.message); console.error('RSA Key Generation Error:', error); }
 });
 
-// RSA Step 2: Generate AES Key (SENDER generates)
+// RSA Step 2: Generate AES Key
 document.getElementById('rsa-btn-step2').addEventListener('click', async function() {
     activateStep('rsa', 2);
     try {
@@ -68,11 +67,14 @@ document.getElementById('rsa-btn-step2').addEventListener('click', async functio
     } catch (error) { showError('rsa', 2, error.message); console.error('AES Key Generation Error:', error); }
 });
 
-// RSA Step 3: Encrypt AES Key (SENDER encrypts, sends over NETWORK)
+// RSA Step 3: Encrypt AES Key
 document.getElementById('rsa-btn-step3').addEventListener('click', async function() {
     activateStep('rsa', 3);
     try {
-        const requestData = { data: JSON.stringify({ publicKey: state.rsa.publicKey, aesKey: state.rsa.aesKey }) };
+        const requestData = {
+            publicKey: state.rsa.publicKey,
+            aesKey: state.rsa.aesKey
+        };
         const response = await fetch(`${API_BASE}/rsa/encrypt-aes-key`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestData)
         });
@@ -88,11 +90,15 @@ document.getElementById('rsa-btn-step3').addEventListener('click', async functio
     } catch (error) { showError('rsa', 3, error.message); console.error('RSA Encryption Error:', error); }
 });
 
-// RSA Step 4: Decrypt AES Key (RECEIVER decrypts and RECOVERS)
+// RSA Step 4: Decrypt AES Key
 document.getElementById('rsa-btn-step4').addEventListener('click', async function() {
     activateStep('rsa', 4);
     try {
-        const requestData = { data: JSON.stringify({ privateKey: state.rsa.privateKey, encryptedKey: state.rsa.encryptedKey, originalKey: state.rsa.aesKey }) };
+        const requestData = {
+            privateKey: state.rsa.privateKey,
+            encryptedKey: state.rsa.encryptedKey,
+            originalKey: state.rsa.aesKey
+        };
         const response = await fetch(`${API_BASE}/rsa/decrypt-aes-key`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestData)
         });
@@ -102,21 +108,19 @@ document.getElementById('rsa-btn-step4').addEventListener('click', async functio
             document.getElementById('rsa-step4-content').style.display = 'block';
             document.getElementById('rsa-decrypted-key').textContent = state.rsa.decryptedKey;
             document.getElementById('rsa-match').textContent = data.data.keysMatch;
-            document.getElementById('debug-rsa-recovered').textContent = state.rsa.decryptedKey;
             completeStep('rsa', 4); updateProgress('rsa', 100); checkBothReady();
         } else { showError('rsa', 4, data.error || 'Failed to decrypt AES key'); }
     } catch (error) { showError('rsa', 4, error.message); console.error('RSA Decryption Error:', error); }
 });
 
-// KEM Step 1: Generate Key Pair (RECEIVER generates)
+// KEM Step 1: Generate Key Pair
 document.getElementById('kem-btn-step1').addEventListener('click', async function() {
     activateStep('kem', 1);
     try {
         const response = await fetch(`${API_BASE}/kem/generate-keypair`);
         const data = await response.json();
         if (data.success) {
-            state.kem.publicKey = data.data.publicKey;
-            state.kem.privateKey = data.data.privateKey;
+            state.kem.publicKey = data.data.publicKey; state.kem.privateKey = data.data.privateKey;
             document.getElementById('kem-step1-content').style.display = 'block';
             document.getElementById('debug-kem-public').textContent = state.kem.publicKey;
             document.getElementById('debug-kem-private').textContent = state.kem.privateKey;
@@ -126,18 +130,19 @@ document.getElementById('kem-btn-step1').addEventListener('click', async functio
     } catch (error) { showError('kem', 1, error.message); console.error('KEM Key Generation Error:', error); }
 });
 
-// KEM Step 2: Encapsulation (SENDER encapsulates - derives secret + creates encapsulation)
+// KEM Step 2: Encapsulation
 document.getElementById('kem-btn-step2').addEventListener('click', async function() {
     activateStep('kem', 2);
     try {
-        const requestData = { data: JSON.stringify({ publicKey: state.kem.publicKey }) };
+        const requestData = {
+            publicKey: state.kem.publicKey
+        };
         const response = await fetch(`${API_BASE}/kem/encapsulate`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestData)
         });
         const data = await response.json();
         if (data.success) {
-            state.kem.sharedSecret = data.data.sharedSecret;
-            state.kem.encapsulation = data.data.encapsulation;
+            state.kem.sharedSecret = data.data.sharedSecret; state.kem.encapsulation = data.data.encapsulation;
             document.getElementById('kem-step2-content').style.display = 'block';
             document.getElementById('kem-shared-secret').textContent = state.kem.sharedSecret;
             document.getElementById('kem-encapsulation').textContent = state.kem.encapsulation;
@@ -149,7 +154,7 @@ document.getElementById('kem-btn-step2').addEventListener('click', async functio
     } catch (error) { showError('kem', 2, error.message); console.error('KEM Encapsulation Error:', error); }
 });
 
-// KEM Step 3: Transmit Encapsulation (NETWORK - only encapsulation travels, NO key material)
+// KEM Step 3: Transmit Encapsulation
 document.getElementById('kem-btn-step3').addEventListener('click', function() {
     activateStep('kem', 3);
     setTimeout(() => {
@@ -159,11 +164,15 @@ document.getElementById('kem-btn-step3').addEventListener('click', function() {
     }, 300);
 });
 
-// KEM Step 4: Decapsulation (RECEIVER derives the same secret locally)
+// KEM Step 4: Decapsulation
 document.getElementById('kem-btn-step4').addEventListener('click', async function() {
     activateStep('kem', 4);
     try {
-        const requestData = { data: JSON.stringify({ privateKey: state.kem.privateKey, encapsulation: state.kem.encapsulation, originalSecret: state.kem.sharedSecret }) };
+        const requestData = {
+            privateKey: state.kem.privateKey,
+            encapsulation: state.kem.encapsulation,
+            originalSecret: state.kem.sharedSecret
+        };
         const response = await fetch(`${API_BASE}/kem/decapsulate`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestData)
         });
@@ -173,7 +182,6 @@ document.getElementById('kem-btn-step4').addEventListener('click', async functio
             document.getElementById('kem-step4-content').style.display = 'block';
             document.getElementById('kem-derived-secret').textContent = state.kem.derivedSecret;
             document.getElementById('kem-match').textContent = data.data.secretsMatch;
-            document.getElementById('debug-kem-derived').textContent = state.kem.derivedSecret;
             completeStep('kem', 4); updateProgress('kem', 100); checkBothReady();
         } else { showError('kem', 4, data.error || 'Failed to decapsulate'); }
     } catch (error) { showError('kem', 4, error.message); console.error('KEM Decapsulation Error:', error); }
@@ -185,23 +193,28 @@ function checkBothReady() {
     }
 }
 
-// Encrypt Message with Both Methods (STEP 5 - Symmetric encryption with AES-GCM)
+// Encrypt Message with Both Methods
 document.getElementById('btn-encrypt-both').addEventListener('click', async function() {
     const message = document.getElementById('message-input').value;
     if (!message) { alert('Please enter a message to encrypt'); return; }
     try {
-        // RSA Method - use the RECOVERED AES key (receiver's copy)
         const rsaEncryptResponse = await fetch(`${API_BASE}/encrypt-message`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: message, data: JSON.stringify({ aesKey: state.rsa.decryptedKey }) })
+            body: JSON.stringify({
+                message: message,
+                aesKey: state.rsa.decryptedKey
+            })
         });
         const rsaEncryptData = await rsaEncryptResponse.json();
         if (rsaEncryptData.success) {
-            state.rsa.ciphertext = rsaEncryptData.data.ciphertext;
-            state.rsa.iv = rsaEncryptData.data.iv;
+            state.rsa.ciphertext = rsaEncryptData.data.ciphertext; state.rsa.iv = rsaEncryptData.data.iv;
             const rsaDecryptResponse = await fetch(`${API_BASE}/decrypt-message`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ data: JSON.stringify({ aesKey: state.rsa.decryptedKey, iv: state.rsa.iv, ciphertext: state.rsa.ciphertext }) })
+                body: JSON.stringify({
+                    ciphertext: state.rsa.ciphertext,
+                    iv: state.rsa.iv,
+                    aesKey: state.rsa.decryptedKey
+                })
             });
             const rsaDecryptData = await rsaDecryptResponse.json();
             if (rsaDecryptData.success) {
@@ -210,19 +223,23 @@ document.getElementById('btn-encrypt-both').addEventListener('click', async func
                 document.getElementById('rsa-plaintext').textContent = rsaDecryptData.data.plaintext;
             }
         }
-
-        // KEM Method - use the DERIVED shared secret (receiver's copy)
         const kemEncryptResponse = await fetch(`${API_BASE}/encrypt-message`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: message, data: JSON.stringify({ aesKey: state.kem.derivedSecret }) })
+            body: JSON.stringify({
+                message: message,
+                aesKey: state.kem.derivedSecret
+            })
         });
         const kemEncryptData = await kemEncryptResponse.json();
         if (kemEncryptData.success) {
-            state.kem.ciphertext = kemEncryptData.data.ciphertext;
-            state.kem.iv = kemEncryptData.data.iv;
+            state.kem.ciphertext = kemEncryptData.data.ciphertext; state.kem.iv = kemEncryptData.data.iv;
             const kemDecryptResponse = await fetch(`${API_BASE}/decrypt-message`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ data: JSON.stringify({ aesKey: state.kem.derivedSecret, iv: state.kem.iv, ciphertext: state.kem.ciphertext }) })
+                body: JSON.stringify({
+                    ciphertext: state.kem.ciphertext,
+                    iv: state.kem.iv,
+                    aesKey: state.kem.derivedSecret
+                })
             });
             const kemDecryptData = await kemDecryptResponse.json();
             if (kemDecryptData.success) {
