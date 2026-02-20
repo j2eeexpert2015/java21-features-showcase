@@ -107,6 +107,7 @@ document.getElementById('rsa-btn-step4').addEventListener('click', async functio
             state.rsa.decryptedKey = data.data.decryptedKey;
             document.getElementById('rsa-step4-content').style.display = 'block';
             document.getElementById('rsa-decrypted-key').textContent = state.rsa.decryptedKey;
+            document.getElementById('debug-rsa-recovered').textContent = state.rsa.decryptedKey;
             document.getElementById('rsa-match').textContent = data.data.keysMatch;
             completeStep('rsa', 4); updateProgress('rsa', 100); checkBothReady();
         } else { showError('rsa', 4, data.error || 'Failed to decrypt AES key'); }
@@ -181,6 +182,7 @@ document.getElementById('kem-btn-step4').addEventListener('click', async functio
             state.kem.derivedSecret = data.data.derivedSecret;
             document.getElementById('kem-step4-content').style.display = 'block';
             document.getElementById('kem-derived-secret').textContent = state.kem.derivedSecret;
+            document.getElementById('debug-kem-derived').textContent = state.kem.derivedSecret;
             document.getElementById('kem-match').textContent = data.data.secretsMatch;
             completeStep('kem', 4); updateProgress('kem', 100); checkBothReady();
         } else { showError('kem', 4, data.error || 'Failed to decapsulate'); }
