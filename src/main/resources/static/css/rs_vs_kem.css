@@ -408,6 +408,18 @@ body {
     color: #0c5460;
 }
 
+/* KEM Step 2 - Second info box spacing */
+.info-box-spaced {
+    margin-top: 8px;
+}
+
+/* Debug panel inline warnings/success boxes */
+.debug-inline-box {
+    margin-top: 3px;
+    font-size: 9px;
+    padding: 4px 8px;
+}
+
 .key-display, .debug-value {
     background: #2c3e50;
     color: #ecf0f1;
@@ -477,6 +489,11 @@ body {
     gap: 4px;
 }
 
+/* Decrypted label spacing for message encryption results */
+.debug-label-spaced {
+    margin-top: 6px;
+}
+
 .message-section {
     background: white;
     padding: 18px;
@@ -513,6 +530,32 @@ body {
 .message-input:focus {
     outline: none;
     border-color: #3498db;
+}
+
+/* Encryption results grid */
+#encryption-results {
+    margin-top: 12px;
+}
+
+.encryption-results-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+/* Method result headings in encryption results */
+.method-result-heading {
+    margin-bottom: 6px;
+    font-size: 12px;
+}
+
+.method-result-heading.rsa {
+    color: #e74c3c;
+}
+
+.method-result-heading.kem {
+    color: #27ae60;
 }
 
 .progress-indicator {
@@ -660,5 +703,9 @@ body {
     .legend-group {
         flex-wrap: wrap;
         justify-content: center;
+    }
+
+    .encryption-results-grid {
+        grid-template-columns: 1fr;
     }
 }
