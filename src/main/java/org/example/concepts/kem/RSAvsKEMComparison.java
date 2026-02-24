@@ -246,8 +246,7 @@ public class RSAvsKEMComparison {
         // STEP 6: DERIVE AES KEY - Use KDF in production
         // ============================================================
         System.out.println("STEP 6: Derive AES key from shared secret");
-        System.out.println("  ⚠️  In production: Use HKDF or similar KDF");
-        System.out.println("  ⚠️  This demo: Direct truncation (for simplicity only)");
+        
 
         byte[] aesKeyBytes = Arrays.copyOf(receiverSecretBytes, 32); // 256 bits
         SecretKey derivedAESKey = new SecretKeySpec(aesKeyBytes, "AES");
