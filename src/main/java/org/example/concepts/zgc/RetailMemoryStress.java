@@ -120,7 +120,7 @@ public class RetailMemoryStress {
      * 200,000 = ~200MB | 400,000 = ~400MB | 600,000 = ~600MB
      */
     //private static final int PRODUCT_CATALOG_COUNT = 400_000;
-    private static final int PRODUCT_CATALOG_COUNT = 600_000;
+    private static final int PRODUCT_CATALOG_COUNT = 400_000;
 
     /**
      * ALLOCATION INTENSITY: Controls how much garbage we create per iteration
@@ -130,7 +130,7 @@ public class RetailMemoryStress {
      * - Aggressive: 10-20 (high pressure, guaranteed stalls with 1GB heap)
      * - Nuclear: 50+ (extreme pressure)
      */
-    private static final int ORDERS_PER_ITERATION = 20;
+    private static final int ORDERS_PER_ITERATION = 1;
 
     /**
      * ITEMS_PER_ORDER: Number of products added to each order
