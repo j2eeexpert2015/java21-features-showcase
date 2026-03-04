@@ -22,8 +22,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * 1. COMPILE:
  *    mvn clean compile
  *
- * 2. RUN ALL SCENARIOS:
- *
  * PREPARATION:
  * mkdir -p logs jfr
  * NOTE: logs/ and jfr/ directories are also created automatically by the application
@@ -57,22 +55,9 @@ import java.util.concurrent.atomic.AtomicLong;
  * java -cp target/classes -Xmx512M -Xms512M -XX:+UseZGC -XX:+ZGenerational -Xlog:gc*:file=logs/generational-zgc-512m.log:time,level,tags -XX:StartFlightRecording=duration=60s,filename=jfr/generational-zgc-512m.jfr org.example.concepts.zgc.RetailMemoryStress
  *
  * ============================================================================
- * COMPARISON SUMMARY
+ * ANALYZING JFR RECORDINGS:
  * ============================================================================
  *
- * With 1GB heap:
- * - G1GC: Stable, predictable pauses
- * - Non-Gen ZGC: Manageable, occasional pressure
- * - Gen ZGC: Excellent, minimal stalls
- * Lesson: All GCs work with adequate heap
- *
- * With 512MB heap (TIGHT CONDITIONS):
- * - G1GC: 0 stalls, frequent 2ms pauses (98% efficiency)
- * - Non-Gen ZGC: ~2300 stalls, constant thrashing (78% efficiency) <- DISASTER!
- * - Gen ZGC: ~30 stalls, mostly smooth (99.9% efficiency) <- WINNER!
- * Lesson: Generational separation matters under pressure!
- *
- * ANALYZING JFR RECORDINGS:
  * 1. Open JDK Mission Control (jmc)
  * 2. File -> Open File -> Select jfr/*.jfr
  * 3. Navigate to "Event Browser"
@@ -100,76 +85,47 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * 5. Reduce heap: -Xmx512M -> -Xmx384M or -Xmx256M
  *    Effect: Even less available space, guaranteed stalls
- *
- * Current settings are already aggressive (BURST MODE):
- * - ORDERS_PER_ITERATION = 20 (20x multiplier!)
- * - ITEMS_PER_ORDER = 100 (large orders)
- * - ORDER_METADATA_SIZE = 2048 (2KB each)
- * - WAIT_FOR_PROFILER = false (auto-start)
- *
- * These settings with 512MB heap should trigger allocation stalls in Non-Gen ZGC!
  */
 public class RetailMemoryStress {
 
-    // ========================================================================
-    // WORKLOAD CONFIGURATION - Adjust these to control allocation pressure
-    // ========================================================================
-
-    /**
-     * CATALOG SIZE: Controls long-lived data (Old Generation)
-     * 200,000 = ~200MB | 400,000 = ~400MB | 600,000 = ~600MB
-     */
-    //private static final int PRODUCT_CATALOG_COUNT = 400_000;
-    private static final int PRODUCT_CATALOG_COUNT = 400_000;
-
-    /**
-     * ALLOCATION INTENSITY: Controls how much garbage we create per iteration
-     *
-     * ORDERS_PER_ITERATION: How many orders to create per loop iteration
-     * - Default: 1 (moderate pressure)
-     * - Aggressive: 10-20 (high pressure, guaranteed stalls with 1GB heap)
-     * - Nuclear: 50+ (extreme pressure)
-     */
-    private static final int ORDERS_PER_ITERATION = 1;
-
-    /**
-     * ITEMS_PER_ORDER: Number of products added to each order
-     * - Default: 50 (realistic shopping cart)
-     * - Aggressive: 100-200 (large orders)
-     * - Effect: Forces ArrayList growth, more allocations
-     */
-    private static final int ITEMS_PER_ORDER = 50;
-
-    /**
-     * ORDER_METADATA_SIZE: Size of metadata byte array per order
-     * - Default: 1024 bytes (1KB)
-     * - Aggressive: 2048-4096 bytes (2-4KB)
-     * - Effect: Each order is heavier
-     */
-    private static final int ORDER_METADATA_SIZE = 1024;
-
-    /**
-     * PROFILER ATTACHMENT: Wait for user input before starting workload
-     * - true: Pause for VisualVM/JMC attachment (good for visual demos)
-     * - false: Start immediately (recommended for triggering stalls)
-     *
-     * Note: Manual pause can reduce allocation rate due to JIT optimization!
-     */
-    private static final boolean WAIT_FOR_PROFILER = false;
-    //private static final boolean WAIT_FOR_PROFILER = true;
-
-    /**
-     * AUTO START DELAY: Seconds to wait before starting (if not waiting for user)
-     * Gives you time to attach profilers without killing allocation momentum
-     */
+    private static final int PRODUCT_CATALOG_COUNT    = 400_000;
+    private static final int ORDERS_PER_ITERATION     = 1;
+    private static final int ITEMS_PER_ORDER          = 50;
+    private static final int ORDER_METADATA_SIZE      = 1024;
+    private static final boolean WAIT_FOR_PROFILER    = false;
     private static final int AUTO_START_DELAY_SECONDS = 5;
 
-    // ========================================================================
+    /*
+     * Memory size constants (bytes)
+     *
+     * Product breakdown:
+     *   Object header: 16 | int id: 4 | String ref: 4 | String obj: 24
+     *   String byte[]: 26 | payload ref: 4 | byte[512]: 528 | padding: 4
+     *   Total: 610 bytes per Product
+     */
+    private static final int PRODUCT_SIZE_BYTES = 610;
 
-    // LONG-LIVED DATA: Static catalog simulates production caches
+    /*
+     * Order breakdown (live at peak):
+     *   Order obj: 28 | ArrayList obj: 28 | final backing array (cap 73): 308
+     *   byte[] metaData[1024]: 1,040
+     *   Total live: 1,404 bytes
+     */
+    private static final int ORDER_LIVE_BYTES = 1_404;
+
+    /*
+     * ArrayList grows 10->15->22->33->49->73 while adding 50 items.
+     * Each growth discards the old array — 5 discarded arrays = 596 bytes immediate garbage.
+     */
+    private static final int ORDER_DISCARDED_ARRAYS_BYTES = 596;
+
+    /*
+     * Total allocated per Order (live + discarded backing arrays) = 2,000 bytes
+     */
+    private static final int ORDER_TOTAL_ALLOCATED_BYTES =
+            ORDER_LIVE_BYTES + ORDER_DISCARDED_ARRAYS_BYTES;
+
     private static final List<Product> PRODUCT_CATALOG = new ArrayList<>();
-
-    // Metrics to track application throughput impact
     private static final AtomicLong ordersProcessed = new AtomicLong(0);
     private static volatile boolean running = true;
 
@@ -177,25 +133,26 @@ public class RetailMemoryStress {
         printHeader();
         printConfiguration();
 
-        // STEP 1: Create long-lived data (Old Gen baseline)
-        System.out.println("[Init] Loading Product Catalog (" + PRODUCT_CATALOG_COUNT + " objects)...");
-
+        /* STEP 1: Create long-lived data (Old Gen baseline) */
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < PRODUCT_CATALOG_COUNT; i++) {
             PRODUCT_CATALOG.add(new Product(i, "SKU-" + i, new byte[512]));
         }
+        long loadTime    = System.currentTimeMillis() - startTime;
+        long catalogBytes = (long) PRODUCT_CATALOG_COUNT * PRODUCT_SIZE_BYTES
+                + 16 + (long) PRODUCT_CATALOG_COUNT * 4; /* ArrayList backing array */
 
-        long loadTime = System.currentTimeMillis() - startTime;
-        int catalogSizeMB = (PRODUCT_CATALOG_COUNT * 1024) / (1024 * 1024);
-        System.out.println("[Init] Catalog loaded in " + loadTime + "ms (~" + catalogSizeMB + "MB)");
+        System.out.printf("[Init] Catalog loaded in %dms — Old Generation occupied: %,d objects x %d bytes = ~%.1f MB%n",
+                loadTime, PRODUCT_CATALOG_COUNT, PRODUCT_SIZE_BYTES, catalogBytes / 1024.0 / 1024.0);
+        System.out.println("[Init] Static reference — always reachable, never collected. Permanent Old Gen pressure.");
         System.out.println();
 
-        // STEP 2: Pause or delay for profiler attachment
+        /* STEP 2: Pause or delay for profiler attachment */
         if (WAIT_FOR_PROFILER) {
             waitForUserInput();
         } else {
-            System.out.println("[Ready] Auto-starting in " + AUTO_START_DELAY_SECONDS + " seconds...");
-            System.out.println("[Ready] Attach profilers now if needed (PID: " + ProcessHandle.current().pid() + ")");
+            System.out.println("[Ready] Auto-starting in " + AUTO_START_DELAY_SECONDS + " seconds... " +
+                    "(PID: " + ProcessHandle.current().pid() + " — attach JMC now if needed)");
             try {
                 Thread.sleep(AUTO_START_DELAY_SECONDS * 1000L);
             } catch (InterruptedException e) {
@@ -205,74 +162,55 @@ public class RetailMemoryStress {
             System.out.println();
         }
 
-        // STEP 3: Start high-allocation workload
-        System.out.println("[Action] Starting Black Friday Traffic Simulation...");
+        /* STEP 3: Start high-allocation workload */
         int threads = Runtime.getRuntime().availableProcessors();
-        System.out.println("[Action] Worker threads: " + threads);
-        System.out.println("[Action] Orders per iteration: " + ORDERS_PER_ITERATION);
-        System.out.println("[Action] Items per order: " + ITEMS_PER_ORDER);
 
-        int orderSize = ITEMS_PER_ORDER * 8 + ORDER_METADATA_SIZE + 100; // Rough estimate
-        int allocationPerSec = threads * ORDERS_PER_ITERATION * orderSize * 1000; // Very rough
-        System.out.println("[Action] Estimated allocation rate: ~" + (allocationPerSec / 1024 / 1024) + " MB/sec");
+        System.out.println("[Action] Worker threads: " + threads);
+        System.out.println("[Action] Per Order allocation breakdown:");
+        System.out.println("[Action]   Order object:                  28 bytes");
+        System.out.println("[Action]   ArrayList object:              28 bytes");
+        System.out.println("[Action]   ArrayList backing (final):    308 bytes  (cap 73 after 50 items)");
+        System.out.println("[Action]   byte[] metaData[1024]:      1,040 bytes");
+        System.out.println("[Action]   -----------------------------------------");
+        System.out.printf ("[Action]   Live size per Order:        %,d bytes  (~%.1f KB)%n",
+                ORDER_LIVE_BYTES, ORDER_LIVE_BYTES / 1024.0);
+        System.out.println("[Action]   ArrayList growth (10->15->22->33->49->73):");
+        System.out.println("[Action]   Discarded backing arrays:      596 bytes  (immediate Young Gen garbage)");
+        System.out.println("[Action]   -----------------------------------------");
+        System.out.printf ("[Action]   Total allocated per Order:  %,d bytes  (~%.1f KB) — all garbage within microseconds%n",
+                ORDER_TOTAL_ALLOCATED_BYTES, ORDER_TOTAL_ALLOCATED_BYTES / 1024.0);
         System.out.println();
 
         for (int i = 0; i < threads; i++) {
             new Thread(RetailMemoryStress::generateTraffic, "Worker-" + i).start();
         }
 
-        // STEP 4: Report throughput (watch for GC impact)
-        System.out.println("[Reporter] Throughput reporting started...");
-        System.out.println("[Reporter] Format: [Xs] Throughput: Y orders/sec | Total: Z");
-        System.out.println("[Reporter] Watch for drops (GC pauses) or zeros (allocation stalls)");
-        System.out.println();
-
+        /* STEP 4: Report throughput — drops = GC pauses, zeros = allocation stalls */
         reportThroughput();
     }
 
-    /**
-     * Worker thread: Creates short-lived Orders continuously
-     *
-     * This is where the magic happens! Each iteration creates ORDERS_PER_ITERATION
-     * orders, each with ITEMS_PER_ORDER items. All of these objects die immediately
-     * after the iteration completes.
-     *
-     * GC Behavior:
-     * - G1GC: Orders die in Eden, reclaimed by fast Young GC
-     * - Non-Gen ZGC: No young/old separation -> must scan catalog too -> falls behind -> STALLS
-     * - Gen ZGC: Minor GC only scans young regions -> ultra-fast -> no stalls
-     */
     private static void generateTraffic() {
         Random random = new Random();
-
         while (running) {
-            // BURST MODE: Create multiple orders per iteration
-            // Increase ORDERS_PER_ITERATION to amplify allocation pressure
             for (int burst = 0; burst < ORDERS_PER_ITERATION; burst++) {
                 Order order = new Order(ORDER_METADATA_SIZE);
 
-                // Add items to the order
-                // Increase ITEMS_PER_ORDER for larger orders
+                /*
+                 * ArrayList starts at capacity 10, grows to 73 after 50 addItem calls.
+                 * Growth steps: 10 -> 15 -> 22 -> 33 -> 49 -> 73
+                 * Each step allocates a new backing array and discards the old one.
+                 */
                 for (int i = 0; i < ITEMS_PER_ORDER; i++) {
                     Product p = PRODUCT_CATALOG.get(random.nextInt(PRODUCT_CATALOG.size()));
                     order.addItem(p);
                 }
-
                 ordersProcessed.incrementAndGet();
-
-                // Order goes out of scope -> garbage
-                // Lifetime: microseconds to milliseconds
+                /* order goes out of scope here — ~2KB back to Young Gen as garbage */
             }
-
-            // No sleep, no delay - continuous allocation!
-            // This is intentional to create maximum pressure
+            /* no sleep — continuous allocation */
         }
     }
 
-    /**
-     * Reports throughput every second
-     * GC pauses -> throughput drops -> visible in output
-     */
     private static void reportThroughput() {
         long lastCount = 0;
         long startTime = System.currentTimeMillis();
@@ -286,31 +224,27 @@ public class RetailMemoryStress {
             }
 
             long currentCount = ordersProcessed.get();
-            long throughput = currentCount - lastCount;
-            long uptime = (System.currentTimeMillis() - startTime) / 1000;
+            long throughput   = currentCount - lastCount;
+            long uptime       = (System.currentTimeMillis() - startTime) / 1000;
 
-            System.out.printf("[%3ds] Throughput: %,7d orders/sec | Total: %,12d%n",
-                    uptime, throughput, currentCount);
+            /* orders/sec x bytes per order = MB/sec into Young Gen */
+            double allocMBps    = (throughput * ORDER_TOTAL_ALLOCATED_BYTES) / 1024.0 / 1024.0;
+            double totalAllocMB = (currentCount * (double) ORDER_TOTAL_ALLOCATED_BYTES) / 1024.0 / 1024.0;
+
+            System.out.printf("[%3ds] Orders/sec: %,7d | Allocated to Young Gen: ~%5.1f MB/sec | Total allocated to Young Gen: ~%,.0f MB%n",
+                    uptime, throughput, allocMBps, totalAllocMB);
 
             lastCount = currentCount;
         }
     }
 
     private static void waitForUserInput() {
-        long pid = ProcessHandle.current().pid();
-
         System.out.println("=================================================================");
-        System.out.printf("   Process ID: %d%n", pid);
+        System.out.printf ("   Process ID: %d%n", ProcessHandle.current().pid());
+        System.out.println("   Attach JMC: Start Flight Recording (60-120 sec)");
+        System.out.println("   GC logs already enabled via -Xlog flag");
         System.out.println("=================================================================");
-        System.out.println();
-        System.out.println("ATTACH YOUR TOOL:");
-        //System.out.println("   - VisualVM: Monitor tab -> watch Heap graph");
-        System.out.println("   - JMC: Start Flight Recording (60-120 sec)");
-        System.out.println("   - GC logs already enabled (see -Xlog flag)");
-        System.out.println();
         System.out.println("Press [ENTER] to start the workload...");
-        System.out.println();
-
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
         scanner.close();
@@ -323,36 +257,36 @@ public class RetailMemoryStress {
         System.out.println();
     }
 
-
     private static void printConfiguration() {
         System.out.println("WORKLOAD CONFIGURATION:");
-        System.out.println("  Catalog Size:         " + String.format("%,d", PRODUCT_CATALOG_COUNT) + " products (~" + (PRODUCT_CATALOG_COUNT / 1000) + "MB)");
-        System.out.println("  Orders/Iteration:     " + ORDERS_PER_ITERATION + (ORDERS_PER_ITERATION > 1 ? " (BURST MODE!)" : ""));
-        System.out.println("  Items/Order:          " + ITEMS_PER_ORDER);
-        System.out.println("  Order Metadata:       " + ORDER_METADATA_SIZE + " bytes");
-        System.out.println("  Wait for Profiler:    " + (WAIT_FOR_PROFILER ? "YES (manual start)" : "NO (auto-start in " + AUTO_START_DELAY_SECONDS + "s)"));
+        System.out.printf("  Catalog Size:      %,d products%n", PRODUCT_CATALOG_COUNT);
+        System.out.printf("  Orders/Iteration:  %d%n", ORDERS_PER_ITERATION);
+        System.out.printf("  Items/Order:       %d  (ArrayList growth: 10->15->22->33->49->73)%n", ITEMS_PER_ORDER);
+        System.out.printf("  Order Metadata:    %,d bytes%n", ORDER_METADATA_SIZE);
+        System.out.printf("  Wait for Profiler: %s%n",
+                WAIT_FOR_PROFILER ? "YES (manual start)" : "NO (auto-start in " + AUTO_START_DELAY_SECONDS + "s)");
         System.out.println();
 
-        if (ORDERS_PER_ITERATION > 5) {
-            System.out.println("WARNING: BURST MODE ACTIVE! High allocation pressure expected.");
-            System.out.println("   Non-Gen ZGC should show allocation stalls!");
-            System.out.println();
-        }
+        long catalogMB = ((long) PRODUCT_CATALOG_COUNT * PRODUCT_SIZE_BYTES) / 1024 / 1024;
+        System.out.println("MEMORY IMPACT:");
+        System.out.printf("  Old Generation (permanent): ~%dMB  (%,d Products x %d bytes each)%n",
+                catalogMB, PRODUCT_CATALOG_COUNT, PRODUCT_SIZE_BYTES);
+        System.out.printf("  Per Order allocated:        ~%d bytes  (%d live + %d discarded ArrayList arrays)%n",
+                ORDER_TOTAL_ALLOCATED_BYTES, ORDER_LIVE_BYTES, ORDER_DISCARDED_ARRAYS_BYTES);
+        System.out.println();
     }
 
-    // DOMAIN OBJECTS
-
-    /**
-     * Product: Long-lived catalog item (~1KB each)
+    /*
+     * Product: Long-lived catalog item (~610 bytes each)
      * Lifetime: INFINITE (static list)
-     * Promotes to Old Gen -> ignored by frequent Minor GCs in Gen ZGC
+     * Promotes to Old Gen — ignored by Minor GCs in Gen ZGC
      */
     record Product(int id, String sku, byte[] payload) {}
 
-    /**
-     * Order: Short-lived transaction
-     * Lifetime: MILLISECONDS (created -> populated -> discarded)
-     * Dies in Young Gen -> perfect for Minor GC
+    /*
+     * Order: Short-lived transaction (~2KB allocated per instance)
+     * Lifetime: MICROSECONDS (created -> populated -> discarded)
+     * Dies in Young Gen — perfect for Minor GC
      */
     static class Order {
         List<Product> items = new ArrayList<>();
