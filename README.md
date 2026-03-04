@@ -133,8 +133,7 @@ I create practical, hands-on courses on **Java, Spring Boot, Debugging, Git, Pyt
 Clone the repository:
 
 ```bash
-git clone https://github.com/j2eeexpert2015/java21-features-showcase.git
-cd java21-features-showcase
+git clone https://github.com/j2eeexpert2015/java21-features-showcase.git && cd java21-features-showcase
 ```
 
 Build the project:
@@ -168,31 +167,19 @@ All collectors should run smoothly with minimal pressure.
 ### G1GC
 
 ```bash
-java -cp target/classes -Xmx1G -Xms1G \
--XX:+UseG1GC \
--Xlog:gc*:file=logs/g1gc-1g.log:time,level,tags \
--XX:StartFlightRecording=duration=60s,filename=jfr/g1gc-1g.jfr \
-org.example.concepts.zgc.RetailMemoryStress
+java -cp target/classes -Xmx1G -Xms1G -XX:+UseG1GC -Xlog:gc*:file=logs/g1gc-1g.log:time,level,tags -XX:StartFlightRecording=duration=60s,filename=jfr/g1gc-1g.jfr org.example.concepts.zgc.RetailMemoryStress
 ```
 
 ### Non-Generational ZGC
 
 ```bash
-java -cp target/classes -Xmx1G -Xms1G \
--XX:+UseZGC -XX:-ZGenerational \
--Xlog:gc*:file=logs/zgc-1g.log:time,level,tags \
--XX:StartFlightRecording=duration=60s,filename=jfr/zgc-1g.jfr \
-org.example.concepts.zgc.RetailMemoryStress
+java -cp target/classes -Xmx1G -Xms1G -XX:+UseZGC -XX:-ZGenerational -Xlog:gc*:file=logs/zgc-1g.log:time,level,tags -XX:StartFlightRecording=duration=60s,filename=jfr/zgc-1g.jfr org.example.concepts.zgc.RetailMemoryStress
 ```
 
 ### Generational ZGC
 
 ```bash
-java -cp target/classes -Xmx1G -Xms1G \
--XX:+UseZGC -XX:+ZGenerational \
--Xlog:gc*:file=logs/generational-zgc-1g.log:time,level,tags \
--XX:StartFlightRecording=duration=60s,filename=jfr/generational-zgc-1g.jfr \
-org.example.concepts.zgc.RetailMemoryStress
+java -cp target/classes -Xmx1G -Xms1G -XX:+UseZGC -XX:+ZGenerational -Xlog:gc*:file=logs/generational-zgc-1g.log:time,level,tags -XX:StartFlightRecording=duration=60s,filename=jfr/generational-zgc-1g.jfr org.example.concepts.zgc.RetailMemoryStress
 ```
 
 ---
@@ -204,31 +191,19 @@ This scenario highlights the efficiency difference between collectors.
 ### G1GC
 
 ```bash
-java -cp target/classes -Xmx512M -Xms512M \
--XX:+UseG1GC \
--Xlog:gc*:file=logs/g1gc-512m.log:time,level,tags \
--XX:StartFlightRecording=duration=60s,filename=jfr/g1gc-512m.jfr \
-org.example.concepts.zgc.RetailMemoryStress
+java -cp target/classes -Xmx512M -Xms512M -XX:+UseG1GC -Xlog:gc*:file=logs/g1gc-512m.log:time,level,tags -XX:StartFlightRecording=duration=60s,filename=jfr/g1gc-512m.jfr org.example.concepts.zgc.RetailMemoryStress
 ```
 
 ### Non-Generational ZGC
 
 ```bash
-java -cp target/classes -Xmx512M -Xms512M \
--XX:+UseZGC -XX:-ZGenerational \
--Xlog:gc*:file=logs/zgc-512m.log:time,level,tags \
--XX:StartFlightRecording=duration=60s,filename=jfr/zgc-512m.jfr \
-org.example.concepts.zgc.RetailMemoryStress
+java -cp target/classes -Xmx512M -Xms512M -XX:+UseZGC -XX:-ZGenerational -Xlog:gc*:file=logs/zgc-512m.log:time,level,tags -XX:StartFlightRecording=duration=60s,filename=jfr/zgc-512m.jfr org.example.concepts.zgc.RetailMemoryStress
 ```
 
 ### Generational ZGC
 
 ```bash
-java -cp target/classes -Xmx512M -Xms512M \
--XX:+UseZGC -XX:+ZGenerational \
--Xlog:gc*:file=logs/generational-zgc-512m.log:time,level,tags \
--XX:StartFlightRecording=duration=60s,filename=jfr/generational-zgc-512m.jfr \
-org.example.concepts.zgc.RetailMemoryStress
+java -cp target/classes -Xmx512M -Xms512M -XX:+UseZGC -XX:+ZGenerational -Xlog:gc*:file=logs/generational-zgc-512m.log:time,level,tags -XX:StartFlightRecording=duration=60s,filename=jfr/generational-zgc-512m.jfr org.example.concepts.zgc.RetailMemoryStress
 ```
 
 ---
