@@ -142,9 +142,9 @@ public class RetailMemoryStress {
         long catalogBytes = (long) PRODUCT_CATALOG_COUNT * PRODUCT_SIZE_BYTES
                 + 16 + (long) PRODUCT_CATALOG_COUNT * 4; /* ArrayList backing array */
 
-        System.out.printf("[Init] Catalog loaded in %dms — Old Generation occupied: %,d objects x %d bytes = ~%.1f MB%n",
+        System.out.printf("[Init] Catalog loaded in %dms -- Old Generation occupied: %,d objects x %d bytes = ~%.1f MB%n",
                 loadTime, PRODUCT_CATALOG_COUNT, PRODUCT_SIZE_BYTES, catalogBytes / 1024.0 / 1024.0);
-        System.out.println("[Init] Static reference — always reachable, never collected. Permanent Old Gen pressure.");
+        System.out.println("[Init] Static reference -- always reachable, never collected. Permanent Old Gen pressure.");
         System.out.println();
 
         /* STEP 2: Pause or delay for profiler attachment */
@@ -152,7 +152,7 @@ public class RetailMemoryStress {
             waitForUserInput();
         } else {
             System.out.println("[Ready] Auto-starting in " + AUTO_START_DELAY_SECONDS + " seconds... " +
-                    "(PID: " + ProcessHandle.current().pid() + " — attach JMC now if needed)");
+                    "(PID: " + ProcessHandle.current().pid() + " -- attach JMC now if needed)");
             try {
                 Thread.sleep(AUTO_START_DELAY_SECONDS * 1000L);
             } catch (InterruptedException e) {
@@ -177,7 +177,7 @@ public class RetailMemoryStress {
         System.out.println("[Action]   ArrayList growth (10->15->22->33->49->73):");
         System.out.println("[Action]   Discarded backing arrays:      596 bytes  (immediate Young Gen garbage)");
         System.out.println("[Action]   -----------------------------------------");
-        System.out.printf ("[Action]   Total allocated per Order:  %,d bytes  (~%.1f KB) — all garbage within microseconds%n",
+        System.out.printf ("[Action]   Total allocated per Order:  %,d bytes  (~%.1f KB) -- all garbage within microseconds%n",
                 ORDER_TOTAL_ALLOCATED_BYTES, ORDER_TOTAL_ALLOCATED_BYTES / 1024.0);
         System.out.println();
 
@@ -252,12 +252,20 @@ public class RetailMemoryStress {
 
     private static void printHeader() {
         System.out.println("=================================================================");
-        System.out.println("GC COMPARISON DEMO: Black Friday Sale Simulation");
+        System.out.println("GC COMPARISON DEMO: Retail Workload Simulation");
         System.out.println("=================================================================");
         System.out.println();
     }
 
     private static void printConfiguration() {
+        Runtime rt = Runtime.getRuntime();
+        System.out.println("SYSTEM INFO:");
+        System.out.printf("  Java Version:    %s%n", System.getProperty("java.version"));
+        System.out.printf("  OS:              %s (%s)%n", System.getProperty("os.name"), System.getProperty("os.arch"));
+        System.out.printf("  CPU Cores:       %d%n", rt.availableProcessors());
+        System.out.printf("  JVM Heap (-Xmx): %.0f MB%n", rt.maxMemory() / 1024.0 / 1024.0);
+        System.out.println();
+
         System.out.println("WORKLOAD CONFIGURATION:");
         System.out.printf("  Catalog Size:      %,d products%n", PRODUCT_CATALOG_COUNT);
         System.out.printf("  Orders/Iteration:  %d%n", ORDERS_PER_ITERATION);
