@@ -83,6 +83,128 @@ I create practical, hands-on courses on **Java, Spring Boot, Debugging, Git, Pyt
   </tr>
 </table>
 
+### 🧩 Java Debugging Courses
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://www.udemy.com/course/eclipse-debugging-techniques-and-tricks/?referralCode=50C340E2FEFC3F486AD6">
+        <img src="https://img-c.udemycdn.com/course/480x270/417118_3afa_4.jpg" width="260">
+        <br/><b>Eclipse Debugging Techniques And Tricks</b>
+      </a>
+      <br/><img src="https://img.shields.io/badge/⭐_UDEMY_BUSINESS-5624d0?style=flat&logoColor=white" alt="Udemy Business">
+      <br/><i>Boost your Eclipse productivity with powerful debugging features</i>
+      <br/><br/>
+      <a href="https://www.udemy.com/course/eclipse-debugging-techniques-and-tricks/?referralCode=50C340E2FEFC3F486AD6">
+        <img src="https://img.shields.io/badge/Udemy-Enroll%20with%20Discount-brightgreen?style=for-the-badge&logo=udemy">
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://www.udemy.com/course/java-debugging-with-intellij-idea/?referralCode=FDEFCC7D8AE9656DA7F0">
+        <img src="https://img-c.udemycdn.com/course/480x270/2608314_47e4.jpg" width="260">
+        <br/><b>Java Debugging With IntelliJ IDEA</b>
+      </a>
+      <br/><img src="https://img.shields.io/badge/⭐_UDEMY_BUSINESS-5624d0?style=flat&logoColor=white" alt="Udemy Business">
+      <br/><i>Debug Java applications efficiently using IntelliJ IDEA</i>
+      <br/><br/>
+      <a href="https://www.udemy.com/course/java-debugging-with-intellij-idea/?referralCode=FDEFCC7D8AE9656DA7F0">
+        <img src="https://img.shields.io/badge/Udemy-Enroll%20with%20Discount-brightgreen?style=for-the-badge&logo=udemy">
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://www.udemy.com/course/java-debugging-with-visual-studio-code-the-ultimate-guide/?referralCode=EC47F1AFB1B64D7991F1">
+        <img src="https://img-c.udemycdn.com/course/480x270/5029852_d692_3.jpg" width="260">
+        <br/><b>Java Debugging using VS Code</b>
+      </a>
+      <br/><img src="https://img.shields.io/badge/⭐_UDEMY_BUSINESS-5624d0?style=flat&logoColor=white" alt="Udemy Business">
+      <br/><i>Learn to debug Java apps with VS Code's lightweight tools</i>
+      <br/><br/>
+      <a href="https://www.udemy.com/course/java-debugging-with-visual-studio-code-the-ultimate-guide/?referralCode=EC47F1AFB1B64D7991F1">
+        <img src="https://img.shields.io/badge/Udemy-Enroll%20with%20Discount-brightgreen?style=for-the-badge&logo=udemy">
+      </a>
+    </td>
+  </tr>
+</table>
+
+### 💡 Java Design Patterns
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://www.udemy.com/course/design-patterns-in-javacreational/?referralCode=749F487E67E5AFF726BE">
+        <img src="https://img-c.udemycdn.com/course/480x270/779796_5770_2.jpg" width="260">
+        <br/><b>Creational Design Patterns in Java</b>
+      </a>
+      <br/><i>Learn proven design patterns for building robust Java apps</i>
+      <br/><br/>
+      <a href="https://www.udemy.com/course/design-patterns-in-javacreational/?referralCode=749F487E67E5AFF726BE">
+        <img src="https://img.shields.io/badge/Udemy-Enroll%20with%20Discount-brightgreen?style=for-the-badge&logo=udemy">
+      </a>
+    </td>
+  </tr>
+</table>
+
+### 🧪 Python Debugging Courses
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://www.udemy.com/course/learn-python-debugging-with-pycharm-ide/?referralCode=0F22D6CC437E868C90F3">
+        <img src="https://img-c.udemycdn.com/course/480x270/4840890_12a3_2.jpg" width="260">
+        <br/><b>Python Debugging With PyCharm IDE</b>
+      </a>
+      <br/><img src="https://img.shields.io/badge/⭐_UDEMY_BUSINESS-5624d0?style=flat&logoColor=white" alt="Udemy Business">
+      <br/><i>Master debugging Python apps with PyCharm</i>
+      <br/><br/>
+      <a href="https://www.udemy.com/course/learn-python-debugging-with-pycharm-ide/?referralCode=0F22D6CC437E868C90F3">
+        <img src="https://img.shields.io/badge/Udemy-Enroll%20with%20Discount-brightgreen?style=for-the-badge&logo=udemy">
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://www.udemy.com/course/python-debugging-with-visual-studio-code/?referralCode=945180A5765D7A2BDDCC">
+        <img src="https://img-c.udemycdn.com/course/480x270/5029842_d36f.jpg" width="260">
+        <br/><b>Python Debugging with VS Code</b>
+      </a>
+      <br/><img src="https://img.shields.io/badge/⭐_UDEMY_BUSINESS-5624d0?style=flat&logoColor=white" alt="Udemy Business">
+      <br/><i>Debug Python code using VS Code step by step</i>
+      <br/><br/>
+      <a href="https://www.udemy.com/course/python-debugging-with-visual-studio-code/?referralCode=945180A5765D7A2BDDCC">
+        <img src="https://img.shields.io/badge/Udemy-Enroll%20with%20Discount-brightgreen?style=for-the-badge&logo=udemy">
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://www.udemy.com/course/get-started-with-python-debugging-in-visual-studio-code">
+        <img src="https://img-c.udemycdn.com/course/480x270/6412275_a17d.jpg" width="260">
+        <br/><b>Python Debugging in VS Code (Free)</b>
+      </a>
+      <br/><i>Quick start to Python debugging with VS Code</i>
+      <br/><br/>
+      <a href="https://www.udemy.com/course/get-started-with-python-debugging-in-visual-studio-code">
+        <img src="https://img.shields.io/badge/View Free Course-blue?style=for-the-badge&logo=udemy">
+      </a>
+    </td>
+  </tr>
+</table>
+
+### 🛠 Git & GitHub with Eclipse
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://www.udemy.com/course/learn-to-use-git-and-github-with-eclipse-a-complete-guide/?referralCode=9447DB0956D60946A217">
+        <img src="https://img-c.udemycdn.com/course/480x270/3369428_995b.jpg" width="260">
+        <br/><b>Git & GitHub with Eclipse</b>
+      </a>
+      <br/><img src="https://img.shields.io/badge/⭐_UDEMY_BUSINESS-5624d0?style=flat&logoColor=white" alt="Udemy Business">
+      <br/><i>Use Git & GitHub directly from Eclipse IDE</i>
+      <br/><br/>
+      <a href="https://www.udemy.com/course/learn-to-use-git-and-github-with-eclipse-a-complete-guide/?referralCode=9447DB0956D60946A217">
+        <img src="https://img.shields.io/badge/Udemy-Enroll%20with%20Discount-brightgreen?style=for-the-badge&logo=udemy">
+      </a>
+    </td>
+  </tr>
+</table>
+
 ---
 
 ## ⚙️ Requirements
