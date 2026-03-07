@@ -6,27 +6,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-/**
- * Simple memory load generation service
- * Creates realistic generational workload patterns
- */
 @Service
 public class MemoryService {
 
-    private static final int OBJECT_SIZE_MB = 10;
-    private static final int BYTES_PER_MB = 1024 * 1024;
-    private static final int MAX_SURVIVORS = 20; // Keep ~200MB of survivors
+    private static final int OBJECT_SIZE_MB  = 10;
+    private static final int BYTES_PER_MB    = 1024 * 1024;
+    private static final int MAX_SURVIVORS   = 20; // ceiling: 200MB of long-lived objects
 
-    // Hold references for survivor objects
     private volatile List<byte[]> survivors = new ArrayList<>();
     private final Object lock = new Object();
 
     /**
-     * Natural generational workload
+     * Creates a natural generational heap workload.
      *
-     * @param shortLivedMB Short-lived objects in MB (dies immediately)
-     * @param survivorsMB Survivor objects in MB (kept alive for rotation)
-     * @return Result with allocation details
+     * shortLivedMB  → allocated as local variables, become garbage on method return
+     * survivorsMB   → added to the survivors list, promoted to old gen, rotated out gradually
      */
     public AllocationResult createNaturalWorkload(int shortLivedMB, int survivorsMB) {
         long startTime = System.nanoTime();
@@ -34,7 +28,7 @@ public class MemoryService {
         int youngCount = 0;
         int survivorCount = 0;
 
-        // 1. Create short-lived objects (young generation)
+        // Short-lived — local list, all chunks become garbage when method returns
         List<byte[]> youngObjects = new ArrayList<>();
         int shortLivedChunks = shortLivedMB / OBJECT_SIZE_MB;
 
@@ -46,7 +40,7 @@ public class MemoryService {
             youngCount++;
         }
 
-        // 2. Create survivor objects (old generation)
+        // Survivors — passed to rotateSurvivors, held by class-level reference
         List<byte[]> newSurvivors = new ArrayList<>();
         int survivorChunks = survivorsMB / OBJECT_SIZE_MB;
 
@@ -58,12 +52,11 @@ public class MemoryService {
             survivorCount++;
         }
 
-        // 3. Rotate survivors naturally
         rotateSurvivors(newSurvivors);
 
         long durationNanos = System.nanoTime() - startTime;
 
-        // youngObjects become garbage here
+        // youngObjects goes out of scope here — 160MB becomes garbage
         return new AllocationResult(
                 youngCount + survivorCount,
                 totalBytes,
@@ -74,35 +67,13 @@ public class MemoryService {
     }
 
     /**
-     * Get current survivor statistics
-     */
-    public SurvivorStats getSurvivorStats() {
-        synchronized (lock) {
-            long survivorBytes = (long) survivors.size() * OBJECT_SIZE_MB * BYTES_PER_MB;
-            return new SurvivorStats(
-                    survivors.size(),
-                    survivorBytes / BYTES_PER_MB
-            );
-        }
-    }
-
-    /**
-     * Clear all survivors
-     */
-    public void clearSurvivors() {
-        synchronized (lock) {
-            survivors.clear();
-        }
-    }
-
-    /**
-     * Rotate survivors - keep only recent ones
+     * Adds new survivors, trims the oldest once the list exceeds MAX_SURVIVORS.
+     * Synchronized because multiple JMeter threads call this concurrently.
      */
     private void rotateSurvivors(List<byte[]> newSurvivors) {
         synchronized (lock) {
             survivors.addAll(newSurvivors);
 
-            // Keep only last N survivors
             if (survivors.size() > MAX_SURVIVORS) {
                 survivors = new ArrayList<>(
                         survivors.subList(survivors.size() - MAX_SURVIVORS, survivors.size())
@@ -112,15 +83,13 @@ public class MemoryService {
     }
 
     /**
-     * Fill array with random data to prevent JVM optimizations
+     * Fills the array with random data — prevents JIT dead-code elimination
+     * and escape analysis from removing the allocations entirely.
      */
     private void fillWithData(byte[] array) {
         ThreadLocalRandom.current().nextBytes(array);
     }
 
-    /**
-     * Allocation result data
-     */
     public record AllocationResult(
             int totalObjects,
             long totalBytes,
@@ -128,20 +97,7 @@ public class MemoryService {
             int youngObjects,
             int survivorObjects
     ) {
-        public double durationMs() {
-            return durationNanos / 1_000_000.0;
-        }
-
-        public double totalMB() {
-            return totalBytes / (double) (1024 * 1024);
-        }
+        public double durationMs() { return durationNanos / 1_000_000.0; }
+        public double totalMB()    { return totalBytes / (double) (1024 * 1024); }
     }
-
-    /**
-     * Survivor statistics data
-     */
-    public record SurvivorStats(
-            int count,
-            long sizeInMB
-    ) {}
 }
