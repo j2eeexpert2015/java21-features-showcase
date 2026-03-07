@@ -35,6 +35,7 @@ I create practical, hands-on courses on **Java, Spring Boot, Debugging, Git, Pyt
         <img src="https://img-c.udemycdn.com/course/480x270/6688129_bd51.jpg" width="260">
         <br/><b>Java Virtual Threads & Structured Concurrency with Spring Boot</b>
       </a>
+      <br/><img src="https://img.shields.io/badge/⭐_UDEMY_BUSINESS-5624d0?style=flat&logoColor=white" alt="Udemy Business">
       <br/><i>Master Virtual Threads, Structured Concurrency & Scoped Values with Spring Boot</i>
       <br/><br/>
       <a href="https://www.udemy.com/course/java-virtual-threads-structured-concurrency-with-spring-boot/?referralCode=078836F584A59839FE03">
@@ -167,6 +168,28 @@ java -cp target/classes -Xmx512M -Xms512M -XX:+UseZGC -XX:-ZGenerational -Xlog:g
 
 ```bash
 java -cp target/classes -Xmx512M -Xms512M -XX:+UseZGC -XX:+ZGenerational -Xlog:gc*:file=logs/generational-zgc-512m.log:time,level,tags -XX:StartFlightRecording=duration=60s,filename=jfr/generational-zgc-512m.jfr org.example.concepts.zgc.RetailMemoryStress
+```
+
+---
+
+# 🚀 Run the Spring Boot App with Different GC Configurations
+
+### G1GC — port 8080
+
+```bash
+java -Xmx2g -Xms2g -XX:+UseG1GC --enable-preview -jar "target/java21-features-showcase-1.0-SNAPSHOT.jar" --server.port=8080
+```
+
+### Generational ZGC — port 8081
+
+```bash
+java -Xmx2g -Xms2g -XX:+UseZGC -XX:+ZGenerational --enable-preview -jar "target/java21-features-showcase-1.0-SNAPSHOT.jar" --server.port=8081
+```
+
+### Classic ZGC — port 8082
+
+```bash
+java -Xmx2g -Xms2g -XX:+UseZGC -XX:-ZGenerational --enable-preview -jar "target/java21-features-showcase-1.0-SNAPSHOT.jar" --server.port=8082
 ```
 
 ---
