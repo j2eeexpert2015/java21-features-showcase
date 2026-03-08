@@ -211,6 +211,7 @@ I create practical, hands-on courses on **Java, Spring Boot, Debugging, Git, Pyt
 
 - **JDK 21**
 - **Maven 3.9+**
+- **Docker Desktop** (for Prometheus + Grafana observability stack)
 
 ---
 
@@ -316,4 +317,63 @@ java -Xmx2g -Xms2g -XX:+UseZGC -XX:-ZGenerational --enable-preview -jar "target/
 
 ---
 
-**Happy Learning! 🚀**
+# 📊 Observability Stack — Prometheus + Grafana
+
+Prometheus and Grafana run as Docker containers. The Spring Boot apps run on the host machine. Prometheus reaches the host from inside Docker using `host.docker.internal`.
+
+## Project structure
+
+```
+docker/
+├── docker-compose.yml
+├── prometheus/
+│   └── prometheus.yml
+└── grafana/
+    └── provisioning/
+        ├── datasources/
+        │   └── prometheus.yml
+        └── dashboards/
+            └── dashboard.yml
+```
+
+## Step 1 — Start Prometheus and Grafana
+
+```bash
+cd docker
+docker compose up -d
+```
+
+This starts:
+
+| Service    | URL                          | Default credentials   |
+|------------|------------------------------|-----------------------|
+| Prometheus | http://localhost:9090        | —                     |
+| Grafana    | http://localhost:3000        | admin / admin         |
+
+## Step 2 — Verify Prometheus targets
+
+Open http://localhost:9090/targets
+
+All three targets should show state **UP**:
+
+```
+gc-comparison / localhost:8080  UP   (G1GC)
+gc-comparison / localhost:8081  UP   (Generational ZGC)
+gc-comparison / localhost:8082  UP   (Classic ZGC)
+```
+
+If a target shows **DOWN**, verify the Spring Boot app on that port is running and `/actuator/prometheus` is reachable from your browser.
+
+## Step 3 — Open Grafana
+
+Open http://localhost:3000 and log in with `admin / admin`.
+
+The GC Comparison dashboard is pre-provisioned. Navigate to:
+
+**Dashboards → GC Comparison — G1GC vs ZGC vs Generational ZGC**
+
+## Step 4 — Stop the stack
+
+```bash
+docker compose down
+```
