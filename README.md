@@ -295,7 +295,28 @@ java -cp target/classes -Xmx512M -Xms512M -XX:+UseZGC -XX:+ZGenerational -Xlog:g
 
 ---
 
-# 🚀 Run the Spring Boot App with Different GC Configurations
+# 🚀 Run the Spring Boot App with Different GC Configurations (High RAM Needed - Each Application with 8GB)
+
+### G1GC — port 8080
+
+```bash
+java -Xmx8g -Xms8g -XX:+UseG1GC --enable-preview -jar "target/java21-features-showcase-1.0-SNAPSHOT.jar" --server.port=8080
+```
+
+### Generational ZGC — port 8081
+
+```bash
+java -Xmx8g -Xms8g -XX:+UseZGC -XX:+ZGenerational --enable-preview -jar "target/java21-features-showcase-1.0-SNAPSHOT.jar" --server.port=8081
+```
+
+### Classic ZGC — port 8082
+
+```bash
+java -Xmx8g -Xms8g -XX:+UseZGC -XX:-ZGenerational --enable-preview -jar "target/java21-features-showcase-1.0-SNAPSHOT.jar" --server.port=8082
+```
+
+---
+# 🚀 Run the Spring Boot App with Different GC Configurations (Each Application with 2GB)
 
 ### G1GC — port 8080
 
