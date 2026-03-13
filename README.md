@@ -361,6 +361,8 @@ docker/
 
 ```bash
 cd docker
+docker compose up
+        OR
 docker compose up -d
 ```
 
@@ -369,7 +371,7 @@ This starts:
 | Service    | URL                          | Default credentials   |
 |------------|------------------------------|-----------------------|
 | Prometheus | http://localhost:9090        | —                     |
-| Grafana    | http://localhost:3000        | admin / admin         |
+| Grafana    | http://localhost:3000        | admin / password         |
 
 ## Step 2 — Verify Prometheus targets
 
@@ -387,7 +389,7 @@ If a target shows **DOWN**, verify the Spring Boot app on that port is running a
 
 ## Step 3 — Open Grafana
 
-Open http://localhost:3000 and log in with `admin / admin`.
+Open http://localhost:3000 and log in with `admin / password`.
 
 The GC Comparison dashboard is pre-provisioned. Navigate to:
 
