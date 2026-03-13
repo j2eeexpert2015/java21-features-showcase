@@ -232,7 +232,8 @@ mvn clean compile
 Create directories for logs and JFR recordings:
 
 ```bash
-mkdir -p logs jfr
+mkdir jfr
+mkdir logs
 ```
 
 ---
