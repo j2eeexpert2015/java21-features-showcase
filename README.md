@@ -432,6 +432,7 @@ This starts:
 | Prometheus | http://localhost:9090 | —                   |
 | Grafana    | http://localhost:3000 | admin / password    |
 
+
 ## Step 2 — Verify Prometheus targets
 
 Open http://localhost:9090/targets
