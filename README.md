@@ -226,7 +226,7 @@ git clone https://github.com/j2eeexpert2015/java21-features-showcase.git && cd j
 Build the project:
 
 ```bash
-mvn clean package -DskipTests
+mvn clean compile
 ```
 
 Create directories for logs and JFR recordings:
@@ -313,6 +313,14 @@ Two heap configurations are provided below. Choose based on your available RAM.
 If you reduce the heap size, also reduce the JMeter allocation parameters —
 set `SHORT_LIVED_MB` to `40` and `SURVIVOR_MB` to `10` in the User Defined Variables
 at the top of the JMeter plan.
+
+---
+
+## Build the Project
+
+```bash
+mvn clean package -DskipTests
+```
 
 ---
 
@@ -431,7 +439,6 @@ This starts:
 |------------|-----------------------|---------------------|
 | Prometheus | http://localhost:9090 | —                   |
 | Grafana    | http://localhost:3000 | admin / password    |
-
 
 ## Step 2 — Verify Prometheus targets
 
