@@ -226,13 +226,14 @@ git clone https://github.com/j2eeexpert2015/java21-features-showcase.git && cd j
 Build the project:
 
 ```bash
-mvn clean compile
+mvn clean package -DskipTests
 ```
 
 Create directories for logs and JFR recordings:
 
 ```bash
-mkdir -p logs jfr
+mkdir jfr
+mkdir logs
 ```
 
 ---
@@ -295,7 +296,31 @@ java -cp target/classes -Xmx512M -Xms512M -XX:+UseZGC -XX:+ZGenerational -Xlog:g
 
 ---
 
-# 🚀 Run the Spring Boot App with Different GC Configurations (High RAM Needed - Each Application with 8GB)
+# 🚀 Run the Spring Boot App with Different GC Configurations
+
+## ⚠️ A Note on Results and System Resources
+
+This demo was recorded on a **32GB RAM, 8-core VM** with an 8GB heap allocated to each application.
+JMeter runs on the same machine alongside the three Spring Boot instances, so it adds its own memory
+and CPU pressure on top of the applications.
+
+**Your results will vary based on available system resources — that is completely expected.**
+The relative patterns between collectors remain consistent regardless of machine size:
+G1GC will still show longer pauses, ZGC variants will still remain sub-millisecond.
+The absolute numbers will differ.
+
+Two heap configurations are provided below. Choose based on your available RAM.
+If you reduce the heap size, also reduce the JMeter allocation parameters —
+set `SHORT_LIVED_MB` to `40` and `SURVIVOR_MB` to `10` in the User Defined Variables
+at the top of the JMeter plan.
+
+---
+
+## Each Application with 8GB
+
+> **RAM requirement:** Each of the three applications uses 8GB heap — that is 24GB for the JVMs alone.
+> Add RAM for the OS, JMeter, Prometheus, and Grafana on top of that.
+> A 32GB machine is the practical minimum for this configuration.
 
 ### G1GC — port 8080
 
@@ -316,7 +341,8 @@ java -Xmx8g -Xms8g -XX:+UseZGC -XX:-ZGenerational --enable-preview -jar "target/
 ```
 
 ---
-# 🚀 Run the Spring Boot App with Different GC Configurations (Each Application with 2GB)
+
+## Each Application with 2GB (Requires ~8GB RAM)
 
 ### G1GC — port 8080
 
@@ -338,38 +364,73 @@ java -Xmx2g -Xms2g -XX:+UseZGC -XX:-ZGenerational --enable-preview -jar "target/
 
 ---
 
+## JVM Flag Reference
+
+| Flag | Effect |
+|------|--------|
+| `-Xmx8g -Xms8g` | Fix heap at 8GB, pre-allocated at startup — no resizing during the run |
+| `-XX:+UseG1GC` | Enable G1GC — default since Java 9, included explicitly for clarity |
+| `-XX:+UseZGC` | Enable ZGC |
+| `-XX:+ZGenerational` | Enable generational mode in ZGC (Java 21+) |
+| `-XX:-ZGenerational` | Disable generational mode — gives Classic (single-generation) ZGC |
+| `--enable-preview` | Required for Java 21 preview features used in the application |
+
+---
+
+## Verifying Startup — GC Bean Registration
+
+After each application starts, check the `GcNotificationListener` output in the console.
+Before any request is processed, the listener logs how many GC beans each collector registered:
+
+| Collector | Beans registered | Beans |
+|-----------|-----------------|-------|
+| G1GC | 3 | G1 Young Generation, G1 Concurrent GC, G1 Old Generation |
+| Generational ZGC | 4 | ZGC Minor Cycles, ZGC Minor Pauses, ZGC Major Cycles, ZGC Major Pauses |
+| Classic ZGC | 2 | ZGC Cycles, ZGC Pauses (single unified ZHeap) |
+
+The 4-bean count for Generational ZGC is the first structural proof that the young/old split is real —
+visible in the JVM's own monitoring interface before JMeter sends a single request.
+
+---
+
 # 📊 Observability Stack — Prometheus + Grafana
 
-Prometheus and Grafana run as Docker containers. The Spring Boot apps run on the host machine. Prometheus reaches the host from inside Docker using `host.docker.internal`.
+Prometheus and Grafana run as Docker containers. The Spring Boot apps run on the host machine.
+Prometheus reaches the host from inside Docker using `host.docker.internal`.
 
-## Project structure
+## Infrastructure layout
 
 ```
 docker/
-├── docker-compose.yml
+├── docker-compose.yml                  # Starts Prometheus and Grafana as containers
 ├── prometheus/
-│   └── prometheus.yml
+│   └── prometheus.yml                  # Scrape config — 3 targets, 5s interval
 └── grafana/
     └── provisioning/
         ├── datasources/
-        │   └── prometheus.yml
+        │   └── prometheus.yml          # Wires Prometheus as Grafana data source
         └── dashboards/
-            └── dashboard.yml
+            └── dashboard.yml           # Pre-provisions the GC comparison dashboard
+
+jmeter/
+└── gc-comparison-standard-5min.jmx     # 3 thread groups, 9 threads total, 5-minute run
 ```
 
 ## Step 1 — Start Prometheus and Grafana
 
 ```bash
 cd docker
+docker compose up
+        OR
 docker compose up -d
 ```
 
 This starts:
 
-| Service    | URL                          | Default credentials   |
-|------------|------------------------------|-----------------------|
-| Prometheus | http://localhost:9090        | —                     |
-| Grafana    | http://localhost:3000        | admin / admin         |
+| Service    | URL                   | Default credentials |
+|------------|-----------------------|---------------------|
+| Prometheus | http://localhost:9090 | —                   |
+| Grafana    | http://localhost:3000 | admin / password    |
 
 ## Step 2 — Verify Prometheus targets
 
@@ -383,11 +444,12 @@ gc-comparison / localhost:8081  UP   (Generational ZGC)
 gc-comparison / localhost:8082  UP   (Classic ZGC)
 ```
 
-If a target shows **DOWN**, verify the Spring Boot app on that port is running and `/actuator/prometheus` is reachable from your browser.
+If a target shows **DOWN**, verify the Spring Boot app on that port is running and
+`/actuator/prometheus` is reachable from your browser.
 
 ## Step 3 — Open Grafana
 
-Open http://localhost:3000 and log in with `admin / admin`.
+Open http://localhost:3000 and log in with `admin / password`.
 
 The GC Comparison dashboard is pre-provisioned. Navigate to:
 
