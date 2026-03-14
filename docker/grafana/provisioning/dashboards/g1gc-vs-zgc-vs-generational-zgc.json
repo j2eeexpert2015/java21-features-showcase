@@ -30,7 +30,7 @@
       },
       "targets": [
         {
-          "expr": "max by (job) (jvm_gc_pause_seconds_max{action!~\".*cycle.*\"}) * 1000",
+          "expr": "max by (job) (max_over_time(jvm_gc_pause_seconds_max{action!~\".*cycle.*\"}[$__range])) * 1000",
           "legendFormat": "{{job}}",
           "refId": "A"
         }
@@ -559,7 +559,7 @@
       },
       "targets": [
         {
-          "expr": "max by (gc_type) (jvm_gc_pause_seconds_max{action!~\".*cycle.*\"}) * 1000",
+          "expr": "max by (gc_type) (max_over_time(jvm_gc_pause_seconds_max{action!~\".*cycle.*\"}[$__range])) * 1000",
           "legendFormat": "{{gc_type}} - Max Pause",
           "refId": "A"
         },
@@ -703,7 +703,7 @@
         "reduceOptions": {
           "values": false,
           "calcs": [
-            "lastNotNull"
+            "max"
           ],
           "fields": ""
         },
@@ -809,7 +809,7 @@
     },
     {
       "title": "GC Events by Cause (Generational-ZGC)",
-      "description": "Generational-ZGC - Allocation Rate, Proactive, \u26a0\ufe0f Allocation Stall",
+      "description": "Generational-ZGC - Allocation Rate, Proactive, ⚠️ Allocation Stall",
       "type": "timeseries",
       "gridPos": {
         "h": 8,
@@ -885,7 +885,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Allocation Stall \u26a0\ufe0f"
+              "options": "Allocation Stall ⚠️"
             },
             "properties": [
               {
@@ -932,7 +932,7 @@
     },
     {
       "title": "GC Events by Cause (ZGC)",
-      "description": "ZGC - Allocation Rate, Proactive, \u26a0\ufe0f Allocation Stall",
+      "description": "ZGC - Allocation Rate, Proactive, ⚠️ Allocation Stall",
       "type": "timeseries",
       "gridPos": {
         "h": 8,
@@ -963,7 +963,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "\u26a0\ufe0f Allocation Stall"
+              "options": "⚠️ Allocation Stall"
             },
             "properties": [
               {
