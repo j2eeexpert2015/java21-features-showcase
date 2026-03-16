@@ -3,13 +3,9 @@ package org.example.concepts.ffi;
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 
-/**
- * Demo : Basic Downcall - Calling C functions from Java
- *
- * Shows how to call C's strlen() using the Foreign Function & Memory API.
- * This is called a "downcall" - Java calling into native code.
- *
- * Requirements: Java 21+ with --enable-preview flag
+/*
+ * Demo 1: Downcall — Java calling C's strlen() using the FFM API
+ * No JNI, no C code, no native compiler required
  */
 @SuppressWarnings("preview")
 public class BasicDowncall {
@@ -19,50 +15,52 @@ public class BasicDowncall {
         System.out.println("Calling C's strlen() from Java\n");
 
         try {
-            // Step 1: Get the native linker
+            // Step 1: Get the native linker — entry point to native code
             Linker linker = Linker.nativeLinker();
 
-            // Step 2: Lookup the C standard library
+            // Step 2: Get a lookup for the C standard library
             SymbolLookup stdlib = linker.defaultLookup();
 
-            // Step 3: Find the strlen function
+            // Step 3: Find strlen's address in memory
             MemorySegment strlenAddr = stdlib.find("strlen")
                     .orElseThrow(() -> new RuntimeException("strlen not found"));
 
-            // Step 4: Define the function signature
-            // C: size_t strlen(const char *str)
+            /*
+             * Step 4: Describe the function signature
+             * C signature: size_t strlen(const char *str)
+             */
             FunctionDescriptor descriptor = FunctionDescriptor.of(
-                    ValueLayout.JAVA_LONG,    // return: size_t
-                    ValueLayout.ADDRESS       // param: const char*
+                    ValueLayout.JAVA_LONG,  // return: size_t
+                    ValueLayout.ADDRESS     // param:  const char*
             );
 
-            // Step 5: Create a method handle (Java -> Native bridge)
+            // Step 5: Create a callable method handle
             MethodHandle strlen = linker.downcallHandle(strlenAddr, descriptor);
 
-            // Step 6: Use it!
+            // Step 6: Test with sample strings
             testStrlen(strlen, "Hello, World!");
             testStrlen(strlen, "Java 21 FFM API");
             testStrlen(strlen, "🚀 Unicode!");
 
         } catch (Throwable e) {
             System.err.println("Error: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
+    /*
+     * Allocates a native string, calls C strlen,
+     * prints byte vs char comparison
+     */
     private static void testStrlen(MethodHandle strlen, String text) throws Throwable {
         try (Arena arena = Arena.ofConfined()) {
-            // Allocate native memory for the string
             MemorySegment nativeStr = arena.allocateUtf8String(text);
-
-            // Call native strlen
             long length = (long) strlen.invoke(nativeStr);
 
-            System.out.printf("\"%s\"%n", text);
-            System.out.printf("  C strlen():    %d bytes%n", length);
-            System.out.printf("  Java length(): %d chars%n", text.length());
+            System.out.println("Sample text   : " + text);
+            System.out.printf( "C strlen()    : %d bytes%n", length);
+            System.out.printf( "Java length() : %d chars%n", text.length());
             if (length != text.length()) {
-                System.out.println("  (UTF-8 encoding uses multiple bytes for some characters)");
+                System.out.println("Note          : UTF-8 uses multiple bytes for this character");
             }
             System.out.println();
         }
