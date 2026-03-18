@@ -35,7 +35,7 @@ import java.util.Random;
 public class DualScenarioVectorDemo {
 
     /** Preferred SIMD shape for the CPU (for example, 512 bits = 16 x int lanes). */
-    static final VectorSpecies<Integer> S = IntVector.SPECIES_PREFERRED;
+    static final VectorSpecies<Integer> SPECIES = IntVector.SPECIES_PREFERRED;
 
     /** Controls arithmetic intensity for the CPU-bound case. Higher R = more work per element. */
     static final int R = 128;
@@ -54,7 +54,7 @@ public class DualScenarioVectorDemo {
         }
 
         System.out.println("=== Vector Capability ===");
-        System.out.println("Vector bits (int): " + S.vectorBitSize() + ", lanes: " + S.length());
+        System.out.println("Vector bits (int): " + SPECIES.vectorBitSize() + ", lanes: " + SPECIES.length());
         System.out.println("Array size       : " + String.format("%,d", n));
         System.out.println();
 
@@ -100,17 +100,17 @@ public class DualScenarioVectorDemo {
 
     /** Vectorized version of element-wise addition using the Vector API. */
     static void vectorMemoryBound(int[] a, int[] b, int[] out) {
-        int i = 0, upper = S.loopBound(a.length);
-        for (; i < upper; i += S.length()) {
-            IntVector va = IntVector.fromArray(S, a, i);
-            IntVector vb = IntVector.fromArray(S, b, i);
-            va.add(vb).intoArray(out, i);
+        int i = 0, upper = SPECIES.loopBound(a.length);
+        for (; i < upper; i += SPECIES.length()) {
+            IntVector vecA = IntVector.fromArray(SPECIES, a, i);
+            IntVector vecB = IntVector.fromArray(SPECIES, b, i);
+            vecA.add(vecB).intoArray(out, i);
         }
         if (i < a.length) {
-            VectorMask<Integer> mask = S.indexInRange(i, a.length);
-            IntVector va = IntVector.fromArray(S, a, i, mask);
-            IntVector vb = IntVector.fromArray(S, b, i, mask);
-            va.add(vb).intoArray(out, i, mask);
+            VectorMask<Integer> mask = SPECIES.indexInRange(i, a.length);
+            IntVector vecA = IntVector.fromArray(SPECIES, a, i, mask);
+            IntVector vecB = IntVector.fromArray(SPECIES, b, i, mask);
+            vecA.add(vecB).intoArray(out, i, mask);
         }
     }
 
@@ -129,24 +129,24 @@ public class DualScenarioVectorDemo {
 
     /** Vectorized version of the same compute-heavy operation using the Vector API. */
     static void vectorCpuBound(int[] a, int[] b, int[] out) {
-        final IntVector c3 = IntVector.broadcast(S, 3);
-        int i = 0, upper = S.loopBound(a.length);
-        for (; i < upper; i += S.length()) {
-            IntVector vx = IntVector.fromArray(S, a, i);
-            IntVector vy = IntVector.fromArray(S, b, i);
-            IntVector acc = IntVector.zero(S);
+        final IntVector c3 = IntVector.broadcast(SPECIES, 3);
+        int i = 0, upper = SPECIES.loopBound(a.length);
+        for (; i < upper; i += SPECIES.length()) {
+            IntVector vecX = IntVector.fromArray(SPECIES, a, i);
+            IntVector vecY = IntVector.fromArray(SPECIES, b, i);
+            IntVector acc  = IntVector.zero(SPECIES);
             for (int r = 0; r < R; r++) {
-                acc = acc.add(vx.mul(c3).add(vy));
+                acc = acc.add(vecX.mul(c3).add(vecY));
             }
             acc.intoArray(out, i);
         }
         if (i < a.length) {
-            VectorMask<Integer> mask = S.indexInRange(i, a.length);
-            IntVector vx = IntVector.fromArray(S, a, i, mask);
-            IntVector vy = IntVector.fromArray(S, b, i, mask);
-            IntVector acc = IntVector.zero(S);
+            VectorMask<Integer> mask = SPECIES.indexInRange(i, a.length);
+            IntVector vecX = IntVector.fromArray(SPECIES, a, i, mask);
+            IntVector vecY = IntVector.fromArray(SPECIES, b, i, mask);
+            IntVector acc  = IntVector.zero(SPECIES);
             for (int r = 0; r < R; r++) {
-                acc = acc.add(vx.mul(c3).add(vy));
+                acc = acc.add(vecX.mul(c3).add(vecY));
             }
             acc.intoArray(out, i, mask);
         }
@@ -185,9 +185,9 @@ public class DualScenarioVectorDemo {
     static void report(int n, long nsScalar, long nsVector, String label, long sumS, long sumV) {
         double scalarMs = nsScalar / 1e6;
         double vectorMs = nsVector / 1e6;
-        double speedup = (double) nsScalar / (double) nsVector;
+        double speedup  = (double) nsScalar / (double) nsVector;
 
-        double bytes = 12.0 * n;
+        double bytes     = 12.0 * n;
         double scalarGBs = (bytes / (nsScalar / 1e9)) / 1e9;
         double vectorGBs = (bytes / (nsVector / 1e9)) / 1e9;
 
