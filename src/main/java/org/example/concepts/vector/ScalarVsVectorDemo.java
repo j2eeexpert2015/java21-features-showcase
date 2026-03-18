@@ -11,7 +11,7 @@ import java.util.Random;
   Why this shows a difference:
   ---------------------------
   Pure array addition is usually MEMORY-BOUND (RAM bandwidth dominates), so SIMD
-  often looks only slightly faster. To make SIMD’s ALUs matter, we increase the
+  often looks only slightly faster. To make SIMD's ALUs matter, we increase the
   amount of arithmetic per element using a small inner loop controlled by R.
   This pushes the benchmark toward COMPUTE-BOUND, where SIMD shines.
 
@@ -20,19 +20,19 @@ import java.util.Random;
   R is the "repeat count" (arithmetic intensity knob). Each element performs the
   same core arithmetic R times. Higher R = more work per element = clearer SIMD gain.
   - Keep R moderate (32–256) so the run is quick but still compute-bound.
-  - Both scalar and vector paths do identical work; only the way it’s expressed differs.
+  - Both scalar and vector paths do identical work; only the way it's expressed differs.
 
   How to read the output:
   -----------------------
-  - “Scalar” and “Vector” are the best (lowest) times out of a few short runs.
-  - “Speedup” = Scalar time / Vector time.
+  - "Scalar" and "Vector" are the best (lowest) times out of a few short runs.
+  - "Speedup" = Scalar time / Vector time.
   - GB/s is an *effective* bandwidth number ≈ (read a + read b + write out).
-    It’s useful to see when you’re memory-bound (both versions close in GB/s).
+    It's useful to see when you're memory-bound (both versions close in GB/s).
 */
 
-public class TinyVectorDemo {
+public class ScalarVsVectorDemo {
     // Preferred SIMD shape for this CPU/JVM (e.g., 512 bits = 16 lanes of 32-bit ints).
-    static final VectorSpecies<Integer> S = IntVector.SPECIES_PREFERRED;
+    static final VectorSpecies<Integer> SPECIES = IntVector.SPECIES_PREFERRED;
 
     // Arithmetic intensity knob: increase to amplify SIMD gains (compute-bound),
     // decrease to approach memory-bound behavior.
@@ -42,7 +42,7 @@ public class TinyVectorDemo {
         final int n = 10_000_000; // 10M elements keeps the run short but representative
 
         int[] a = new int[n], b = new int[n];
-        int[] outS = new int[n], outV = new int[n];
+        int[] outScalar = new int[n], outVector = new int[n];
 
         // Fill with deterministic data
         var rnd = new Random(42);
@@ -52,54 +52,54 @@ public class TinyVectorDemo {
         }
 
         // Quick warmup so the JIT has a chance to optimize
-        scalar(a, b, outS);
-        vector(a, b, outV);
-        scalar(a, b, outS);
-        vector(a, b, outV);
+        scalarCompute(a, b, outScalar);
+        vectorCompute(a, b, outVector);
+        scalarCompute(a, b, outScalar);
+        vectorCompute(a, b, outVector);
 
         // Measure best-of-5 to reduce run-to-run noise
-        long bestS = Long.MAX_VALUE, bestV = Long.MAX_VALUE;
+        long bestScalar = Long.MAX_VALUE, bestVector = Long.MAX_VALUE;
         for (int r = 0; r < 5; r++) {
             long t0 = System.nanoTime();
-            scalar(a, b, outS);
+            scalarCompute(a, b, outScalar);
             long t1 = System.nanoTime();
-            vector(a, b, outV);
+            vectorCompute(a, b, outVector);
             long t2 = System.nanoTime();
 
-            bestS = Math.min(bestS, t1 - t0);
-            bestV = Math.min(bestV, t2 - t1);
+            bestScalar = Math.min(bestScalar, t1 - t0);
+            bestVector = Math.min(bestVector, t2 - t1);
         }
 
         // Simple DCE guard: sum each output once
-        long sumS = 0, sumV = 0;
-        for (int v : outS) sumS += v;
-        for (int v : outV) sumV += v;
+        long sumScalar = 0, sumVector = 0;
+        for (int v : outScalar) sumScalar += v;
+        for (int v : outVector) sumVector += v;
 
         // Report
-        System.out.println("Vector bits: " + S.vectorBitSize() + ", lanes(int): " + S.length());
+        System.out.println("Vector bits: " + SPECIES.vectorBitSize() + ", lanes(int): " + SPECIES.length());
         System.out.println("Elements  : " + String.format("%,d", n));
         System.out.println("R (repeats per element): " + R);
 
-        double sMs = bestS / 1e6, vMs = bestV / 1e6;
-        System.out.printf("Scalar: %.3f ms%n", sMs);
-        System.out.printf("Vector: %.3f ms%n", vMs);
-        System.out.println("Checksums: " + sumS + " / " + sumV);
+        double scalarMs = bestScalar / 1e6, vectorMs = bestVector / 1e6;
+        System.out.printf("Scalar: %.3f ms%n", scalarMs);
+        System.out.printf("Vector: %.3f ms%n", vectorMs);
+        System.out.println("Checksums: " + sumScalar + " / " + sumVector);
 
-        double speedup = (double) bestS / (double) bestV;
+        double speedup = (double) bestScalar / (double) bestVector;
         System.out.printf("Speedup (scalar/vector): %.2fx%n", speedup);
 
         // Effective bandwidth (approx): read a + read b + write out = 12 bytes per element
         double bytes = 12.0 * n;
-        double sGBs = (bytes / (bestS / 1e9)) / 1e9;
-        double vGBs = (bytes / (bestV / 1e9)) / 1e9;
-        System.out.printf("Effective BW: Scalar %.2f GB/s | Vector %.2f GB/s%n", sGBs, vGBs);
+        double scalarGBs = (bytes / (bestScalar / 1e9)) / 1e9;
+        double vectorGBs = (bytes / (bestVector / 1e9)) / 1e9;
+        System.out.printf("Effective BW: Scalar %.2f GB/s | Vector %.2f GB/s%n", scalarGBs, vectorGBs);
     }
 
     // --------------------------------------------------------------------
     // Scalar version: out[i] accumulates (a[i] * 3 + b[i]) exactly R times.
     // This adds enough ALU work per element to expose SIMD benefits clearly.
     // --------------------------------------------------------------------
-    static void scalar(int[] a, int[] b, int[] out) {
+    static void scalarCompute(int[] a, int[] b, int[] out) {
         final int C = 3;
         for (int i = 0; i < a.length; i++) {
             int x = a[i], y = b[i], acc = 0;
@@ -114,33 +114,30 @@ public class TinyVectorDemo {
     // Vector version: same math, expressed with the Vector API.
     // We keep the main loop mask-free and use a masked tail only if needed.
     // --------------------------------------------------------------------
-    static void vector(int[] a, int[] b, int[] out) {
-        final var c3 = IntVector.broadcast(S, 3);
+    static void vectorCompute(int[] a, int[] b, int[] out) {
+        final var c3 = IntVector.broadcast(SPECIES, 3);
 
-        int i = 0, up = S.loopBound(a.length); // up is the largest index < length aligned to a full vector
-        for (; i < up; i += S.length()) {
-            var va = IntVector.fromArray(S, a, i);
-            var vb = IntVector.fromArray(S, b, i);
-
-            // Repeat the same per-element computation R times, but vectorized.
-            var acc = IntVector.zero(S);
+        int i = 0, upper = SPECIES.loopBound(a.length);
+        for (; i < upper; i += SPECIES.length()) {
+            var vecA = IntVector.fromArray(SPECIES, a, i);
+            var vecB = IntVector.fromArray(SPECIES, b, i);
+            var acc  = IntVector.zero(SPECIES);
             for (int r = 0; r < R; r++) {
-                acc = acc.add(va.mul(c3).add(vb));
+                acc = acc.add(vecA.mul(c3).add(vecB));
             }
             acc.intoArray(out, i);
         }
 
         // Tail (if n is not a multiple of the vector length)
         if (i < a.length) {
-            var m  = S.indexInRange(i, a.length);
-            var va = IntVector.fromArray(S, a, i, m);
-            var vb = IntVector.fromArray(S, b, i, m);
-
-            var acc = IntVector.zero(S);
+            var mask = SPECIES.indexInRange(i, a.length);
+            var vecA = IntVector.fromArray(SPECIES, a, i, mask);
+            var vecB = IntVector.fromArray(SPECIES, b, i, mask);
+            var acc  = IntVector.zero(SPECIES);
             for (int r = 0; r < R; r++) {
-                acc = acc.add(va.mul(c3).add(vb));
+                acc = acc.add(vecA.mul(c3).add(vecB));
             }
-            acc.intoArray(out, i, m);
+            acc.intoArray(out, i, mask);
         }
     }
 }
