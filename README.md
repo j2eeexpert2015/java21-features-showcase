@@ -238,6 +238,57 @@ mkdir logs
 
 ---
 
+# ⚡ Vector API Demo: SIMD Performance with Java
+
+The Vector API demos are located in `org.example.concepts.vector`:
+
+- `TinyVectorDemo`
+- `DualScenarioVectorDemo`
+- `SimpleVectorBench`
+- `VectorBenchmark`
+
+---
+
+## ⚙️ IntelliJ Run Configuration (Required for all Vector API classes)
+
+The Vector API requires the `jdk.incubator.vector` module to be explicitly activated. Apply this to each class you want to run.
+
+**Steps:**
+
+1. Open **Run/Debug Configurations** for the class
+2. Click **Modify options** → under the **Java** section, select **Add VM options**
+3. The **VM options** field will appear — add the following:
+
+```
+--enable-preview --add-modules jdk.incubator.vector
+```
+
+> **Why this is needed:** `jdk.incubator.vector` is an incubator module — it exists in the JDK but is not on the module path by default. Without it, you will see:
+> ```
+> Error: Unable to initialize main class ...
+> Caused by: java.lang.NoClassDefFoundError: jdk/incubator/vector/Vector
+> ```
+
+---
+
+## ▶️ Run from Command Line (Alternative)
+
+```bash
+# TinyVectorDemo
+java --enable-preview --add-modules jdk.incubator.vector -cp target/classes org.example.concepts.vector.TinyVectorDemo
+
+# DualScenarioVectorDemo
+java --enable-preview --add-modules jdk.incubator.vector -cp target/classes org.example.concepts.vector.DualScenarioVectorDemo
+
+# SimpleVectorBench
+java --enable-preview --add-modules jdk.incubator.vector -cp target/classes org.example.concepts.vector.SimpleVectorBench
+
+# VectorBenchmark
+java --enable-preview --add-modules jdk.incubator.vector -cp target/classes org.example.concepts.vector.VectorBenchmark
+```
+
+---
+
 # ⚡ GC Comparison Demo: Retail Workload Simulation
 
 Main class:
