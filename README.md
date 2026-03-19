@@ -220,7 +220,8 @@ I create practical, hands-on courses on **Java, Spring Boot, Debugging, Git, Pyt
 Clone the repository:
 
 ```bash
-git clone https://github.com/j2eeexpert2015/java21-features-showcase.git && cd java21-features-showcase
+git clone https://github.com/j2eeexpert2015/java21-features-showcase.git
+cd java21-features-showcase
 ```
 
 Build the project:
@@ -556,8 +557,8 @@ The Vector API requires the `jdk.incubator.vector` module to be explicitly activ
 ## ▶️ Run from Command Line (Alternative)
 
 ```bash
-# TinyVectorDemo
-java --enable-preview --add-modules jdk.incubator.vector -cp target/classes org.example.concepts.vector.TinyVectorDemo
+# ScalarVsVectorDemo
+java --enable-preview --add-modules jdk.incubator.vector -cp target/classes org.example.concepts.vector.ScalarVsVectorDemo
 
 # DualScenarioVectorDemo
 java --enable-preview --add-modules jdk.incubator.vector -cp target/classes org.example.concepts.vector.DualScenarioVectorDemo
