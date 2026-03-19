@@ -236,110 +236,6 @@ mkdir jfr
 mkdir logs
 ```
 
----
-
-# 🔗 FFM API Demo: Foreign Function & Memory API
-
-The FFM API demos are located in `org.example.concepts.ffi`:
-
-- `BasicDowncall` — calls C's `strlen()` directly from Java (no JNI)
-- `QSortUpcall` — sorts an array using C's `qsort()` with a Java comparator callback
-- `MemoryManagement` — allocates, reads, and frees off-heap memory using Arenas
-
----
-
-## ⚙️ IntelliJ Run Configuration (Required for all FFM API classes)
-
-1. Open **Run/Debug Configurations** for the class
-2. Click **Modify options** → under the **Java** section, select **Add VM options**
-3. Add the following:
-
-```
---enable-preview --enable-native-access=ALL-UNNAMED
-```
-
-> **Why this is needed:** `--enable-preview` is required because the FFM API ships as a preview feature in Java 21.
-> `--enable-native-access=ALL-UNNAMED` suppresses the restricted-access warnings that appear when calling native code from an unnamed module.
-> Without it, the code still runs but prints three WARNING lines before the output.
-
----
-
-## ▶️ Run from Command Line (Alternative)
-
-```bash
-# BasicDowncall — calls strlen() from Java
-java --enable-preview --enable-native-access=ALL-UNNAMED -cp target/classes org.example.concepts.ffi.BasicDowncall
-
-# QSortUpcall — C's qsort() calling back into Java
-java --enable-preview --enable-native-access=ALL-UNNAMED -cp target/classes org.example.concepts.ffi.QSortUpcall
-
-# MemoryManagement — off-heap allocation with Arena lifecycle
-java --enable-preview --enable-native-access=ALL-UNNAMED -cp target/classes org.example.concepts.ffi.MemoryManagement
-```
-
----
-
-## 📋 Demo Reference
-
-| Class | Concept | API Highlights |
-|-------|---------|----------------|
-| `BasicDowncall` | Java → C (downcall) | `Linker`, `FunctionDescriptor`, `MethodHandle`, `Arena` |
-| `QSortUpcall` | C → Java (upcall) | `Linker.upcallStub()`, `MemorySegment`, `Arena` |
-| `MemoryManagement` | Off-heap memory management | `Arena.ofConfined()`, `Arena.ofShared()`, `Arena.ofAuto()`, `MemorySegment` |
-
----
-
-# ⚡ Vector API Demo: SIMD Performance with Java
-
-The Vector API demos are located in `org.example.concepts.vector`:
-
-- `TinyVectorDemo`
-- `DualScenarioVectorDemo`
-- `SimpleVectorBench`
-- `VectorBenchmark`
-
----
-
-## ⚙️ IntelliJ Run Configuration (Required for all Vector API classes)
-
-The Vector API requires the `jdk.incubator.vector` module to be explicitly activated. Apply this to each class you want to run.
-
-**Steps:**
-
-1. Open **Run/Debug Configurations** for the class
-2. Click **Modify options** → under the **Java** section, select **Add VM options**
-3. The **VM options** field will appear — add the following:
-
-```
---enable-preview --add-modules jdk.incubator.vector
-```
-
-> **Why this is needed:** `jdk.incubator.vector` is an incubator module — it exists in the JDK but is not on the module path by default. Without it, you will see:
-> ```
-> Error: Unable to initialize main class ...
-> Caused by: java.lang.NoClassDefFoundError: jdk/incubator/vector/Vector
-> ```
-
----
-
-## ▶️ Run from Command Line (Alternative)
-
-```bash
-# TinyVectorDemo
-java --enable-preview --add-modules jdk.incubator.vector -cp target/classes org.example.concepts.vector.TinyVectorDemo
-
-# DualScenarioVectorDemo
-java --enable-preview --add-modules jdk.incubator.vector -cp target/classes org.example.concepts.vector.DualScenarioVectorDemo
-
-# SimpleVectorBench
-java --enable-preview --add-modules jdk.incubator.vector -cp target/classes org.example.concepts.vector.SimpleVectorBench
-
-# VectorBenchmark
-java --enable-preview --add-modules jdk.incubator.vector -cp target/classes org.example.concepts.vector.VectorBenchmark
-```
-
----
-
 # ⚡ GC Comparison Demo: Retail Workload Simulation
 
 Main class:
@@ -569,4 +465,106 @@ The GC Comparison dashboard is pre-provisioned. Navigate to:
 
 ```bash
 docker compose down
+```
+
+---
+
+# 🔗 FFM API Demo: Foreign Function & Memory API
+
+The FFM API demos are located in `org.example.concepts.ffi`:
+
+- `BasicDowncall` — calls C's `strlen()` directly from Java (no JNI)
+- `QSortUpcall` — sorts an array using C's `qsort()` with a Java comparator callback
+- `MemoryManagement` — allocates, reads, and frees off-heap memory using Arenas
+
+---
+
+## ⚙️ IntelliJ Run Configuration (Required for all FFM API classes)
+
+1. Open **Run/Debug Configurations** for the class
+2. Click **Modify options** → under the **Java** section, select **Add VM options**
+3. Add the following:
+
+```
+--enable-preview --enable-native-access=ALL-UNNAMED
+```
+
+> **Why this is needed:** `--enable-preview` is required because the FFM API ships as a preview feature in Java 21.
+> `--enable-native-access=ALL-UNNAMED` suppresses the restricted-access warnings that appear when calling native code from an unnamed module.
+> Without it, the code still runs but prints three WARNING lines before the output.
+
+---
+
+## ▶️ Run from Command Line (Alternative)
+
+```bash
+# BasicDowncall — calls strlen() from Java
+java --enable-preview --enable-native-access=ALL-UNNAMED -cp target/classes org.example.concepts.ffi.BasicDowncall
+
+# QSortUpcall — C's qsort() calling back into Java
+java --enable-preview --enable-native-access=ALL-UNNAMED -cp target/classes org.example.concepts.ffi.QSortUpcall
+
+# MemoryManagement — off-heap allocation with Arena lifecycle
+java --enable-preview --enable-native-access=ALL-UNNAMED -cp target/classes org.example.concepts.ffi.MemoryManagement
+```
+
+---
+
+## 📋 Demo Reference
+
+| Class | Concept | API Highlights |
+|-------|---------|----------------|
+| `BasicDowncall` | Java → C (downcall) | `Linker`, `FunctionDescriptor`, `MethodHandle`, `Arena` |
+| `QSortUpcall` | C → Java (upcall) | `Linker.upcallStub()`, `MemorySegment`, `Arena` |
+| `MemoryManagement` | Off-heap memory management | `Arena.ofConfined()`, `Arena.ofShared()`, `Arena.ofAuto()`, `MemorySegment` |
+
+---
+
+# ⚡ Vector API Demo: SIMD Performance with Java
+
+The Vector API demos are located in `org.example.concepts.vector`:
+
+- `TinyVectorDemo`
+- `DualScenarioVectorDemo`
+- `SimpleVectorBench`
+- `VectorBenchmark`
+
+---
+
+## ⚙️ IntelliJ Run Configuration (Required for all Vector API classes)
+
+The Vector API requires the `jdk.incubator.vector` module to be explicitly activated. Apply this to each class you want to run.
+
+**Steps:**
+
+1. Open **Run/Debug Configurations** for the class
+2. Click **Modify options** → under the **Java** section, select **Add VM options**
+3. The **VM options** field will appear — add the following:
+
+```
+--enable-preview --add-modules jdk.incubator.vector
+```
+
+> **Why this is needed:** `jdk.incubator.vector` is an incubator module — it exists in the JDK but is not on the module path by default. Without it, you will see:
+> ```
+> Error: Unable to initialize main class ...
+> Caused by: java.lang.NoClassDefFoundError: jdk/incubator/vector/Vector
+> ```
+
+---
+
+## ▶️ Run from Command Line (Alternative)
+
+```bash
+# TinyVectorDemo
+java --enable-preview --add-modules jdk.incubator.vector -cp target/classes org.example.concepts.vector.TinyVectorDemo
+
+# DualScenarioVectorDemo
+java --enable-preview --add-modules jdk.incubator.vector -cp target/classes org.example.concepts.vector.DualScenarioVectorDemo
+
+# SimpleVectorBench
+java --enable-preview --add-modules jdk.incubator.vector -cp target/classes org.example.concepts.vector.SimpleVectorBench
+
+# VectorBenchmark
+java --enable-preview --add-modules jdk.incubator.vector -cp target/classes org.example.concepts.vector.VectorBenchmark
 ```
