@@ -1,4 +1,4 @@
-package org.example.concepts.ffi;
+package org.example.concepts.ffm;
 
 import java.lang.foreign.*;
 import java.util.Arrays;

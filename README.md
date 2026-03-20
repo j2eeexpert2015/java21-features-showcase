@@ -472,7 +472,7 @@ docker compose down
 
 # 🔗 FFM API Demo: Foreign Function & Memory API
 
-The FFM API demos are located in `org.example.concepts.ffi`:
+The FFM API demos are located in `org.example.concepts.ffm`:
 
 - `BasicDowncall` — calls C's `strlen()` directly from Java (no JNI)
 - `QSortUpcall` — sorts an array using C's `qsort()` with a Java comparator callback
@@ -500,13 +500,13 @@ The FFM API demos are located in `org.example.concepts.ffi`:
 
 ```bash
 # BasicDowncall — calls strlen() from Java
-java --enable-preview --enable-native-access=ALL-UNNAMED -cp target/classes org.example.concepts.ffi.BasicDowncall
+java --enable-preview --enable-native-access=ALL-UNNAMED -cp target/classes org.example.concepts.ffm.BasicDowncall
 
 # QSortUpcall — C's qsort() calling back into Java
-java --enable-preview --enable-native-access=ALL-UNNAMED -cp target/classes org.example.concepts.ffi.QSortUpcall
+java --enable-preview --enable-native-access=ALL-UNNAMED -cp target/classes org.example.concepts.ffm.QSortUpcall
 
 # MemoryManagement — off-heap allocation with Arena lifecycle
-java --enable-preview --enable-native-access=ALL-UNNAMED -cp target/classes org.example.concepts.ffi.MemoryManagement
+java --enable-preview --enable-native-access=ALL-UNNAMED -cp target/classes org.example.concepts.ffm.MemoryManagement
 ```
 
 ---
