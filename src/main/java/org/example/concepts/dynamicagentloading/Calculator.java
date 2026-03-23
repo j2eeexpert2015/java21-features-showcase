@@ -1,13 +1,13 @@
 package org.example.concepts.dynamicagentloading;
 
 /**
- * JEP 451 Demo: Simple final class
+ * JEP 451 Demo: Simple Calculator class
  *
  * The 'final' keyword prevents Mockito from using traditional
  * subclass-based mocking, forcing it to dynamically load
  * ByteBuddy's agent at runtime.
  */
-public final class Calculator {
+public class Calculator {
 
     public int add(int a, int b) {
         return a + b;
