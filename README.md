@@ -569,3 +569,88 @@ java --enable-preview --add-modules jdk.incubator.vector -cp target/classes org.
 # VectorBenchmark
 java --enable-preview --add-modules jdk.incubator.vector -cp target/classes org.example.concepts.vector.VectorBenchmark
 ```
+
+---
+
+# 🔍 Dynamic Agent Loading Demo: JEP 451 in Action
+
+The Dynamic Agent Loading demo is located in `org.example.concepts.dynamicagentloading`:
+
+- `Calculator` — simple class used as the mock target
+- `DynamicAgentLoadingDemo` — Mockito test that triggers JEP 451 warnings
+
+---
+
+## 🧠 What This Demo Shows
+
+Mockito 5 uses `InlineByteBuddyMockMaker` as its default mock maker. Unlike the traditional subclass-based approach, it uses bytecode instrumentation — which requires loading the ByteBuddy agent dynamically into the running JVM via the Attach API. This is exactly the mechanism Java 21 is beginning to restrict under JEP 451.
+
+This demo shows:
+- How a standard Mockito test triggers dynamic agent loading
+- What the 4 JEP 451 warning lines mean
+- How to diagnose the root cause using `-Djdk.instrument.traceUsage`
+- How to suppress the warnings using `-XX:+EnableDynamicAgentLoading` in Surefire config
+
+---
+
+## ▶️ Run the Demo
+
+### Default run — 4 JEP 451 warnings appear
+
+```bash
+mvn clean compile test -Dtest=DynamicAgentLoadingDemo
+```
+
+**Expected console output:**
+
+```
+[INFO] Running org.example.concepts.dynamicagentloading.DynamicAgentLoadingDemo
+WARNING: A Java agent has been loaded dynamically (byte-buddy-agent-1.14.10.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+```
+
+### Diagnose — find root cause via full stack trace
+
+```bash
+mvn clean compile test -Dtest=DynamicAgentLoadingDemo -Djdk.instrument.traceUsage
+```
+
+This prints a full stack trace for every `Instrumentation` API call, identifying exactly which class inside `mockito-core` triggered the agent load. Read the stack trace from the bottom up — it starts at `Mockito.<clinit>` and traces through the plugin system to `InlineDelegateByteBuddyMockMaker` at line 134.
+
+### Suppress — add to `pom.xml` Surefire config
+
+`-XX:+EnableDynamicAgentLoading` is a JVM flag and cannot be passed directly on the `mvn` command line. It must go in the Surefire plugin `<argLine>`:
+
+```xml
+<plugin>
+    <artifactId>maven-surefire-plugin</artifactId>
+    <configuration>
+        <argLine>-XX:+EnableDynamicAgentLoading</argLine>
+    </configuration>
+</plugin>
+```
+
+---
+
+## 📋 Command Reference
+
+| Command | Purpose |
+|---------|---------|
+| `mvn clean compile test -Dtest=DynamicAgentLoadingDemo` | Default run — shows 4 JEP 451 warning lines |
+| `mvn clean compile test -Dtest=DynamicAgentLoadingDemo -Djdk.instrument.traceUsage` | Diagnostic run — shows full stack trace identifying the root cause |
+| Surefire `<argLine>` with `-XX:+EnableDynamicAgentLoading` | Suppresses warnings — explicitly acknowledges dynamic loading |
+
+---
+
+## ⚠️ JEP 451 Warning Lines Decoded
+
+| Line | Meaning |
+|------|---------|
+| `A Java agent has been loaded dynamically (byte-buddy-agent-1.14.10.jar)` | Identifies exactly which agent JAR was loaded and from where |
+| `If a serviceability tool is in use, run with -XX:+EnableDynamicAgentLoading` | The suppress path — use this for legitimate tools like Mockito |
+| `If a serviceability tool is not in use, run with -Djdk.instrument.traceUsage` | The diagnostic path — use this to find unexpected agent loading |
+| `Dynamic loading of agents will be disallowed by default in a future release` | The core JEP 451 message — plan ahead, this will break in a future Java version |

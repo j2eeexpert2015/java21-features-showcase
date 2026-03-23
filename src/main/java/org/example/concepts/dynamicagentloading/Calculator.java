@@ -3,9 +3,10 @@ package org.example.concepts.dynamicagentloading;
 /**
  * JEP 451 Demo: Simple Calculator class
  *
- * The 'final' keyword prevents Mockito from using traditional
- * subclass-based mocking, forcing it to dynamically load
- * ByteBuddy's agent at runtime.
+ * Mockito's InlineByteBuddyMockMaker (default since Mockito 5)
+ * uses bytecode instrumentation to mock any class, loading
+ * ByteBuddy's agent dynamically at runtime via the Attach API.
+ * This triggers JEP 451 warnings even on non-final classes.
  */
 public class Calculator {
 
