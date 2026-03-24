@@ -587,7 +587,7 @@ Mockito 5 uses `InlineByteBuddyMockMaker` as its default mock maker. Unlike the 
 
 This demo shows:
 - How a standard Mockito test triggers dynamic agent loading
-- What the 4 JEP 451 warning lines mean
+- What the JEP 451 warning lines mean
 - How to diagnose the root cause using `-Djdk.instrument.traceUsage`
 - How to suppress the warnings using `-XX:+EnableDynamicAgentLoading` in Surefire config
 
@@ -595,7 +595,7 @@ This demo shows:
 
 ## ▶️ Run the Demo
 
-### Default run — 4 JEP 451 warnings appear
+### Default run — JEP 451 warnings appear
 
 ```bash
 mvn clean compile test -Dtest=DynamicAgentLoadingDemo
@@ -615,15 +615,17 @@ WARNING: Dynamic loading of agents will be disallowed by default in a future rel
 
 ### Diagnose — find root cause via full stack trace
 
+Add `-Djdk.instrument.traceUsage` as a system property on the `mvn` command line. This is a system property (not a JVM flag), so it can be passed directly:
+
 ```bash
 mvn clean compile test -Dtest=DynamicAgentLoadingDemo -Djdk.instrument.traceUsage
 ```
 
 This prints a full stack trace for every `Instrumentation` API call, identifying exactly which class inside `mockito-core` triggered the agent load. Read the stack trace from the bottom up — it starts at `Mockito.<clinit>` and traces through the plugin system to `InlineDelegateByteBuddyMockMaker` at line 134.
 
-### Suppress — add to `pom.xml` Surefire config
+### Suppress — add `-XX:+EnableDynamicAgentLoading` to Surefire config
 
-`-XX:+EnableDynamicAgentLoading` is a JVM flag and cannot be passed directly on the `mvn` command line. It must go in the Surefire plugin `<argLine>`:
+`-XX:+EnableDynamicAgentLoading` is a JVM flag — it cannot be passed directly on the `mvn` command line. Maven would try to interpret `-XX` as a plugin prefix and fail with `NoPluginFoundForPrefixException`. It must go in the Surefire plugin `<argLine>` so it is passed to the forked JVM that runs your tests:
 
 ```xml
 <plugin>
@@ -636,13 +638,53 @@ This prints a full stack trace for every `Instrumentation` API call, identifying
 
 ---
 
-## 📋 Command Reference
+## 🖥️ Demo 2 — VisualVM Profiling (Standalone App)
 
-| Command | Purpose |
-|---------|---------|
-| `mvn clean compile test -Dtest=DynamicAgentLoadingDemo` | Default run — shows 4 JEP 451 warning lines |
-| `mvn clean compile test -Dtest=DynamicAgentLoadingDemo -Djdk.instrument.traceUsage` | Diagnostic run — shows full stack trace identifying the root cause |
-| Surefire `<argLine>` with `-XX:+EnableDynamicAgentLoading` | Suppresses warnings — explicitly acknowledges dynamic loading |
+VisualVM uses the same Attach API mechanism as Mockito. When you start CPU profiling, VisualVM dynamically loads `jfluid-server-15.jar` — triggering identical JEP 451 warnings.
+
+### Before you run — enable the profiler wait flag
+
+Inside `RetailMemoryStress.java`, set the following field to `true`:
+
+```java
+private static final boolean WAIT_FOR_PROFILER = true;
+```
+
+This makes the app pause at startup and print its PID, giving you time to attach VisualVM and start profiling before the workload begins.
+
+### Run the standalone app
+
+```bash
+java -cp target/classes org.example.concepts.zgc.RetailMemoryStress
+```
+
+The app will pause and display its PID — do not press Enter yet.
+
+### VisualVM CPU profiling steps
+
+1. Launch VisualVM
+2. Find the `RetailMemoryStress` process under **Local Applications**
+3. Double-click to attach — **no JEP 451 warning at this point**
+4. Click the **Profiler** tab
+5. Click the **CPU** button to start profiling
+6. **JEP 451 warning fires immediately** in the application console — this is the exact moment VisualVM loads `jfluid-server-15.jar` via the Attach API
+7. Go back to the terminal and press Enter to let the workload run
+
+### Suppress — add `-XX:+EnableDynamicAgentLoading` directly to the java command
+
+For a standalone app, Surefire `<argLine>` does not apply. Pass the flag directly on the `java` command line:
+
+```bash
+java -cp target/classes -XX:+EnableDynamicAgentLoading org.example.concepts.zgc.RetailMemoryStress
+```
+
+### Diagnose — prove VisualVM uses the same Attach API
+
+Add `-Djdk.instrument.traceUsage` directly to the `java` command. When you click CPU profiling in VisualVM, the stack trace will name `jfluid-server-15.jar` as the caller — identical in structure to the Mockito trace from Demo 1:
+
+```bash
+java -cp target/classes -Djdk.instrument.traceUsage org.example.concepts.zgc.RetailMemoryStress
+```
 
 ---
 
