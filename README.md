@@ -680,11 +680,33 @@ java -cp target/classes -XX:+EnableDynamicAgentLoading org.example.concepts.zgc.
 
 ### Diagnose — prove VisualVM uses the same Attach API
 
-Add `-Djdk.instrument.traceUsage` directly to the `java` command. When you click CPU profiling in VisualVM, the stack trace will name `jfluid-server-15.jar` as the caller — identical in structure to the Mockito trace from Demo 1:
+Add `-Djdk.instrument.traceUsage` directly to the `java` command. When you click CPU profiling in VisualVM, the console will show the agent being loaded:
 
 ```bash
 java -cp target/classes -Djdk.instrument.traceUsage org.example.concepts.zgc.RetailMemoryStress
 ```
+
+**Actual console output when CPU profiling starts:**
+
+```
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot
+     loader classes because bootstrap classpath has been appended
+WARNING: A Java agent has been loaded dynamically
+     (C:\...\visualvm_22\visualvm\lib\jfluid-server-15.jar)
+WARNING: If a serviceability tool is in use, please run with
+     -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+Profiler Agent: JNI OnLoad Initializing...
+Profiler Agent: Established connection with the tool
+Profiler Agent: Local accelerated session
+```
+
+**Key observations:**
+
+- The full path `visualvm\lib\jfluid-server-15.jar` is shown — this is the proof. VisualVM loaded its own agent dynamically via the Attach API, the same mechanism as Mockito
+- Only **3 JEP 451 warning lines** appear here — unlike Mockito which shows 4. The third Mockito line (`-Djdk.instrument.traceUsage for more information`) is absent because `traceUsage` is already active
+- `-Djdk.instrument.traceUsage` does **not** produce a full stack trace for VisualVM's agent loading — VisualVM's native profiler agent (`jfluid-server-15.jar`) uses a JNI-based loading path, which bypasses the Java-level `Instrumentation` stack that `traceUsage` intercepts
+- The `CDS warning` (`Sharing is only supported for boot loader classes`) is unrelated to JEP 451 — it is a harmless side effect of the bootstrap classpath being modified by the profiler agent
 
 ---
 
