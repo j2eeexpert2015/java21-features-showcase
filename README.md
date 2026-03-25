@@ -525,10 +525,8 @@ java --enable-preview --enable-native-access=ALL-UNNAMED -cp target/classes org.
 
 The Vector API demos are located in `org.example.concepts.vector`:
 
-- `TinyVectorDemo`
-- `DualScenarioVectorDemo`
-- `SimpleVectorBench`
-- `VectorBenchmark`
+- `ScalarVsVectorDemo` — benchmarks a scalar loop against a Vector API implementation on a computation-heavy workload, showing the SIMD speedup directly
+- `DualScenarioVectorDemo` — runs two back-to-back benchmarks to contrast a memory-bound workload (minimal gain) against a CPU-bound workload (significant gain), demonstrating when the Vector API actually helps
 
 ---
 
@@ -557,18 +555,21 @@ The Vector API requires the `jdk.incubator.vector` module to be explicitly activ
 ## ▶️ Run from Command Line (Alternative)
 
 ```bash
-# ScalarVsVectorDemo
+# ScalarVsVectorDemo — scalar vs vector benchmark on a CPU-bound workload
 java --enable-preview --add-modules jdk.incubator.vector -cp target/classes org.example.concepts.vector.ScalarVsVectorDemo
 
-# DualScenarioVectorDemo
+# DualScenarioVectorDemo — memory-bound vs CPU-bound comparison
 java --enable-preview --add-modules jdk.incubator.vector -cp target/classes org.example.concepts.vector.DualScenarioVectorDemo
-
-# SimpleVectorBench
-java --enable-preview --add-modules jdk.incubator.vector -cp target/classes org.example.concepts.vector.SimpleVectorBench
-
-# VectorBenchmark
-java --enable-preview --add-modules jdk.incubator.vector -cp target/classes org.example.concepts.vector.VectorBenchmark
 ```
+
+---
+
+## 📋 Demo Reference
+
+| Class | What it shows | Key concept |
+|-------|---------------|-------------|
+| `ScalarVsVectorDemo` | Scalar loop vs Vector API on 10M elements with R=128 | SIMD parallelism on a CPU-bound workload |
+| `DualScenarioVectorDemo` | Memory-bound (1× speedup) vs CPU-bound (10×+ speedup) | Workload type determines the gain, not the API |
 
 ---
 
