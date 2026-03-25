@@ -51,8 +51,9 @@ public class ScalarVsVectorDemo {
             b[i] = rnd.nextInt();
         }
 
-        System.out.println("=== Vector Capability ===");
-        System.out.println("Vector bits (int): " + SPECIES.vectorBitSize() + ", lanes: " + SPECIES.length());
+        printEnvironment();
+
+        System.out.println("=== Benchmark Setup ===");
         System.out.println("Elements         : " + String.format("%,d", n));
         System.out.println("R (repeats per element): " + R);
         System.out.println();
@@ -115,6 +116,20 @@ public class ScalarVsVectorDemo {
             }
             acc.intoArray(out, i, mask);
         }
+    }
+
+    /** Prints JDK version, OS, and SIMD vector capability detected at runtime. */
+    static void printEnvironment() {
+        System.out.println("=== Environment ===");
+        System.out.println("JDK version : " + System.getProperty("java.version"));
+        System.out.println("OS          : " + System.getProperty("os.name")
+                + " " + System.getProperty("os.arch"));
+        System.out.println("Vector bits : " + SPECIES.vectorBitSize()
+                + " (" + SPECIES.length() + " int lanes)");
+        System.out.println("SIMD width  : " +
+                (SPECIES.vectorBitSize() >= 512 ? "AVX-512" :
+                        SPECIES.vectorBitSize() >= 256 ? "AVX2" : "SSE"));
+        System.out.println();
     }
 
     /** Performs a few warm-up runs so the JIT compiler optimizes the code. */
