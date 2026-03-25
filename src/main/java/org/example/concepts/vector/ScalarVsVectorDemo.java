@@ -26,8 +26,7 @@ import java.util.Random;
   -----------------------
   - "Scalar" and "Vector" are the best (lowest) times out of a few short runs.
   - "Speedup" = Scalar time / Vector time.
-  - GB/s is an *effective* bandwidth number ≈ (read a + read b + write out).
-    It's useful to see when you're memory-bound (both versions close in GB/s).
+  - Checksums are printed side by side — if they match, both paths produced identical results.
 */
 
 public class ScalarVsVectorDemo {
