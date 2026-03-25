@@ -144,23 +144,16 @@ public class ScalarVsVectorDemo {
     }
 
     /**
-     * Prints results including scalar and vector execution times, speedup,
-     * effective bandwidth, and checksum values for verification.
-     * Effective Bandwidth ≈ 12 bytes per element (read a + read b + write out).
+     * Prints scalar and vector execution times, speedup, and checksum values for verification.
      */
     static void report(int n, long nsScalar, long nsVector, long sumS, long sumV) {
         double scalarMs = nsScalar / 1e6;
         double vectorMs = nsVector / 1e6;
         double speedup  = (double) nsScalar / (double) nsVector;
 
-        double bytes     = 12.0 * n;
-        double scalarGBs = (bytes / (nsScalar / 1e9)) / 1e9;
-        double vectorGBs = (bytes / (nsVector / 1e9)) / 1e9;
-
         System.out.printf("Scalar : %.3f ms%n", scalarMs);
         System.out.printf("Vector : %.3f ms%n", vectorMs);
         System.out.printf("Speedup (scalar/vector): %.2fx%n", speedup);
-        System.out.printf("Effective BW: Scalar %.2f GB/s | Vector %.2f GB/s%n", scalarGBs, vectorGBs);
         System.out.println("Checksums: " + sumS + " / " + sumV);
     }
 }
