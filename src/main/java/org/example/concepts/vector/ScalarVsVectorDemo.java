@@ -31,11 +31,12 @@ import java.util.Random;
 */
 
 public class ScalarVsVectorDemo {
-    // Preferred SIMD shape for this CPU/JVM (e.g., 512 bits = 16 lanes of 32-bit ints).
+
+    /** Preferred SIMD shape for this CPU/JVM (e.g., 512 bits = 16 lanes of 32-bit ints). */
     static final VectorSpecies<Integer> SPECIES = IntVector.SPECIES_PREFERRED;
 
-    // Arithmetic intensity knob: increase to amplify SIMD gains (compute-bound),
-    // decrease to approach memory-bound behavior.
+    /** Arithmetic intensity knob: increase to amplify SIMD gains (compute-bound),
+     *  decrease to approach memory-bound behavior. */
     static final int R = 128;
 
     public static void main(String[] args) {
@@ -51,48 +52,24 @@ public class ScalarVsVectorDemo {
             b[i] = rnd.nextInt();
         }
 
-        // Quick warmup so the JIT has a chance to optimize
-        scalarCompute(a, b, outScalar);
-        vectorCompute(a, b, outVector);
-        scalarCompute(a, b, outScalar);
-        vectorCompute(a, b, outVector);
+        System.out.println("=== Vector Capability ===");
+        System.out.println("Vector bits (int): " + SPECIES.vectorBitSize() + ", lanes: " + SPECIES.length());
+        System.out.println("Elements         : " + String.format("%,d", n));
+        System.out.println("R (repeats per element): " + R);
+        System.out.println();
+
+        // Warmup — give the JIT a chance to compile and optimise both methods
+        warmup(() -> scalarCompute(a, b, outScalar), () -> vectorCompute(a, b, outVector));
 
         // Measure best-of-5 to reduce run-to-run noise
-        long bestScalar = Long.MAX_VALUE, bestVector = Long.MAX_VALUE;
-        for (int r = 0; r < 5; r++) {
-            long t0 = System.nanoTime();
-            scalarCompute(a, b, outScalar);
-            long t1 = System.nanoTime();
-            vectorCompute(a, b, outVector);
-            long t2 = System.nanoTime();
+        long bestScalar = bestOf(5, () -> scalarCompute(a, b, outScalar));
+        long bestVector = bestOf(5, () -> vectorCompute(a, b, outVector));
 
-            bestScalar = Math.min(bestScalar, t1 - t0);
-            bestVector = Math.min(bestVector, t2 - t1);
-        }
+        // Checksum — confirms correctness and prevents dead-code elimination
+        long sumScalar = checksum(outScalar);
+        long sumVector = checksum(outVector);
 
-        // Simple DCE guard: sum each output once
-        long sumScalar = 0, sumVector = 0;
-        for (int v : outScalar) sumScalar += v;
-        for (int v : outVector) sumVector += v;
-
-        // Report
-        System.out.println("Vector bits: " + SPECIES.vectorBitSize() + ", lanes(int): " + SPECIES.length());
-        System.out.println("Elements  : " + String.format("%,d", n));
-        System.out.println("R (repeats per element): " + R);
-
-        double scalarMs = bestScalar / 1e6, vectorMs = bestVector / 1e6;
-        System.out.printf("Scalar: %.3f ms%n", scalarMs);
-        System.out.printf("Vector: %.3f ms%n", vectorMs);
-        System.out.println("Checksums: " + sumScalar + " / " + sumVector);
-
-        double speedup = (double) bestScalar / (double) bestVector;
-        System.out.printf("Speedup (scalar/vector): %.2fx%n", speedup);
-
-        // Effective bandwidth (approx): read a + read b + write out = 12 bytes per element
-        double bytes = 12.0 * n;
-        double scalarGBs = (bytes / (bestScalar / 1e9)) / 1e9;
-        double vectorGBs = (bytes / (bestVector / 1e9)) / 1e9;
-        System.out.printf("Effective BW: Scalar %.2f GB/s | Vector %.2f GB/s%n", scalarGBs, vectorGBs);
+        report(n, bestScalar, bestVector, sumScalar, sumVector);
     }
 
     // --------------------------------------------------------------------
@@ -128,7 +105,7 @@ public class ScalarVsVectorDemo {
             acc.intoArray(out, i);
         }
 
-        // Tail (if n is not a multiple of the vector length)
+        // Tail — handles remaining elements if n is not a multiple of vector length
         if (i < a.length) {
             var mask = SPECIES.indexInRange(i, a.length);
             var vecA = IntVector.fromArray(SPECIES, a, i, mask);
@@ -139,5 +116,51 @@ public class ScalarVsVectorDemo {
             }
             acc.intoArray(out, i, mask);
         }
+    }
+
+    /** Performs a few warm-up runs so the JIT compiler optimizes the code. */
+    static void warmup(Runnable scalar, Runnable vector) {
+        scalar.run(); vector.run();
+        scalar.run(); vector.run();
+    }
+
+    /** Executes the runnable multiple times and returns the best (minimum) execution time. */
+    static long bestOf(int iterations, Runnable r) {
+        long best = Long.MAX_VALUE;
+        for (int i = 0; i < iterations; i++) {
+            long start = System.nanoTime();
+            r.run();
+            long end = System.nanoTime();
+            best = Math.min(best, end - start);
+        }
+        return best;
+    }
+
+    /** Calculates a simple checksum (sum of all elements) to prevent dead-code elimination. */
+    static long checksum(int[] array) {
+        long sum = 0;
+        for (int v : array) sum += v;
+        return sum;
+    }
+
+    /**
+     * Prints results including scalar and vector execution times, speedup,
+     * effective bandwidth, and checksum values for verification.
+     * Effective Bandwidth ≈ 12 bytes per element (read a + read b + write out).
+     */
+    static void report(int n, long nsScalar, long nsVector, long sumS, long sumV) {
+        double scalarMs = nsScalar / 1e6;
+        double vectorMs = nsVector / 1e6;
+        double speedup  = (double) nsScalar / (double) nsVector;
+
+        double bytes     = 12.0 * n;
+        double scalarGBs = (bytes / (nsScalar / 1e9)) / 1e9;
+        double vectorGBs = (bytes / (nsVector / 1e9)) / 1e9;
+
+        System.out.printf("Scalar : %.3f ms%n", scalarMs);
+        System.out.printf("Vector : %.3f ms%n", vectorMs);
+        System.out.printf("Speedup (scalar/vector): %.2fx%n", speedup);
+        System.out.printf("Effective BW: Scalar %.2f GB/s | Vector %.2f GB/s%n", scalarGBs, vectorGBs);
+        System.out.println("Checksums: " + sumS + " / " + sumV);
     }
 }
