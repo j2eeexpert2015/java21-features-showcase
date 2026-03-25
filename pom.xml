@@ -133,13 +133,13 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
+                <!--
                 <configuration>
                     <argLine>
-                        --enable-preview
-                        -Djdk.instrument.traceUsage
                         -XX:+EnableDynamicAgentLoading
                     </argLine>
                 </configuration>
+                -->
             </plugin>
         </plugins>
     </build>
