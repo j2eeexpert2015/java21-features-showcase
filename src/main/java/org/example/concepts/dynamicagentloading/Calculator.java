@@ -7,7 +7,7 @@ package org.example.concepts.dynamicagentloading;
  * subclass-based mocking, forcing it to dynamically load
  * ByteBuddy's agent at runtime.
  */
-public final class Calculator {
+public class Calculator {
 
     public int add(int a, int b) {
         return a + b;
