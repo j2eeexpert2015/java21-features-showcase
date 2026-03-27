@@ -1,11 +1,5 @@
 package org.example.concepts.unnamed;
 
-import org.example.concepts.unnamed.model.Customer;
-import org.example.concepts.unnamed.model.Order;
-import org.example.concepts.unnamed.model.PaymentInfo;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,18 +10,14 @@ import java.util.List;
  *
  * Contexts covered:
  *   1. Exception catch blocks
- *   2. Lambda parameters (single and two-param)
+ *   2. Lambda parameters (single param)
  *   3. Enhanced for loops
  *   4. Try-with-resources
  *
- * Compile: javac --enable-preview --source 21
- * Run:     java  --enable-preview
  */
 public class UnnamedVariablesDemo {
 
-    // ─────────────────────────────────────────────
     // 1. EXCEPTION HANDLING
-    // ─────────────────────────────────────────────
 
     // BEFORE: 'ex' is declared but never used — compiler/IDE warning noise
     public String reserveStock_Before(String productId, int quantity) {
@@ -56,47 +46,31 @@ public class UnnamedVariablesDemo {
         System.out.println("Reserved " + quantity + " units of " + productId);
     }
 
-    // ─────────────────────────────────────────────
     // 2. LAMBDA PARAMETERS
-    // ─────────────────────────────────────────────
 
     public void lambdaDemo() {
         record OrderEvent(String orderId, String type) {}
 
         var events = List.of(
-            new OrderEvent("O1", "COMPLETED"),
-            new OrderEvent("O2", "COMPLETED"),
-            new OrderEvent("O3", "PENDING")
+                new OrderEvent("O1", "COMPLETED"),
+                new OrderEvent("O2", "COMPLETED"),
+                new OrderEvent("O3", "PENDING")
         );
 
         System.out.println("\n-- Lambda: single param --");
 
         // BEFORE: 'event' is declared but never read inside the body
         events.stream()
-              .filter(e -> e.type().equals("COMPLETED"))
-              .forEach(event -> System.out.println("  [before] order processed"));
+                .filter(e -> e.type().equals("COMPLETED"))
+                .forEach(event -> System.out.println("  [before] order processed"));
 
         // AFTER: _ makes the intent explicit
         events.stream()
-              .filter(e -> e.type().equals("COMPLETED"))
-              .forEach(_ -> System.out.println("  [after]  order processed"));
-
-        System.out.println("\n-- Lambda: two params (Comparator) --");
-
-        var products = new ArrayList<>(List.of("Laptop", "Phone", "Tablet", "Mouse"));
-
-        // BEFORE: a and b declared but neither is used — external service drives order
-        products.sort((a, b) -> 0);
-        System.out.println("  [before] " + products);
-
-        // AFTER: each _ is an independent unnamed variable
-        products.sort((_, _) -> 0);
-        System.out.println("  [after]  " + products);
+                .filter(e -> e.type().equals("COMPLETED"))
+                .forEach(_ -> System.out.println("  [after]  order processed"));
     }
 
-    // ─────────────────────────────────────────────
     // 3. ENHANCED FOR LOOP
-    // ─────────────────────────────────────────────
 
     public void loopDemo() {
         System.out.println("\n-- Enhanced for loop --");
@@ -118,9 +92,7 @@ public class UnnamedVariablesDemo {
         System.out.println("  [after]  retry count:   " + retries);
     }
 
-    // ─────────────────────────────────────────────
     // 4. TRY-WITH-RESOURCES
-    // ─────────────────────────────────────────────
 
     // Simulates a lock — acquired and auto-closed, never referenced by name
     static class InventoryLock implements AutoCloseable {
@@ -150,47 +122,7 @@ public class UnnamedVariablesDemo {
         }
     }
 
-    // ─────────────────────────────────────────────
-    // 5. SERVICE LAYER (Slide 10 — case study)
-    // ─────────────────────────────────────────────
-
-    public Order processOrder(String orderId) {
-        try {
-            return findOrder(orderId);
-        } catch (IllegalStateException _) {    // unnamed variable — type is enough
-            System.err.println("Database error processing order: " + orderId);
-            throw new RuntimeException("Unable to process order");
-        }
-    }
-
-    public void sendOrderConfirmation(Order order) {
-        try {
-            sendEmail(order.customer().email(), "Confirmation for " + order.orderId());
-        } catch (RuntimeException _) {         // unnamed variable — log and continue
-            System.err.println("Failed to send confirmation for: " + order.orderId());
-        }
-    }
-
-    private Order findOrder(String orderId) {
-        if (orderId == null || orderId.isBlank()) {
-            throw new IllegalStateException("DB connection error");
-        }
-        return new Order(
-            orderId,
-            new Customer("C1", "alice@example.com", "PREMIUM"),
-            new PaymentInfo("CARD", true),
-            new BigDecimal("299.99")
-        );
-    }
-
-    private void sendEmail(String to, String body) {
-        if (to == null) throw new RuntimeException("Mail server unreachable");
-        System.out.println("  Email sent to: " + to);
-    }
-
-    // ─────────────────────────────────────────────
     // MAIN
-    // ─────────────────────────────────────────────
 
     public static void main(String[] args) {
         var demo = new UnnamedVariablesDemo();
@@ -199,21 +131,13 @@ public class UnnamedVariablesDemo {
         System.out.println(demo.reserveStock_Before("P001", 200));
         System.out.println(demo.reserveStock_After("P001", 200));
 
-        System.out.println("\n=== 2 & 3. Lambda and Loop ===");
+        System.out.println("\n=== 2. Lambda Parameters ===");
         demo.lambdaDemo();
+
+        System.out.println("\n=== 3. Enhanced For Loop ===");
         demo.loopDemo();
 
         System.out.println("\n=== 4. Try-with-Resources ===");
         demo.tryWithResourcesDemo();
-
-        System.out.println("\n=== 5. Service Layer ===");
-        var order = demo.processOrder("O999");
-        demo.sendOrderConfirmation(order);
-        System.out.println("  Triggering catch block:");
-        try {
-            demo.processOrder(null);
-        } catch (RuntimeException e) {
-            System.out.println("  Caught: " + e.getMessage());
-        }
     }
 }
