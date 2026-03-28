@@ -16,26 +16,18 @@ import java.math.BigDecimal;
  *   1. instanceof with record patterns — before/after comparison
  *   2. switch expressions with record patterns — discount rule logic
  *
- * Note: Java 21 record patterns do not support constant patterns (string literals,
- * enum constants) as nested components. Use a when guard for constant matching.
- *
- * Compile: javac --enable-preview --source 21
- * Run:     java  --enable-preview
  */
 public class UnnamedPatternsDemo {
 
-    // ─────────────────────────────────────────────
     // 1. instanceof — RECORD DESTRUCTURING
-    // ─────────────────────────────────────────────
 
-    // BEFORE: all components bound even though only 'email' is used
+    // BEFORE: all components named even though only 'email' is used
     public String getCustomerEmail_Before(Order order) {
         if (order instanceof Order(
                 String id,
                 Customer(String custId, String email, String tier),
                 PaymentInfo payment,
                 var total)) {
-            // id, custId, tier, payment, total — all unused noise
             return email;
         }
         return null;
@@ -53,15 +45,12 @@ public class UnnamedPatternsDemo {
         return null;
     }
 
-    // ─────────────────────────────────────────────
     // 2. switch — DISCOUNT CALCULATION
-    // ─────────────────────────────────────────────
 
     public BigDecimal calculateDiscount(Order order) {
         return switch (order) {
 
-            // PREMIUM: bind tier with when guard — only total extracted
-            // constant patterns ("PREMIUM") are not supported in Java 21 record patterns
+            // PREMIUM: only tier (for when guard) and total are needed
             case Order(_, Customer(_, _, var tier), _, var total)
                     when tier.equals("PREMIUM") ->
                     total.multiply(new BigDecimal("0.20"));
@@ -87,9 +76,7 @@ public class UnnamedPatternsDemo {
         };
     }
 
-    // ─────────────────────────────────────────────
     // MAIN
-    // ─────────────────────────────────────────────
 
     public static void main(String[] args) {
         var demo = new UnnamedPatternsDemo();

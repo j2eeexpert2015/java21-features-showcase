@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Case Study: Real-world unnamed patterns in a service class (Slide 6)
+ * Case Study: Real-world unnamed patterns in a service class.
  *
  * Teaching point: each switch arm extracts only what its business rule needs.
  * Everything else is skipped with _.
@@ -15,26 +15,19 @@ import java.time.format.DateTimeFormatter;
  * Key contrast:
  *   SHIPPED  — extracts timestamp (the date is part of the message)
  *   PENDING  — skips timestamp and notes (neither is relevant)
- *
- * Note: enum constants (e.g. Status.SHIPPED) cannot be used directly as
- * component patterns inside record patterns in Java 21. Use a when guard instead.
- *
- * Compile: javac --enable-preview --source 21
- * Run:     java  --enable-preview
  */
 public class OrderStatusService {
 
     public String getStatusMessage(OrderStatus orderStatus) {
         return switch (orderStatus) {
 
-            // SHIPPED: bind status + timestamp, skip notes with _
-            // when guard matches the enum constant — _ still skips notes
-            case OrderStatus(String id, var status, var shipped, _)
+            // SHIPPED: timestamp needed — notes skipped with _
+            case OrderStatus(String id, var status, var timestamp, _)
                     when status == Status.SHIPPED ->
                     String.format("Order %s shipped on %s",
-                            id, shipped.format(DateTimeFormatter.ISO_LOCAL_DATE));
+                            id, timestamp.format(DateTimeFormatter.ISO_LOCAL_DATE));
 
-            // PENDING: bind status + id, skip timestamp and notes with _
+            // PENDING: only id needed — timestamp and notes skipped with _
             case OrderStatus(String id, var status, _, _)
                     when status == Status.PENDING ->
                     "Order " + id + " is awaiting confirmation";
@@ -44,10 +37,6 @@ public class OrderStatusService {
                     String.format("Order %s status: %s", id, currentStatus);
         };
     }
-
-    // ─────────────────────────────────────────────
-    // MAIN
-    // ─────────────────────────────────────────────
 
     public static void main(String[] args) {
         var service = new OrderStatusService();
