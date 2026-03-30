@@ -305,29 +305,11 @@ The demos are located in:
 
 ## InstanceMainDemo — Instance Main in Action
 
-### Run from IntelliJ
-Open `InstanceMainDemo.java` and run directly from the IDE.
-
 ### Inspect compiled class (Maven)
 ```bash
 mvn compile
 javap -p target/classes/org/example/concepts/instancemain/InstanceMainDemo.class
 ```
-
----
-
-## MainMethodPriorityDemo — Main Method Selection Priority
-
-All four valid main method signatures are present but commented out.
-Uncomment one at a time to see which signature gets selected.
-
-### Compile and run (Maven)
-```bash
-mvn compile
-java --enable-preview org.example.concepts.instancemain.MainMethodPriorityDemo
-```
-
-> **Try it:** Uncomment combinations of signatures to verify priority selection. Uncomment both `static void main()` and `void main()` together to trigger the static vs instance clash compile error.
 
 ---
 
@@ -354,20 +336,6 @@ javap -p src/main/java/org/example/concepts/unnamed/Greeting.class
 mvn compile
 javap -p target/classes/org/example/concepts/unnamedclass/Greeting.class
 ```
-
-> **Try it — break the rules:**
->
-> Add `Greeting() {}` anywhere in the file and compile:
-> ```
-> error: Explicit constructor in implicitly declared class is not allowed
-> ```
->
-> Remove or comment out `void main()` and compile:
-> ```
-> error: implicitly declared class contains no main method
-> ```
->
-> When the compiler says "implicitly declared class" — that is its formal term for your unnamed class. The class it generated from your file behind the scenes.
 
 ---
 
