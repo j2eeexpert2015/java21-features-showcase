@@ -295,178 +295,79 @@ java -cp target/classes -Xmx512M -Xms512M -XX:+UseZGC -XX:+ZGenerational -Xlog:g
 
 ---
 
-# 🚀 Run the Spring Boot App with Different GC Configurations
+# 🚀 Instance Main Methods and Unnamed Classes (JEP 445)
 
-## ⚠️ A Note on Results and System Resources
-
-This demo was recorded on a **32GB RAM, 8-core VM** with an 8GB heap allocated to each application.
-JMeter runs on the same machine alongside the three Spring Boot instances, so it adds its own memory
-and CPU pressure on top of the applications.
-
-**Your results will vary based on available system resources — that is completely expected.**
-The relative patterns between collectors remain consistent regardless of machine size:
-G1GC will still show longer pauses, ZGC variants will still remain sub-millisecond.
-The absolute numbers will differ.
-
-Two heap configurations are provided below. Choose based on your available RAM.
-If you reduce the heap size, also reduce the JMeter allocation parameters —
-set `SHORT_LIVED_MB` to `40` and `SURVIVOR_MB` to `10` in the User Defined Variables
-at the top of the JMeter plan.
+The demos are located in:
+- `org.example.concepts.instancemain` — Instance Main Methods
+- `org.example.concepts.unnamed` — Unnamed Classes
 
 ---
 
-## Build the Project
+## InstanceMainDemo — Instance Main in Action
 
+### Run from IntelliJ
+Open `InstanceMainDemo.java` and run directly from the IDE.
+
+### Inspect compiled class (Maven)
 ```bash
-mvn clean package -DskipTests
+mvn compile
+javap -p target/classes/org/example/concepts/instancemain/InstanceMainDemo.class
 ```
 
 ---
 
-## Each Application with 8GB
+## MainMethodPriorityDemo — Main Method Selection Priority
 
-> **RAM requirement:** Each of the three applications uses 8GB heap — that is 24GB for the JVMs alone.
-> Add RAM for the OS, JMeter, Prometheus, and Grafana on top of that.
-> A 32GB machine is the practical minimum for this configuration.
+All four valid main method signatures are present but commented out.
+Uncomment one at a time to see which signature gets selected.
 
-### G1GC — port 8080
-
+### Compile and run (Maven)
 ```bash
-java -Xmx8g -Xms8g -XX:+UseG1GC --enable-preview -jar "target/java21-features-showcase-1.0-SNAPSHOT.jar" --server.port=8080
+mvn compile
+java --enable-preview org.example.concepts.instancemain.MainMethodPriorityDemo
 ```
 
-### Generational ZGC — port 8081
-
-```bash
-java -Xmx8g -Xms8g -XX:+UseZGC -XX:+ZGenerational --enable-preview -jar "target/java21-features-showcase-1.0-SNAPSHOT.jar" --server.port=8081
-```
-
-### Classic ZGC — port 8082
-
-```bash
-java -Xmx8g -Xms8g -XX:+UseZGC -XX:-ZGenerational --enable-preview -jar "target/java21-features-showcase-1.0-SNAPSHOT.jar" --server.port=8082
-```
+> **Try it:** Uncomment combinations of signatures to verify priority selection. Uncomment both `static void main()` and `void main()` together to trigger the static vs instance clash compile error.
 
 ---
 
-## Each Application with 2GB (Requires ~8GB RAM)
+## Greeting.java — Unnamed Class in Action
 
-### G1GC — port 8080
-
+### Run directly — no compile step needed
 ```bash
-java -Xmx2g -Xms2g -XX:+UseG1GC --enable-preview -jar "target/java21-features-showcase-1.0-SNAPSHOT.jar" --server.port=8080
+java --enable-preview --source 21 src/main/java/org/example/concepts/unnamed/Greeting.java
 ```
 
-### Generational ZGC — port 8081
-
+### Single file — compile and run
 ```bash
-java -Xmx2g -Xms2g -XX:+UseZGC -XX:+ZGenerational --enable-preview -jar "target/java21-features-showcase-1.0-SNAPSHOT.jar" --server.port=8081
+javac --enable-preview --release 21 src/main/java/org/example/concepts/unnamed/Greeting.java
+java --enable-preview --source 21 src/main/java/org/example/concepts/unnamed/Greeting.java
 ```
 
-### Classic ZGC — port 8082
-
+### Single file — inspect generated class
 ```bash
-java -Xmx2g -Xms2g -XX:+UseZGC -XX:-ZGenerational --enable-preview -jar "target/java21-features-showcase-1.0-SNAPSHOT.jar" --server.port=8082
+javap -p src/main/java/org/example/concepts/unnamed/Greeting.class
 ```
 
----
-
-## JVM Flag Reference
-
-| Flag | Effect |
-|------|--------|
-| `-Xmx8g -Xms8g` | Fix heap at 8GB, pre-allocated at startup — no resizing during the run |
-| `-XX:+UseG1GC` | Enable G1GC — default since Java 9, included explicitly for clarity |
-| `-XX:+UseZGC` | Enable ZGC |
-| `-XX:+ZGenerational` | Enable generational mode in ZGC (Java 21+) |
-| `-XX:-ZGenerational` | Disable generational mode — gives Classic (single-generation) ZGC |
-| `--enable-preview` | Required for Java 21 preview features used in the application |
-
----
-
-## Verifying Startup — GC Bean Registration
-
-After each application starts, check the `GcNotificationListener` output in the console.
-Before any request is processed, the listener logs how many GC beans each collector registered:
-
-| Collector | Beans registered | Beans |
-|-----------|-----------------|-------|
-| G1GC | 3 | G1 Young Generation, G1 Concurrent GC, G1 Old Generation |
-| Generational ZGC | 4 | ZGC Minor Cycles, ZGC Minor Pauses, ZGC Major Cycles, ZGC Major Pauses |
-| Classic ZGC | 2 | ZGC Cycles, ZGC Pauses (single unified ZHeap) |
-
-The 4-bean count for Generational ZGC is the first structural proof that the young/old split is real —
-visible in the JVM's own monitoring interface before JMeter sends a single request.
-
----
-
-# 📊 Observability Stack — Prometheus + Grafana
-
-Prometheus and Grafana run as Docker containers. The Spring Boot apps run on the host machine.
-Prometheus reaches the host from inside Docker using `host.docker.internal`.
-
-## Infrastructure layout
-
-```
-docker/
-├── docker-compose.yml                  # Starts Prometheus and Grafana as containers
-├── prometheus/
-│   └── prometheus.yml                  # Scrape config — 3 targets, 5s interval
-└── grafana/
-    └── provisioning/
-        ├── datasources/
-        │   └── prometheus.yml          # Wires Prometheus as Grafana data source
-        └── dashboards/
-            └── dashboard.yml           # Pre-provisions the GC comparison dashboard
-
-jmeter/
-└── gc-comparison-standard-5min.jmx     # 3 thread groups, 9 threads total, 5-minute run
-```
-
-## Step 1 — Start Prometheus and Grafana
-
+### Maven project — inspect compiled class
 ```bash
-cd docker
-docker compose up
-        OR
-docker compose up -d
+mvn compile
+javap -p target/classes/org/example/concepts/unnamedclass/Greeting.class
 ```
 
-This starts:
-
-| Service    | URL                   | Default credentials |
-|------------|-----------------------|---------------------|
-| Prometheus | http://localhost:9090 | —                   |
-| Grafana    | http://localhost:3000 | admin / password    |
-
-## Step 2 — Verify Prometheus targets
-
-Open http://localhost:9090/targets
-
-All three targets should show state **UP**:
-
-```
-gc-comparison / localhost:8080  UP   (G1GC)
-gc-comparison / localhost:8081  UP   (Generational ZGC)
-gc-comparison / localhost:8082  UP   (Classic ZGC)
-```
-
-If a target shows **DOWN**, verify the Spring Boot app on that port is running and
-`/actuator/prometheus` is reachable from your browser.
-
-## Step 3 — Open Grafana
-
-Open http://localhost:3000 and log in with `admin / password`.
-
-The GC Comparison dashboard is pre-provisioned. Navigate to:
-
-**Dashboards → GC Comparison — G1GC vs ZGC vs Generational ZGC**
-
-## Step 4 — Stop the stack
-
-```bash
-docker compose down
-```
+> **Try it — break the rules:**
+>
+> Add `Greeting() {}` anywhere in the file and compile:
+> ```
+> error: Explicit constructor in implicitly declared class is not allowed
+> ```
+>
+> Remove or comment out `void main()` and compile:
+> ```
+> error: implicitly declared class contains no main method
+> ```
+>
+> When the compiler says "implicitly declared class" — that is its formal term for your unnamed class. The class it generated from your file behind the scenes.
 
 ---
 
@@ -616,17 +517,11 @@ WARNING: Dynamic loading of agents will be disallowed by default in a future rel
 
 ### Diagnose — find root cause via full stack trace
 
-Add `-Djdk.instrument.traceUsage` as a system property on the `mvn` command line. This is a system property (not a JVM flag), so it can be passed directly:
-
 ```bash
 mvn clean compile test -Dtest=DynamicAgentLoadingDemo -Djdk.instrument.traceUsage
 ```
 
-This prints a full stack trace for every `Instrumentation` API call, identifying exactly which class inside `mockito-core` triggered the agent load. Read the stack trace from the bottom up — it starts at `Mockito.<clinit>` and traces through the plugin system to `InlineDelegateByteBuddyMockMaker` at line 134.
-
 ### Suppress — add `-XX:+EnableDynamicAgentLoading` to Surefire config
-
-`-XX:+EnableDynamicAgentLoading` is a JVM flag — it cannot be passed directly on the `mvn` command line. Maven would try to interpret `-XX` as a plugin prefix and fail with `NoPluginFoundForPrefixException`. It must go in the Surefire plugin `<argLine>` so it is passed to the forked JVM that runs your tests:
 
 ```xml
 <plugin>
@@ -641,8 +536,6 @@ This prints a full stack trace for every `Instrumentation` API call, identifying
 
 ## 🖥️ Demo 2 — VisualVM Profiling (Standalone App)
 
-VisualVM uses the same Attach API mechanism as Mockito. When you start CPU profiling, VisualVM dynamically loads `jfluid-server-15.jar` — triggering identical JEP 451 warnings.
-
 ### Before you run — enable the profiler wait flag
 
 Inside `RetailMemoryStress.java`, set the following field to `true`:
@@ -651,29 +544,13 @@ Inside `RetailMemoryStress.java`, set the following field to `true`:
 private static final boolean WAIT_FOR_PROFILER = true;
 ```
 
-This makes the app pause at startup and print its PID, giving you time to attach VisualVM and start profiling before the workload begins.
-
 ### Run the standalone app
 
 ```bash
 java -cp target/classes org.example.concepts.zgc.RetailMemoryStress
 ```
 
-The app will pause and display its PID — do not press Enter yet.
-
-### VisualVM CPU profiling steps
-
-1. Launch VisualVM
-2. Find the `RetailMemoryStress` process under **Local Applications**
-3. Double-click to attach — **no JEP 451 warning at this point**
-4. Click the **Profiler** tab
-5. Click the **CPU** button to start profiling
-6. **JEP 451 warning fires immediately** in the application console — this is the exact moment VisualVM loads `jfluid-server-15.jar` via the Attach API
-7. Go back to the terminal and press Enter to let the workload run
-
 ### Suppress — add `-XX:+EnableDynamicAgentLoading` directly to the java command
-
-For a standalone app, Surefire `<argLine>` does not apply. Pass the flag directly on the `java` command line:
 
 ```bash
 java -cp target/classes -XX:+EnableDynamicAgentLoading org.example.concepts.zgc.RetailMemoryStress
@@ -681,33 +558,9 @@ java -cp target/classes -XX:+EnableDynamicAgentLoading org.example.concepts.zgc.
 
 ### Diagnose — prove VisualVM uses the same Attach API
 
-Add `-Djdk.instrument.traceUsage` directly to the `java` command. When you click CPU profiling in VisualVM, the console will show the agent being loaded:
-
 ```bash
 java -cp target/classes -Djdk.instrument.traceUsage org.example.concepts.zgc.RetailMemoryStress
 ```
-
-**Actual console output when CPU profiling starts:**
-
-```
-Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot
-     loader classes because bootstrap classpath has been appended
-WARNING: A Java agent has been loaded dynamically
-     (C:\...\visualvm_22\visualvm\lib\jfluid-server-15.jar)
-WARNING: If a serviceability tool is in use, please run with
-     -XX:+EnableDynamicAgentLoading to hide this warning
-WARNING: Dynamic loading of agents will be disallowed by default in a future release
-Profiler Agent: JNI OnLoad Initializing...
-Profiler Agent: Established connection with the tool
-Profiler Agent: Local accelerated session
-```
-
-**Key observations:**
-
-- The full path `visualvm\lib\jfluid-server-15.jar` is shown — this is the proof. VisualVM loaded its own agent dynamically via the Attach API, the same mechanism as Mockito
-- Only **3 JEP 451 warning lines** appear here — unlike Mockito which shows 4. The third Mockito line (`-Djdk.instrument.traceUsage for more information`) is absent because `traceUsage` is already active
-- `-Djdk.instrument.traceUsage` does **not** produce a full stack trace for VisualVM's agent loading — VisualVM's native profiler agent (`jfluid-server-15.jar`) uses a JNI-based loading path, which bypasses the Java-level `Instrumentation` stack that `traceUsage` intercepts
-- The `CDS warning` (`Sharing is only supported for boot loader classes`) is unrelated to JEP 451 — it is a harmless side effect of the bootstrap classpath being modified by the profiler agent
 
 ---
 
