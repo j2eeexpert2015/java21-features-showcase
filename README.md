@@ -305,20 +305,30 @@ The demos are located in:
 
 ## InstanceMainDemo — Instance Main in Action
 
-### Inspect compiled class (Maven)
+### Single file — compile and run
+```bash
+javac --enable-preview --release 21 src/main/java/org/example/concepts/instancemain/InstanceMainDemo.java
+java --enable-preview org.example.concepts.instancemain.InstanceMainDemo
+```
+
+### Single file — inspect generated class
+```bash
+javap -p src/main/java/org/example/concepts/instancemain/InstanceMainDemo.class
+```
+
+### Maven project — compile
 ```bash
 mvn compile
+```
+
+### Maven project — inspect compiled class
+```bash
 javap -p target/classes/org/example/concepts/instancemain/InstanceMainDemo.class
 ```
 
 ---
 
 ## Greeting.java — Unnamed Class in Action
-
-### Run directly — no compile step needed
-```bash
-java --enable-preview --source 21 src/main/java/org/example/concepts/unnamed/Greeting.java
-```
 
 ### Single file — compile and run
 ```bash
@@ -331,9 +341,13 @@ java --enable-preview --source 21 src/main/java/org/example/concepts/unnamed/Gre
 javap -p src/main/java/org/example/concepts/unnamed/Greeting.class
 ```
 
-### Maven project — inspect compiled class
+### Maven project — compile
 ```bash
 mvn compile
+```
+
+### Maven project — inspect compiled class
+```bash
 javap -p target/classes/org/example/concepts/unnamedclass/Greeting.class
 ```
 
